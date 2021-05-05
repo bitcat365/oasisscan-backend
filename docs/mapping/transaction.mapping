@@ -1,0 +1,302 @@
+PUT /transaction_test/_alias/transaction
+PUT /transaction_test
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 30,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "max_result_window": "100000000"
+        }
+    },
+    "mappings": {
+        "dynamic": "true",
+        "properties": {
+            "tx_hash": {
+                "type": "keyword"
+            },
+            "method": {
+                "type": "keyword"
+            },
+            "nonce": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "height": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "timestamp": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "time": {
+                "type": "date"
+            },
+            "fee": {
+                "properties": {
+                    "amount": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "gas": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    }
+                }
+            },
+            "signature": {
+                "properties": {
+                    "signature": {
+                        "type": "keyword",
+                        "index": false
+                    },
+                    "public_key": {
+                        "type": "keyword"
+                    },
+                    "address": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "error" : {
+                "properties": {
+                    "module": {
+                        "type": "keyword"
+                    },
+                    "message": {
+                        "type": "keyword",
+                        "index": false
+                    },
+                    "code": {
+                        "type": "integer",
+                        "ignore_malformed": true
+                    }
+                }
+            },
+            "body": {
+                "properties": {
+                    "to": {
+                        "type": "keyword"
+                    },
+                    "amount": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "account": {
+                        "type": "keyword"
+                    },
+                    "shares": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "signature": {
+                        "properties": {
+                            "signature": {
+                                "type": "keyword",
+                                "index": false
+                            },
+                            "public_key": {
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "signatures": {
+                        "properties": {
+                            "signature": {
+                                "type": "keyword",
+                                "index": false
+                            },
+                            "public_key": {
+                                "type": "keyword"
+                            }
+                        }
+                    },
+                    "amendment": {
+                        "properties": {
+                            "rates": {
+                                "properties": {
+                                    "start": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "rate": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    }
+                                }
+                            },
+                            "bounds": {
+                                "properties": {
+                                    "start": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "rate_min": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "rate_max": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "node": {
+                "properties": {
+                    "roles": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "expiration": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "id": {
+                        "type": "keyword"
+                    },
+                    "entity_id": {
+                        "type": "keyword"
+                    },
+                    "nodes": {
+                        "type": "keyword"
+                    },
+                    "v": {
+                        "type": "long",
+                        "ignore_malformed": true,
+                        "index": false
+                    },
+                    "tls" : {
+                        "properties" : {
+                            "pub_key" : {
+                                "type": "keyword"
+                            },
+                            "next_pub_key" : {
+                                "type": "keyword"
+                            },
+                            "addresses" : {
+                                "properties": {
+                                    "next_pub_key" : {
+                                        "type": "keyword"
+                                    },
+                                    "address": {
+                                        "properties": {
+                                            "IP": {
+                                                "type": "keyword"
+                                            },
+                                            "Port": {
+                                                "type": "keyword"
+                                            },
+                                            "Zone": {
+                                                "type": "keyword"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "p2p": {
+                        "properties": {
+                            "id": {
+                                "type": "keyword"
+                            },
+                            "addresses": {
+                                "properties": {
+                                    "IP": {
+                                        "type": "keyword"
+                                    },
+                                    "Port": {
+                                        "type": "keyword"
+                                    },
+                                    "Zone": {
+                                        "type": "keyword"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "consensus": {
+                        "properties": {
+                            "id": {
+                                "type": "keyword"
+                            },
+                            "addresses": {
+                                "properties": {
+                                    "id": {
+                                        "type": "keyword"
+                                    },
+                                    "address": {
+                                        "properties": {
+                                            "IP": {
+                                                "type": "keyword"
+                                            },
+                                            "Port": {
+                                                "type": "keyword"
+                                            },
+                                            "Zone": {
+                                                "type": "keyword"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "runtimes": {
+                        "properties": {
+                            "id": {
+                                "type": "keyword"
+                            },
+                            "extra_info": {
+                                "type": "keyword",
+                                "index": false
+                            },
+                            "version": {
+                                "properties": {
+                                    "Major": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "Minor": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "Patch": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    }
+                                }
+                            },
+                            "capabilities": {
+                                "properties": {
+                                    "tee": {
+                                        "properties": {
+                                            "hardware": {
+                                                "type": "integer",
+                                                "ignore_malformed": true,
+                                                "index": false
+                                            },
+                                            "rak": {
+                                                "type": "keyword",
+                                                "index": false
+                                            },
+                                            "attestation": {
+                                                "type": "keyword",
+                                                "index": false
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

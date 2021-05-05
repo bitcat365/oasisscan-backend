@@ -1,0 +1,11 @@
+nohup java -server -Xms1g -Xmx1g \
+-Dserver.port=8181 -Dfile.encoding=UTF-8 \
+-Djava.security.egd=file:/dev/./urandom \
+-Dspring.profiles.active=prod \
+-Dsun.net.inetaddr.ttl=60 -XX:+UseConcMarkSweepGC \
+-XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly \
+-XX:+ScavengeBeforeFullGC -XX:+CMSScavengeBeforeRemark \
+-XX:+PrintGCDateStamps -verbose:gc -XX:+PrintGCDetails \
+-Xloggc:logs/gc.log -XX:+HeapDumpOnOutOfMemoryError \
+-XX:HeapDumpPath=logs/oom.hprof \
+-jar oasisscan-1.0.jar > nohup.out &

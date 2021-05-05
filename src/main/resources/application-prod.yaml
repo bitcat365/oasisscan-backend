@@ -1,0 +1,58 @@
+server:
+  port: 8181
+  address: 127.0.0.1
+
+spring:
+  http:
+    encoding:
+      charset: UTF-8
+      force: true
+      enabled: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/oasis?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: oasis
+    password: 123456
+    hikari:
+      connection-init-sql: SET NAMES utf8mb4
+      allow-pool-suspension: true
+      connection-test-query: SELECT 1
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+      connection-timeout: 45000
+  jpa:
+    # generate-ddl: true
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+    show-sql: false
+    open-in-view: true
+    properties:
+      hibernate.cache.use_second_level_cache: false
+      hibernate.cache.use_query_cache: false
+      hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+  jackson.time-zone: GMT+8
+  jackson.date-format: yyyy-MM-dd HH:mm:ss
+
+application:
+  env: prod
+  oasis:
+    url: http://localhost:3000/
+    node: /mnt/oasis-node
+    stats: /root/oasis-core/go/extra/stats/stats
+    internal: /mnt/serverdir/node/internal.sock
+    api:
+      url: http://localhost:8180
+      name: oasisscan
+  leveldb:
+    path: /mnt/data
+  validator:
+    git-info: https://api.github.com/repos/oasisprotocol/metadata-registry/contents/registry/entity
+    keybase-json: https://keybase.io/_/api/1.0/user/lookup.json
+  upgrade-start-height: 3027601
+
+elasticsearch:
+  hosts:
+    - 127.0.0.1:10029
+  socket-timeout: 30000
+  connection-timeout: 30000
+  request-timeout: 30000
+  block-index: block
+  transaction-index: transaction

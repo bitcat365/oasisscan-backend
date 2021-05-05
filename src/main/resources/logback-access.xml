@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+    <property name="log_dir" value="logs"/>
+    <property name="maxHistory" value="30"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern><![CDATA[
+            >>>>> %t{HH:mm:ss.SSS} - %a - %D{}ms - %reqAttribute{REQ_ID} - %reqAttribute{REQ_STATE} - %reqAttribute{USR_ID} >>>>>
+%replace(%fullRequest){'\s+$',''}%n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%replace(%fullResponse){'\s+$',''}%n==================================================
+            ]]></pattern>
+        </encoder>
+    </appender>
+
+
+    <appender name="API"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern><![CDATA[
+            [>>>>> %t{HH:mm:ss.SSS} - %a - %D{}ms - %reqAttribute{REQ_ID} - %reqAttribute{REQ_STATE} >>>>>
+%replace(%fullRequest){'\s+$',''}%n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+%replace(%fullResponse){'\s+$',''}%n==================================================]
+            ]]></pattern>
+        </encoder>
+        <!--<filter class="ch.qos.logback.core.filter.EvaluatorFilter">-->
+        <!--<evaluator>-->
+        <!--<expression><![CDATA[ event.getRequestURI().startsWith("/") ]]></expression>-->
+        <!--</evaluator>-->
+        <!--<onMatch>ACCEPT</onMatch>-->
+        <!--<onMismatch>DENY</onMismatch>-->
+        <!--</filter>-->
+        <file>logs/api.log</file>
+        <!-- 最常用的滚动策略，它根据时间来制定滚动策略.既负责滚动也负责出发滚动 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志输出位置  可相对、和绝对路径 -->
+            <fileNamePattern>logs/history/api.%d.%i.log.gz</fileNamePattern>
+            <!-- 可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件假设设置每个月滚动，且<maxHistory>是6，
+            则只保存最近6个月的文件，删除之前的旧文件。注意，删除旧文件是，那些为了归档而创建的目录也会被删除-->
+            <maxFileSize>20MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+    <appender name="logstash"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern><![CDATA[
+            %t{HH:mm:ss.SSS};%D{}ms;%reqAttribute{REQ_ID};%header{X-Wallet-Session};%header{X-Wallet-Uuid};%header{X-Wallet-Platform};%header{X-Wallet-Network};%header{X-Wallet-Version};%header{X-Wallet-OSVersion};%header{X-Wallet-Brand};%header{X-Wallet-Language};%header{X-Wallet-DeviceToken};%header{X-Wallet-DeviceId};%header{X-Wallet-DeviceId};%reqAttribute{REQ_STATE};%requestContent;%responseContent
+            ]]></pattern>
+        </encoder>
+        <!--<filter class="ch.qos.logback.core.filter.EvaluatorFilter">-->
+        <!--<evaluator>-->
+        <!--<expression><![CDATA[ event.getRequestURI().startsWith("/") ]]></expression>-->
+        <!--&lt;!&ndash;<expression><![CDATA[ event.getRequestURI().startsWith("//api/") &&&ndash;&gt;-->
+        <!--&lt;!&ndash;!event.getRequestURI().startsWith("/api/client/base/log.json") ]]></expression>&ndash;&gt;-->
+        <!--</evaluator>-->
+        <!--<onMatch>ACCEPT</onMatch>-->
+        <!--<onMismatch>DENY</onMismatch>-->
+        <!--</filter>-->
+        <file>logs/logstash.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/history/logstash.%d.%i.log.gz</fileNamePattern>
+            <maxFileSize>20MB</maxFileSize>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+
+    <appender-ref ref="API"/>
+    <appender-ref ref="STDOUT"/>
+
+</configuration>

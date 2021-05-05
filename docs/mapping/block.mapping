@@ -1,0 +1,158 @@
+PUT /block_test/_alias/block
+PUT /block_test
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 15,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "max_result_window": "100000000"
+        }
+    },
+    "mappings": {
+        "dynamic": "strict",
+        "properties": {
+            "height": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "hash": {
+                "type": "keyword"
+            },
+            "time": {
+                "type": "date"
+            },
+            "txs": {
+                "type": "integer",
+                "ignore_malformed": true
+            },
+            "metadata": {
+                "properties": {
+                    "last_commit": {
+                        "properties": {
+                            "round": {
+                                "type": "long",
+                                "ignore_malformed": true
+                            },
+                            "height": {
+                                "type": "long",
+                                "ignore_malformed": true
+                            },
+                            "block_id": {
+                                "properties": {
+                                    "hash": {
+                                        "type": "keyword"
+                                    },
+                                    "parts": {
+                                        "type": "object",
+                                        "properties": {
+                                            "hash": {
+                                                "type": "keyword"
+                                            },
+                                            "total": {
+                                                "type": "long",
+                                                "ignore_malformed": true
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "signatures": {
+                                "properties": {
+                                    "signature": {
+                                        "type": "keyword"
+                                    },
+                                    "timestamp": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "block_id_flag": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "validator_address": {
+                                        "type": "keyword"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "header": {
+                        "properties": {
+                            "version": {
+                                "properties": {
+                                    "block": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    },
+                                    "app": {
+                                        "type": "long",
+                                        "ignore_malformed": true
+                                    }
+                                }
+                            },
+                            "chain_id": {
+                                "type": "keyword"
+                            },
+                            "height": {
+                                "type": "long",
+                                "ignore_malformed": true,
+                                "index": false
+                            },
+                            "time": {
+                                "type": "long",
+                                "ignore_malformed": true
+                            },
+                            "last_block_id": {
+                                "properties": {
+                                    "hash": {
+                                        "type": "keyword"
+                                    },
+                                    "parts": {
+                                        "type": "object",
+                                        "properties": {
+                                            "total": {
+                                                "type": "long",
+                                                "ignore_malformed": true
+                                            },
+                                            "hash": {
+                                                "type": "keyword"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "last_commit_hash": {
+                                "type": "keyword"
+                            },
+                            "data_hash": {
+                                "type": "keyword"
+                            },
+                            "validators_hash": {
+                                "type": "keyword"
+                            },
+                            "next_validators_hash": {
+                                "type": "keyword"
+                            },
+                            "consensus_hash": {
+                                "type": "keyword"
+                            },
+                            "app_hash": {
+                                "type": "keyword"
+                            },
+                            "last_results_hash": {
+                                "type": "keyword"
+                            },
+                            "evidence_hash": {
+                                "type": "keyword"
+                            },
+                            "proposer_address": {
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

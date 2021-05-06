@@ -18,7 +18,7 @@ public interface DelegatorRepository extends JpaRepository<Delegator, Integer>,
         JpaSpecificationExecutor<Delegator> {
     Optional<Delegator> findByValidatorAndDelegator(String validator, String delegator);
 
-    @Query(value = "select * from delegator ORDER BY CONVERT(shares,UNSIGNED) desc", nativeQuery = true)
+    @Query(value = "select * from delegator where validator=?1 ORDER BY CONVERT(shares,UNSIGNED) desc", nativeQuery = true)
     Page<Delegator> findByValidator(String address, Pageable pageable);
 
     long countByValidator(String validator);

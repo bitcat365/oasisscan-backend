@@ -128,6 +128,7 @@ public class AccountService {
                     ValidatorInfo validatorInfo = optional.get();
                     response.setValidatorAddress(validatorAddress);
                     response.setValidatorName(validatorInfo.getName());
+                    response.setIcon(validatorInfo.getIcon());
                     //tokens = shares * balance / total_shares
                     double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, 2));
                     double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, 2));

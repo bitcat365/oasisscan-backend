@@ -6,6 +6,7 @@ import lombok.Data;
 public class AccountValidatorResponse {
     private String validatorAddress;
     private String validatorName;
+    private String icon;
     private String entityAddress;
     private String shares;
     private String amount;

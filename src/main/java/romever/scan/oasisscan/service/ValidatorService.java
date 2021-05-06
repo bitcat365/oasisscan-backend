@@ -393,7 +393,7 @@ public class ValidatorService {
         if (total > 0) {
             ValidatorResponse validatorResponse = validatorService.validatorInfo(entityId, validatorAddress);
             PageRequest pageRequest = PageRequest.of(page - 1, size);
-            Page<Delegator> delegators = delegatorRepository.findByValidatorOrderBySharesDesc(validatorAddress, pageRequest);
+            Page<Delegator> delegators = delegatorRepository.findByValidator(validatorAddress, pageRequest);
             for (Delegator delegator : delegators) {
                 DelegatorsResponse response = new DelegatorsResponse();
                 response.setEntityId(delegator.getDelegator());

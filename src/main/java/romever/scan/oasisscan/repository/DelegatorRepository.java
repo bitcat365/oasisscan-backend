@@ -19,7 +19,7 @@ public interface DelegatorRepository extends JpaRepository<Delegator, Integer>,
     Optional<Delegator> findByValidatorAndDelegator(String validator, String delegator);
 
     @SortComparator(SharesComparator.class)
-    Page<Delegator> findByValidatorOrderBySharesDesc(String address, Pageable pageable);
+    Page<Delegator> findByValidator(String address, Pageable pageable);
 
     long countByValidator(String validator);
 

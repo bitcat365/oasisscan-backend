@@ -5,7 +5,12 @@ import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,9 +27,12 @@ import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.chain.*;
 
 import javax.annotation.PostConstruct;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static romever.scan.oasisscan.common.ESFields.BLOCK_HEIGHT;
 
 @Slf4j
 @Service
@@ -194,7 +202,7 @@ public class ScanChainService {
         return start;
     }
 
-    /*public Long getStoreHeight() {
+    public Long getEsHeight() {
         Long storeHeight = null;
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.sort(BLOCK_HEIGHT, SortOrder.DESC);
@@ -219,7 +227,7 @@ public class ScanChainService {
             log.error("error", e);
         }
         return storeHeight;
-    }*/
+    }
 
     public Long getStoreHeight() {
         Long latestHeight = null;

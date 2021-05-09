@@ -336,7 +336,7 @@ public class ValidatorService {
         List<ValidatorStatsResponse.Stats> proposals = Lists.newArrayList();
         List<ValidatorStatsResponse.Stats> signs = Lists.newArrayList();
 
-        long height = scanChainService.getStoreHeight();
+        long height = scanChainService.getEsHeight();
         if (height > 0) {
             Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(address);
             if (optional.isPresent()) {

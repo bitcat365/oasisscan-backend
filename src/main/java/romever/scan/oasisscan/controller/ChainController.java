@@ -1,5 +1,6 @@
 package romever.scan.oasisscan.controller;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ public class ChainController {
     @Autowired
     private ScanChainService scanChainService;
 
+    @ApiOperation("Transaction list")
     @GetMapping("/transactions")
     public ApiResult latestTransactions(
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
@@ -33,6 +35,7 @@ public class ChainController {
         return transactionService.transactions(size, page, height, address, method);
     }
 
+    @ApiOperation("Block list")
     @GetMapping("/blocks")
     public ApiResult latestBlocks(
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
@@ -40,6 +43,7 @@ public class ChainController {
         return blockService.latestBlocks(size, page);
     }
 
+    @ApiOperation("Block by height")
     @GetMapping("/block/{height}")
     public ApiResult blockDetail(@PathVariable("height") Long height) {
         return ApiResult.ok(blockService.detail(height));
@@ -84,7 +88,7 @@ public class ChainController {
     }
 
     @GetMapping("/account/list")
-    public ApiResult accountInfo(
+    public ApiResult accountList(
             @RequestParam(value = "size", required = false, defaultValue = "100") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
         return accountService.accountList(page, size);

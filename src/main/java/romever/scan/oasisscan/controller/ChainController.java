@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import romever.scan.oasisscan.common.ApiResult;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.service.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 @Slf4j
 @RestController
@@ -116,6 +117,7 @@ public class ChainController {
         return ApiResult.ok(searchService.search(key));
     }
 
+    @ApiIgnore
     @GetMapping("/sync/block")
     public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) {
         scanChainService.syncBlock(start, end);

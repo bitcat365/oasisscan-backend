@@ -10,4 +10,5 @@ public class AccountValidatorResponse {
     private String entityAddress;
     private String shares;
     private String amount;
+    private boolean active;
 }

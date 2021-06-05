@@ -85,6 +85,7 @@ public class AccountService {
     public ApiResult debondings(String delegator, int page, int size) {
         List<AccountDebondingResponse> responses = Lists.newArrayList();
         long total = debondingRepository.countByDelegator(delegator);
+        long currentEpoch = apiClient.epoch(null);
         if (total > 0) {
             PageRequest pageRequest = PageRequest.of(page - 1, size);
             List<Debonding> list = debondingRepository.findByDelegatorOrderByDebondEndAsc(delegator, pageRequest);
@@ -97,7 +98,9 @@ public class AccountService {
                         AccountDebondingResponse response = new AccountDebondingResponse();
                         response.setValidatorAddress(validatorAddress);
                         response.setValidatorName(validatorInfo.getName());
+                        response.setIcon(validatorInfo.getIcon());
                         response.setDebondEnd(debonding.getDebondEnd());
+                        response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
                         response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
                         responses.add(response);
                     }

@@ -1,26 +1,26 @@
 # oasisscan-api
-* [验证块统计](#验证块统计)
-* [验证人列表](#验证人列表)
-* [验证人详情](#验证人详情)
+* [validator-stats](#validator-stats)
+* [validator-list](#validator-list)
+* [validator-info](#validator-info)
 * [network](#network)
-* [交易列表](#交易列表)
-* [区块列表](#区块列表)
-* [区块详情](#区块详情)
-* [交易详情](#交易详情)
-* [交易类型](#交易类型)
-* [历史交易统计](#历史交易统计)
-* [验证人出块列表](#验证人出块列表)
-* [entity信息](#entity信息)
+* [transactions](#transactions)
+* [blocks](#blocks)
+* [block-info](#block-info)
+* [transaction-info](#transaction-info)
+* [methods](#methods)
+* [transaction-history](#transaction-history)
+* [blockByProposer](#blockByProposer)
+* [entity-info](#entity-info)
 * [powerEvent](#powerEvent)
 * [delegators](#delegators)
-* [escrow统计](#escrow统计)
-* [account列表](#account列表)
-* [account详情](#account详情)
-* [搜索](#搜索)
-* [account质押状态](#account质押状态)
-* [account赎回状态](#account赎回状态)
+* [escrow-stats](#escrow-stats)
+* [account-list](#account-list)
+* [account-info](#account-info)
+* [search](#search)
+* [account-delegations](#account-delegations)
+* [account-debonding](#account-debonding)
 
-### 验证块统计
+### validator stats
 
 ```
 // Request
@@ -54,7 +54,7 @@ GET http://localhost:8181/validator/stats?address=oasis1qzskk72k92y4duc47lqcsxhz
 }
 ```
 
-### 验证人列表
+### validator list
 
 ```
 // Request
@@ -63,12 +63,12 @@ GET http://localhost:8181/validator/list
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| orderBy  | 排序字段(escrow,escrowChange24,delegators,commission,uptime)，默认escrow |
-| sort  | 排序方式，asc,desc, 默认desc |
-| page  | 页码，默认1 |
-| pageSize  | 每页数量，默认300 |
+| orderBy  | sort field(escrow,escrowChange24,delegators,commission,uptime),default:escrow |
+| sort  | asc,desc, default:desc |
+| page  | default:1 |
+| pageSize  | default:300 |
 
 
 ```
@@ -116,7 +116,7 @@ Params
 }
 ```
 
-### 验证人详情
+### validator-info
 
 ```
 // Request
@@ -205,7 +205,7 @@ GET http://localhost:8181/dashboard/network
 }
 ```
 
-### 交易列表
+### transactions
 
 ```
 // Request
@@ -214,13 +214,13 @@ GET http://localhost:8181/chain/transactions
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| size  | 可选，默认10 |
-| page  | 可选，默认1 |
-| height  | 块高，可选 |
-| address  | 可选 |
-| method  | 交易类型，可选 |
+| size  | option,default:10 |
+| page  | option,default:1 |
+| height  | option |
+| address  | option |
+| method  | option |
 
 
 ```
@@ -248,7 +248,7 @@ Params
 }
 ```
 
-### 区块列表
+### blocks
 
 ```
 // Request
@@ -257,10 +257,10 @@ GET http://localhost:8181/chain/blocks
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| size  | 可选，默认10 |
-| page  | 可选，默认1 |
+| size  | option,default:10 |
+| page  | option,default:1 |
 
 
 ```
@@ -301,7 +301,7 @@ Params
 }
 ```
 
-### 区块详情
+### block-info
 
 ```
 // Request
@@ -310,9 +310,9 @@ GET http://localhost:8181/chain/block/{height}
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| height  | 高度 |
+| height  | height |
 
 
 ```
@@ -332,7 +332,7 @@ Params
 }
 ```
 
-### 交易详情
+### transaction-info
 
 ```
 // Request
@@ -341,9 +341,9 @@ GET http://localhost:8181/chain/transaction/{hash}
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| hash  | 交易hash |
+| hash  | tx hash |
 
 ```
 
@@ -368,7 +368,7 @@ Params
 }
 ```
 
-### 交易类型
+### methods
 
 ```
 // Request
@@ -390,7 +390,7 @@ GET http://localhost:8181/chain/methods
 }
 ```
 
-### 历史交易统计
+### transaction-history
 
 ```
 // Request
@@ -450,7 +450,7 @@ GET http://localhost:8181/chain/transactionhistory
 }
 ```
 
-### 验证人出块列表
+### blockByProposer
 
 ```
 // Request
@@ -459,11 +459,11 @@ GET http://localhost:8181/chain/getBlockByProposer
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| address  | 验证人地址 |
-| size  | 可选，默认10 |
-| page  | 可选，默认1 |
+| address  | validator address |
+| size  | option,default:10 |
+| page  | option,default:1 |
 
 ```
 
@@ -492,7 +492,7 @@ Params
 }
 ```
 
-### entity信息
+### entity-info
 
 ```
 // Request
@@ -520,11 +520,11 @@ GET http://localhost:8181/chain/powerevent
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| size  | 可选，默认5 |
-| page  | 可选，默认1 |
-| address  | 可选 |
+| size  | option,default:5 |
+| page  | option,default:1 |
+| address  | option |
 
 ```
 
@@ -606,11 +606,11 @@ GET http://localhost:8181/validator/delegators
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| size  | 可选，默认5 |
-| page  | 可选，默认1 |
-| address  | 验证人地址，必填 |
+| size  | option,default:5 |
+| page  | option,default:1 |
+| address  | validator address |
 
 ```
 
@@ -656,7 +656,7 @@ Params
 }
 ```
 
-### escrow统计
+### escrow-stats
 
 ```
 // Request
@@ -665,9 +665,9 @@ GET http://localhost:8181/validator/escrowstats
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| address  | 验证人地址，必填 |
+| address  | validator address |
 
 ```
 
@@ -689,7 +689,7 @@ Params
 }
 ```
 
-### account列表
+### account-list
 
 ```
 // Request
@@ -698,10 +698,10 @@ GET http://localhost:8181/chain/account/list
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| size  | 可选，默认100 |
-| page  | 可选，默认1 |
+| size  | option,default:100 |
+| page  | option,default:1 |
 
 ```
 
@@ -736,7 +736,7 @@ Params
 ```
 
 
-### account详情
+### account-info
 
 ```
 // Request
@@ -757,7 +757,7 @@ GET http://localhost:8181/chain/account/info/{address}
 }
 ```
 
-### 搜索
+### search
 
 ```
 // Request
@@ -766,9 +766,9 @@ GET http://localhost:8181/chain/search
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| key  | 必填，搜索关键字 |
+| key  | key |
 
 ```
 
@@ -782,20 +782,19 @@ Params
     }
 }
 ```
-说明：result为跳转目标类型页面所需关键参数
+note：result is the key parameter required to jump to the target type page
 
-类型说明
 
-|  类型   | 说明  |
+|  type   | description  |
 |  ----  | ----  |
-| none  | 无结果 |
-| block  | 区块 |
-| transaction  | 交易 |
-| validator  | 验证人 |
-| account  | 账户 |
+| none  | no result |
+| block  | block |
+| transaction  | transaction |
+| validator  | validator |
+| account  | account |
 
 
-### account质押状态
+### account-delegations
 
 ```
 // Request
@@ -804,12 +803,12 @@ GET http://localhost:8181/chain/account/delegations
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| address  | account地址 |
-| all  | 是否包含非验证人，可选，默认false |
-| size  | 可选，默认5 |
-| page  | 可选，默认1 |
+| address  | account address |
+| all  | option,include non-validators,default:false |
+| size  | option,default:5 |
+| page  | option,default:1 |
 
 ```
 
@@ -840,7 +839,7 @@ Params
 }
 ```
 
-### account赎回状态
+### account-debonding
 
 ```
 // Request
@@ -849,11 +848,11 @@ GET http://localhost:8181/chain/account/debonding
 ```
 Params
 
-|  参数名   | 说明  |
+|  param   | description  |
 |  ----  | ----  |
-| address  | account地址 |
-| size  | 可选，默认5 |
-| page  | 可选，默认1 |
+| address  | account address |
+| size  | option,default:5 |
+| page  | option,default:1 |
 
 ```
 

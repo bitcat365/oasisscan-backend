@@ -2,6 +2,11 @@ server:
   port: 9181
   address: 127.0.0.1
 
+springfox:
+  documentation:
+    swagger:
+      v2:
+        host: https://api.oasisscan.com/testnet
 spring:
   http:
     encoding:

@@ -151,7 +151,7 @@ public class TransactionService {
                         MethodEnum methodEnum = MethodEnum.getEnumByName(method);
                         if (methodEnum == MethodEnum.StakingReclaimEscrow) {
                             Transaction.Body body = transaction.getBody();
-                            String validator = body.getTo();
+                            String validator = body.getAccount();
 
                             AccountSimple accountSimple = accountInfo(validator, transaction.getHeight() - 1);
                             if (accountSimple != null) {

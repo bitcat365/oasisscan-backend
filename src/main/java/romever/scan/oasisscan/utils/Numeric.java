@@ -249,8 +249,8 @@ public final class Numeric {
 
     public static String formatDouble(double d, int scale) {
         if (scale > 4) {
-            return new BigDecimal(Double.toString(d)).stripTrailingZeros().toPlainString();
+            return new BigDecimal(Double.toString(d)).setScale(scale, BigDecimal.ROUND_HALF_UP).stripTrailingZeros().toPlainString();
         }
-        return new BigDecimal(Double.toString(d)).toPlainString();
+        return new BigDecimal(Double.toString(d)).setScale(scale, BigDecimal.ROUND_HALF_UP).toPlainString();
     }
 }

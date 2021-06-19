@@ -3,6 +3,7 @@ package romever.scan.oasisscan.vo.response;
 import lombok.Data;
 import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.utils.Mappers;
+import romever.scan.oasisscan.utils.Numeric;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.chain.Transaction;
@@ -25,7 +26,7 @@ public class TransactionDetailResponse {
     private boolean status = true;
     private String errorMessage;
 
-    public static TransactionDetailResponse of(Transaction transaction) {
+    public static TransactionDetailResponse of(Transaction transaction,  double escrowBalance, double totalShares) {
         TransactionDetailResponse response = new TransactionDetailResponse();
 
         TransactionResult.Error error = transaction.getError();
@@ -64,8 +65,15 @@ public class TransactionDetailResponse {
                         response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, 9));
                         break;
                     case StakingReclaimEscrow:
+                        //tokens = shares * balance / total_shares
+                        double shares = Double.parseDouble(Texts.formatDecimals(body.getShares(), Constants.DECIMALS, 2));
+                        double amount = 0;
+                        if (totalShares != 0) {
+                            amount = Numeric.divide(Numeric.multiply(shares, escrowBalance), totalShares, 2);
+                        }
+
                         response.setTo(body.getAccount());
-                        response.setAmount(Texts.formatDecimals(body.getShares(), Constants.DECIMALS, 9));
+                        response.setAmount(String.valueOf(amount));
                         break;
                     default:
                         break;

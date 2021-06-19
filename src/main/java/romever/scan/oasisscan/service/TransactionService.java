@@ -143,7 +143,24 @@ public class TransactionService {
                     Transaction transaction = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<Transaction>() {
                     });
                     if (transaction != null) {
-                        response = TransactionDetailResponse.of(transaction);
+
+                        //calculate reclaim amount
+                        double escrowBalance = 0;
+                        double totalShares = 0;
+                        String method = transaction.getMethod();
+                        MethodEnum methodEnum = MethodEnum.getEnumByName(method);
+                        if (methodEnum == MethodEnum.StakingReclaimEscrow) {
+                            Transaction.Body body = transaction.getBody();
+                            String validator = body.getTo();
+
+                            AccountSimple accountSimple = accountInfo(validator, transaction.getHeight() - 1);
+                            if (accountSimple != null) {
+                                escrowBalance = Double.parseDouble(accountSimple.getEscrow());
+                                totalShares = Double.parseDouble(accountSimple.getTotalShares());
+                            }
+                        }
+
+                        response = TransactionDetailResponse.of(transaction, escrowBalance, totalShares);
                     }
                 }
             } catch (ElasticsearchException e) {

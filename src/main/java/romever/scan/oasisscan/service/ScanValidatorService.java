@@ -516,39 +516,44 @@ public class ScanValidatorService {
                 String address = entry.getKey();
                 AccountInfo accountInfo = entry.getValue();
 
-                Account account = accountRepository.findByAddress(address).orElse(new Account());
-                account.setAddress(address);
-                account.setAvailable(Long.parseLong(accountInfo.getGeneral().getBalance()));
-                List<Delegator> delegations = delegatorRepository.findByDelegator(address);
-                double totalEscrow = 0;
-                if (!CollectionUtils.isEmpty(delegations)) {
-                    for (Delegator d : delegations) {
-                        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(d.getValidator());
-                        double shares = Double.parseDouble(Texts.formatDecimals(d.getShares(), Constants.DECIMALS, 9));
-                        if (optional.isPresent()) {
-                            ValidatorInfo validatorInfo = optional.get();
-                            //tokens = shares * balance / total_shares
-                            double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, 9));
-                            double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, 9));
-                            double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 9);
-                            totalEscrow = Numeric.add(amount, totalEscrow);
-                        } else {
-                            totalEscrow = Numeric.add(shares, totalEscrow);
-                        }
-                    }
-                }
-                String debonding = debondingRepository.sumDelegatorDebonding(address);
-                if (Texts.isBlank(debonding)) {
-                    debonding = "0";
-                }
-                account.setEscrow((long) (totalEscrow * Math.pow(10, 9)));
-                account.setDebonding(Long.parseLong(debonding));
-                account.setTotal(account.getAvailable() + account.getEscrow() + account.getDebonding());
+                Account account = getAccount(address, accountInfo);
                 saveList.add(account);
             }
             accountRepository.saveAll(saveList);
             log.info("account sync done, size: {}", saveList.size());
         }
+    }
+
+    public Account getAccount(String address, AccountInfo accountInfo) {
+        Account account = accountRepository.findByAddress(address).orElse(new Account());
+        account.setAddress(address);
+        account.setAvailable(Long.parseLong(accountInfo.getGeneral().getBalance()));
+        List<Delegator> delegations = delegatorRepository.findByDelegator(address);
+        double totalEscrow = 0;
+        if (!CollectionUtils.isEmpty(delegations)) {
+            for (Delegator d : delegations) {
+                Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(d.getValidator());
+                double shares = Double.parseDouble(Texts.formatDecimals(d.getShares(), Constants.DECIMALS, 9));
+                if (optional.isPresent()) {
+                    ValidatorInfo validatorInfo = optional.get();
+                    //tokens = shares * balance / total_shares
+                    double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, 9));
+                    double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, 9));
+                    double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 9);
+                    totalEscrow = Numeric.add(amount, totalEscrow);
+                } else {
+                    totalEscrow = Numeric.add(shares, totalEscrow);
+                }
+            }
+        }
+        String debonding = debondingRepository.sumDelegatorDebonding(address);
+        if (Texts.isBlank(debonding)) {
+            debonding = "0";
+        }
+        account.setEscrow((long) (totalEscrow * Math.pow(10, 9)));
+        account.setDebonding(Long.parseLong(debonding));
+        account.setTotal(account.getAvailable() + account.getEscrow() + account.getDebonding());
+        return account;
     }
 
     public long statsCount(List<String> tmAddressList, boolean proposal) {

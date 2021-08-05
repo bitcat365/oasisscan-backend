@@ -20,10 +20,13 @@ import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.Account;
 import romever.scan.oasisscan.entity.SystemProperty;
+import romever.scan.oasisscan.repository.AccountRepository;
 import romever.scan.oasisscan.repository.SystemPropertyRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
+import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.chain.*;
 
 import javax.annotation.PostConstruct;
@@ -51,6 +54,10 @@ public class ScanChainService {
 
     @Autowired
     private SystemPropertyRepository systemPropertyRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private ScanValidatorService scanValidatorService;
 
     @PostConstruct
     public void init() {
@@ -160,6 +167,9 @@ public class ScanChainService {
                                             }
                                         }
                                         txMap.put(tx.getTx_hash(), Mappers.map(tx));
+
+                                        //update account info
+                                        updateAccountInfo(tx);
                                     }
                                 }
                             }
@@ -200,6 +210,46 @@ public class ScanChainService {
             break;
         }
         return start;
+    }
+
+    private void updateAccountInfo(Transaction tx) {
+        String method = tx.getMethod();
+        MethodEnum methodEnum = MethodEnum.getEnumByName(method);
+        Transaction.Body body = tx.getBody();
+        if (body == null) {
+            return;
+        }
+
+        if (methodEnum == null) {
+            return;
+        }
+
+        String from = null;
+        String to = null;
+        switch (methodEnum) {
+            case StakingTransfer:
+                to = body.getTo();
+            case StakingAddEscrow:
+            case StakingReclaimEscrow:
+                from = tx.getSignature().getAddress();
+                break;
+            default:
+                break;
+        }
+
+        if (Texts.isNotBlank(from)) {
+            updateAccountInfo(from);
+        }
+
+        if (Texts.isNotBlank(to)) {
+            updateAccountInfo(to);
+        }
+    }
+
+    private void updateAccountInfo(String address) {
+        AccountInfo accountInfo = apiClient.accountInfo(address, null);
+        Account account = scanValidatorService.getAccount(address, accountInfo);
+        accountRepository.save(account);
     }
 
     public Long getEsHeight() {

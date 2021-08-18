@@ -59,6 +59,9 @@ public class Transaction {
         //AmendCommissionSchedule
         private CommissionSchedule amendment;
 
+        //governance
+        private long vote;
+
         /**
          * registry
          */

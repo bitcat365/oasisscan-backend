@@ -120,7 +120,7 @@ public class ChainController {
     @ApiIgnore
     @GetMapping("/sync/block")
     public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) {
-        scanChainService.syncBlock(start, end);
+        scanChainService.syncBlock(start, end, true);
         return ApiResult.ok();
     }
 }

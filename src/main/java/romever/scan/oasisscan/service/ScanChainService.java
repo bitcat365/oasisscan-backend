@@ -81,7 +81,7 @@ public class ScanChainService {
         if (curHeight != null && scanHeight != null) {
             long start = scanHeight;
             long end = curHeight;
-            scanHeight = syncBlock(start, end);
+            scanHeight = syncBlock(start, end, false);
         } else {
             if (scanHeight == null) {
                 scanHeight = getStoreHeight();
@@ -89,7 +89,7 @@ public class ScanChainService {
         }
     }
 
-    public long syncBlock(long start, long end) {
+    public long syncBlock(long start, long end, boolean fix) {
         if (start > end) {
             return start;
         }
@@ -191,11 +191,13 @@ public class ScanChainService {
                                     }
                                 }
 
-                                SystemProperty systemProperty = systemPropertyRepository.findByProperty(Constants.SCAN_HEIGHT_PROPERTY).orElse(new SystemProperty());
-                                systemProperty.setProperty(Constants.SCAN_HEIGHT_PROPERTY);
-                                systemProperty.setValue(String.valueOf(start));
-                                systemPropertyRepository.saveAndFlush(systemProperty);
-                                log.info("transaction [{}] sync done, count: {} ", start, txMap.size());
+                                if (!fix) {
+                                    SystemProperty systemProperty = systemPropertyRepository.findByProperty(Constants.SCAN_HEIGHT_PROPERTY).orElse(new SystemProperty());
+                                    systemProperty.setProperty(Constants.SCAN_HEIGHT_PROPERTY);
+                                    systemProperty.setValue(String.valueOf(start));
+                                    systemPropertyRepository.saveAndFlush(systemProperty);
+                                    log.info("transaction [{}] sync done, count: {} ", start, txMap.size());
+                                }
                             }
                         } catch (Exception e) {
                             log.error("error", e);

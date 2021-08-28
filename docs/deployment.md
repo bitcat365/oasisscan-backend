@@ -8,16 +8,16 @@ Please install elasticsearch and mysql to save blockchain and validators data.
 - [elasticsearch(version>=7.0)](https://www.elastic.co/guide/en/elasticsearch/reference/current/index.html)
 - mysql
 
-You can configure the elasticsearch index through the [mapping file](docs/mapping/),and initialize mysql through the [init.sql](docs/init.sql)
+You can configure the elasticsearch index through the [mapping file](mapping/),and initialize mysql through the [init.sql](docs/init.sql)
 
 ## Configuring oasisscan-backend
-There are three configuration files for three different environments. [application-prod](src/main/resources/application-prod.yaml) for mainnet, [application-test](src/main/resources/application-test.yaml) for testnet.
+There are three configuration files for three different environments. [application-prod](../src/main/resources/application-prod.yaml) for mainnet, [application-test](../src/main/resources/application-test.yaml) for testnet.
 
 Please modify the configuration of **elasticserach, mysql and oasis**.
 
 
 ## Running oasisscan-backend
-Modify the path configuration in the [deploy file](docs/deploy_mainnet.sh) and execute.
+Modify the path configuration in the [deploy file](deploy_mainnet.sh) and execute.
 ```
 mvn clean install -P prod
 cp target/oasisscan-prod.jar /mnt/oasis-scan/

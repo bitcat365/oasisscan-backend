@@ -6,7 +6,7 @@ springfox:
   documentation:
     swagger:
       v2:
-        host: https://api.oasisscan.com/testnet
+        host: api.oasisscan.com/testnet
 spring:
   http:
     encoding:

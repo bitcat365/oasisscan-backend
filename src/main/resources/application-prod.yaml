@@ -6,7 +6,7 @@ springfox:
   documentation:
     swagger:
       v2:
-        host: https://api.oasisscan.com/mainnet
+        host: api.oasisscan.com/mainnet
 
 spring:
   http:

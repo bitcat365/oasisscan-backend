@@ -24,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -616,7 +617,8 @@ public abstract class Texts {
             if (Texts.checkNumber(base64)) {
                 return base64;
             }
-            return String.valueOf(Long.parseLong(Texts.toHex(base64Decode(base64)), 16));
+            BigInteger b = new BigInteger(Texts.toHex(base64Decode(base64)), 16);
+            return b.toString();
         }
         return null;
     }

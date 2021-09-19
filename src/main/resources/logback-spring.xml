@@ -12,7 +12,7 @@
         <!-- 定义日志文件 输入位置 -->
         <property name="log_dir" value="logs"/>
         <!-- 日志最大的历史 30天 -->
-        <property name="maxHistory" value="30"/>
+        <property name="maxHistory" value="7"/>
 
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -41,8 +41,9 @@
         <!-- 定义日志文件 输入位置 -->
         <property name="log_dir" value="logs"/>
         <!-- 日志最大的历史 30天 -->
-        <property name="maxHistory" value="30"/>
-        <property name="maxSize" value="300MB"/>
+        <property name="maxHistory" value="3"/>
+        <property name="maxSize" value="100MB"/>
+        <property name="totalSizeCap" value="1GB"/>
 
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -57,6 +58,8 @@
                 <fileNamePattern>${log_dir}/history/app.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
+                <totalSizeCap>${totalSizeCap}</totalSizeCap>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
         </appender>
         <appender name="okhttp" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -66,6 +69,8 @@
                 <fileNamePattern>${log_dir}/history/okhttp.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
+                <totalSizeCap>${totalSizeCap}</totalSizeCap>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
         </appender>
         <logger name="romever.scan.oasisscan.utils.okhttp.Printer"  level="info"  additivity="false">
@@ -96,8 +101,9 @@
         <!-- 定义日志文件 输入位置 -->
         <property name="log_dir" value="logs"/>
         <!-- 日志最大的历史 30天 -->
-        <property name="maxHistory" value="30"/>
-        <property name="maxSize" value="300MB"/>
+        <property name="maxHistory" value="3"/>
+        <property name="maxSize" value="100MB"/>
+        <property name="totalSizeCap" value="1GB"/>
 
         <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
@@ -112,6 +118,8 @@
                 <fileNamePattern>${log_dir}/history/app.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
+                <totalSizeCap>${totalSizeCap}</totalSizeCap>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
         </appender>
         <appender name="okhttp" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -121,6 +129,8 @@
                 <fileNamePattern>${log_dir}/history/okhttp.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
+                <totalSizeCap>${totalSizeCap}</totalSizeCap>
+                <cleanHistoryOnStart>true</cleanHistoryOnStart>
             </rollingPolicy>
         </appender>
         <logger name="romever.scan.oasisscan.utils.okhttp.Printer"  level="info"  additivity="false">

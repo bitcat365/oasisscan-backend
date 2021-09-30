@@ -119,7 +119,7 @@ public class ScanRuntimeService {
         searchSourceBuilder.sort(ESFields.BLOCK_TIMESTAMP, SortOrder.ASC);
         searchSourceBuilder.size(1);
         try {
-            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), searchSourceBuilder);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getBlockIndex(), searchSourceBuilder);
             if (searchResponse.getTotalShards() != searchResponse.getSuccessfulShards()) {
                 return height;
             }

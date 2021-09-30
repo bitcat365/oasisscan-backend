@@ -62,3 +62,4 @@ elasticsearch:
   request-timeout: 30000
   block-index: block
   transaction-index: transaction
+  runtime-round-index: runtime_round

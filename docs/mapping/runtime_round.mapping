@@ -1,0 +1,56 @@
+PUT /runtime_round_test
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 15,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "max_result_window": "100000000"
+        }
+    },
+    "mappings": {
+        "dynamic": "true",
+        "properties": {
+            "version": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "namespace": {
+                "type": "keyword"
+            },
+            "round": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "timestamp": {
+                "type": "date"
+            },
+            "header_type": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "previous_hash": {
+                "type": "keyword"
+            },
+            "io_root": {
+                "type": "keyword"
+            },
+            "state_root": {
+                "type": "keyword"
+            },
+            "messages_hash": {
+                "type": "keyword"
+            },
+            "storage_signatures": {
+                "properties": {
+                    "public_key": {
+                        "type": "keyword"
+                    },
+                    "signature": {
+                        "type": "keyword"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
-PUT /transaction_test/_alias/transaction
-PUT /transaction_test
+PUT /transaction_main/_alias/transaction
+PUT /transaction_main
 {
     "settings": {
         "index": {

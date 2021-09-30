@@ -43,8 +43,8 @@ application:
     stats: /root/oasis-core/go/extra/stats/stats
     internal: /mnt/serverdir/node/internal.sock
     api:
-      url: http://95.216.211.124:8180
-      name: oasisscan
+      url: http://95.216.211.124:9180
+      name: oasisscan_testnet
   leveldb:
     path: /mnt/data
   validator:
@@ -55,9 +55,10 @@ application:
 elasticsearch:
   hosts:
 #    - localhost:9200
-    - 127.0.0.1:10029
+    - 127.0.0.1:9200
   socket-timeout: 30000
   connection-timeout: 30000
   request-timeout: 30000
   block-index: block
   transaction-index: transaction
+  runtime-round-index: runtime_round

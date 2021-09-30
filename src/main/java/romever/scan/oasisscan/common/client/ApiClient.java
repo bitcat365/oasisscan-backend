@@ -14,6 +14,7 @@ import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.utils.okhttp.OkHttp;
 import romever.scan.oasisscan.vo.chain.*;
+import romever.scan.oasisscan.vo.chain.Runtime;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -253,6 +254,54 @@ public class ApiClient {
             validators = result.getResult();
         }
         return validators;
+    }
+
+    public List<Runtime> runtimes(Long height) {
+        List<Runtime> runtimes = Lists.newArrayList();
+        String url = String.format("%s/api/registry/runtimes/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<List<Runtime>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<Runtime>>>() {
+        });
+        if (result != null) {
+            runtimes = result.getResult();
+        }
+        return runtimes;
+    }
+
+    public RuntimeRound roothashLatestblock(String namespace, Long height) {
+        String url = String.format("%s/api/roothash/latestblock/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("namespace", namespace);
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<RuntimeRound> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<RuntimeRound>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
+
+    public RuntimeState roothashRuntimeState(String namespace, Long height) {
+        String url = String.format("%s/api/roothash/runtimestate/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("namespace", namespace);
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<RuntimeState> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<RuntimeState>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
     }
 
     public static void main(String[] args) throws IOException {

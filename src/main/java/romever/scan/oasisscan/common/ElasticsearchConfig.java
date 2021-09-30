@@ -31,6 +31,7 @@ public class ElasticsearchConfig {
     private int requestTimeout;
     private String blockIndex;
     private String transactionIndex;
+    private String runtimeRoundIndex;
 
     @Bean
     public RestClientBuilder restClientBuilder() {

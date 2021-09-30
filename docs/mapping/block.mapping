@@ -1,5 +1,5 @@
-PUT /block_test/_alias/block
-PUT /block_test
+PUT /block_main/_alias/block
+PUT /block_main
 {
     "settings": {
         "index": {

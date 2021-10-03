@@ -19,4 +19,8 @@ public interface ESFields {
     String TRANSACTION_METHOD = "method";
     String TRANSACTION_RATE_EPOCH_START = "body.amendment.rates.start";
     String TRANSACTION_ERROR_MESSAGE = "error.message";
+
+    //runtime
+    String RUNTIME_ROUND_NAMESPACE = "namespace";
+    String RUNTIME_ROUND_ROUND = "round";
 }

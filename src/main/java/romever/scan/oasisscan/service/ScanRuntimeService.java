@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
@@ -34,6 +35,8 @@ import java.util.Optional;
 public class ScanRuntimeService {
 
     @Autowired
+    private ApplicationConfig applicationConfig;
+    @Autowired
     private ApiClient apiClient;
     @Autowired
     private RestHighLevelClient elasticsearchClient;
@@ -47,6 +50,10 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
     public void scanRuntime() {
+        if (applicationConfig.isLocal()) {
+            return;
+        }
+
         List<Runtime> runtimes = apiClient.runtimes(null);
         if (CollectionUtils.isEmpty(runtimes)) {
             return;
@@ -70,6 +77,10 @@ public class ScanRuntimeService {
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 10 * 1000)
 //    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public void scanRuntimeRound() throws IOException {
+        if (applicationConfig.isLocal()) {
+            return;
+        }
+
         List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAll();
         if (CollectionUtils.isEmpty(runtimes)) {
             return;

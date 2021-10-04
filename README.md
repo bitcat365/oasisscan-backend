@@ -19,6 +19,8 @@
 * [search](#search)
 * [account-delegations](#account-delegations)
 * [account-debonding](#account-debonding)
+* [runtime-round-list](#runtime-round-list)
+* [runtime-round-info](#runtime-round-info)
 
 ### validator stats
 
@@ -878,6 +880,83 @@ Params
         "size": 5,
         "maxPage": 1,
         "totalSize": 2
+    }
+}
+```
+
+### runtime-round-list
+
+```
+// Request
+GET http://localhost:8181/runtime/round/list
+
+```
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | runtime id |
+| size  | option,default:5 |
+| page  | option,default:1 |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "version": 0,
+                "namespace": "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
+                "round": 16,
+                "timestamp": 1629225107,
+                "header_type": 1,
+                "previous_hash": "oSGJn5+baKA+rkwJfkhshGNoJq2zWR/8uMKthOdQxo0=",
+                "io_root": "EJjDyErNa+22fvlYJ+NNohpZY7uW6ErNyoTs/zBcTHQ=",
+                "state_root": "M3TdOyhPZ+Za+l3oBigYrJmlYArDF8Vpsj4pu/8YyTI=",
+                "messages_hash": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno="
+            }
+        ],
+        "page": 1,
+        "size": 10,
+        "maxPage": 2,
+        "totalSize": 17
+    }
+}
+```
+
+### runtime-round-info
+
+```
+// Request
+GET http://localhost:8181/runtime/round/info
+
+```
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | runtime id |
+| round  | runtime round |
+| size  | option,default:5 |
+| page  | option,default:1 |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "version": 0,
+        "namespace": "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
+        "round": 3,
+        "timestamp": 1629224541,
+        "header_type": 1,
+        "previous_hash": "cRuVoUZ+Xivqtli6pdfIbXl8ZX0ZqX+mZ4WbLSwQFaQ=",
+        "io_root": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno=",
+        "state_root": "PbxPXDxWgtm7gVlztThWxSICJhlDWp/z75RPKCJMLoI=",
+        "messages_hash": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno="
     }
 }
 ```

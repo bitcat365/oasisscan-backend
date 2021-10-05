@@ -54,6 +54,7 @@ public class Transaction {
         //allowance
         private String beneficiary;
         private String amount_change;
+        private boolean negative;
 
         //Escrow
         private String account;
@@ -63,7 +64,7 @@ public class Transaction {
         private CommissionSchedule amendment;
 
         //governance
-        private long vote;
+        private Long vote;
 
         /**
          * registry

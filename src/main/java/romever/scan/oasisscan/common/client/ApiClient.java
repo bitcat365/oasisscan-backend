@@ -319,7 +319,7 @@ public class ApiClient {
 //        System.out.println(Texts.toHex(c));
 
 //        String raw = "omlzaWduYXR1cmWiaXNpZ25hdHVyZVhADvUz1NpOMlEVaN/TLbcXEJTaKIqUqR9E1TU/Nic2iP9wYiTfdNGOYOWb43NwtTqLU/mxOOk025UPCNy94J8RDGpwdWJsaWNfa2V5WCAJXOoUgAMPYR3SSEYE1/hG+Hu9I22svVQtORZhCzMOl3N1bnRydXN0ZWRfcmF3X3ZhbHVlWHSkY2ZlZaJjZ2FzGQPoZmFtb3VudEIH0GRib2R5omd4ZmVyX3RvWCBJ5YwRqKlGH+0gicWzsnkr6DIIsO5o15obKVLUnXvPGmt4ZmVyX3Rva2Vuc0FkZW5vbmNlD2ZtZXRob2Rwc3Rha2luZy5UcmFuc2Zlcg==";
-        String raw = "omlzaWduYXR1cmWiaXNpZ25hdHVyZVhA0I+kqfaXAUmfASpTSDjbcQIzOkByZQbcECryag5ipB0izDt4IovkDCu5qSJQ4pQo6vC58HN1+J/qEa541f6oD2pwdWJsaWNfa2V5WCALmR2hlOsS0n0o53YsQy8DmzpdbA+5Vg8nsYw1Yi8WMHN1bnRydXN0ZWRfcmF3X3ZhbHVlWG6kY2ZlZaJjZ2FzGQT/ZmFtb3VudEBkYm9keaJrYmVuZWZpY2lhcnlVAFEj/i94omxty3Y5nSoiZq5UeSlfbWFtb3VudF9jaGFuZ2VFF0h26ABlbm9uY2UY32ZtZXRob2Rtc3Rha2luZy5BbGxvdw==";
+        String raw = "omlzaWduYXR1cmWiaXNpZ25hdHVyZVhAXylHsFUDV2HJcieNZnpCg4+FqqoQuDXzfVg+4t+SjDknvvpyGWVAy+gWtRCSVrr1mlISaPf6Zf3u3XFDPCruB2pwdWJsaWNfa2V5WCALmR2hlOsS0n0o53YsQy8DmzpdbA+5Vg8nsYw1Yi8WMHN1bnRydXN0ZWRfcmF3X3ZhbHVlWHikY2ZlZaJjZ2FzGQUJZmFtb3VudEBkYm9keaNobmVnYXRpdmX0a2JlbmVmaWNpYXJ5VQBRI/4veKJsbct2OZ0qImauVHkpX21hbW91bnRfY2hhbmdlRRdIdugAZW5vbmNlGOhmbWV0aG9kbXN0YWtpbmcuQWxsb3c=";
 //        System.out.println(getSHA512_256(Texts.base64Decode(raw)));
 //
 //        JSONObject json1 = cborToJson(raw);

@@ -54,7 +54,7 @@ public class Transaction {
         //allowance
         private String beneficiary;
         private String amount_change;
-        private boolean negative;
+        private Boolean negative;
 
         //Escrow
         private String account;

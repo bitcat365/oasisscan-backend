@@ -40,7 +40,6 @@ import romever.scan.oasisscan.vo.git.Content;
 import romever.scan.oasisscan.vo.git.EntityInfo;
 import romever.scan.oasisscan.vo.git.EntityRawInfo;
 
-import javax.xml.soap.Text;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -68,8 +67,6 @@ public class ScanValidatorService {
     @Autowired
     private SystemPropertyRepository systemPropertyRepository;
 
-    @Autowired
-    private DataAccess dataAccess;
     @Autowired
     private RestHighLevelClient elasticsearchClient;
     @Autowired
@@ -334,9 +331,6 @@ public class ScanValidatorService {
             String entityId = node.getEntity_id();
             String nodeId = node.getId();
             String consensusId = node.getConsensus().getId();
-            if (!nodeStatus.containsKey(nodeId)) {
-                continue;
-            }
 
             Optional<ValidatorConsensus> consensusOptional =
                     validatorConsensusRepository.findByEntityIdAndNodeIdAndConsensusId(entityId, nodeId, consensusId);
@@ -352,6 +346,10 @@ public class ScanValidatorService {
             consensusList.add(validatorConsensus);
 
             //validator info
+            if (!nodeStatus.containsKey(nodeId)) {
+                continue;
+            }
+
             Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(entityId);
             ValidatorInfo validatorInfo;
             if (optionalValidatorInfo.isPresent()) {

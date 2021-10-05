@@ -285,8 +285,13 @@ public class ScanValidatorService {
                 continue;
             }
 
-            EntityInfo entityInfo = Mappers.parseCborFromBase64(rawInfo.getUntrusted_raw_value(), new TypeReference<EntityInfo>() {
-            });
+            EntityInfo entityInfo = null;
+            try {
+                entityInfo = Mappers.parseCborFromBase64(rawInfo.getUntrusted_raw_value(), new TypeReference<EntityInfo>() {
+                });
+            } catch (IOException e) {
+                log.error("", e);
+            }
             if (entityInfo == null) {
                 return;
             }

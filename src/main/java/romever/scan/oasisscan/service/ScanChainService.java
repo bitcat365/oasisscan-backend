@@ -98,85 +98,92 @@ public class ScanChainService {
             if (block != null) {
                 String meta = block.getMeta();
                 if (Texts.isNotBlank(meta)) {
-                    Block.MetaData metaData = Mappers.parseCborFromBase64(meta, new TypeReference<Block.MetaData>() {
-                    });
-                    if (metaData != null) {
-                        String id = String.valueOf(block.getHeight());
-                        block.setMetadata(metaData);
-                        block.setMeta(null);
+                    try {
+                        Block.MetaData metaData = Mappers.parseCborFromBase64(meta, new TypeReference<Block.MetaData>() {
+                        });
+                        if (metaData != null) {
+                            String id = String.valueOf(block.getHeight());
+                            block.setMetadata(metaData);
+                            block.setMeta(null);
 
-                        //transaction
-                        TransactionWithResult transactionWithResult = apiClient.transactionswithresults(start);
-                        List<String> txList = transactionWithResult.getTransactions();
-                        List<TransactionResult> results = transactionWithResult.getResults();
-                        Map<String, Map<String, Object>> txMap = Maps.newHashMap();
-                        if (!CollectionUtils.isEmpty(txList)) {
-                            for (int i = 0; i < txList.size(); i++) {
-                                String rawTx = txList.get(i);
-                                TransactionResult transactionResult = null;
-                                if (results.size() > i) {
-                                    transactionResult = results.get(i);
-                                }
-                                String txHash = Texts.sha512_256(Texts.base64Decode(rawTx));
-                                RawTransaction rawTransaction = Mappers.parseCborFromBase64(rawTx, new TypeReference<RawTransaction>() {
-                                });
-                                if (rawTransaction != null) {
-                                    Transaction tx = Mappers.parseCborFromBase64(rawTransaction.getUntrusted_raw_value(), new TypeReference<Transaction>() {
+                            //transaction
+                            TransactionWithResult transactionWithResult = apiClient.transactionswithresults(start);
+                            List<String> txList = transactionWithResult.getTransactions();
+                            List<TransactionResult> results = transactionWithResult.getResults();
+                            Map<String, Map<String, Object>> txMap = Maps.newHashMap();
+                            if (!CollectionUtils.isEmpty(txList)) {
+                                for (int i = 0; i < txList.size(); i++) {
+                                    String rawTx = txList.get(i);
+                                    TransactionResult transactionResult = null;
+                                    if (results.size() > i) {
+                                        transactionResult = results.get(i);
+                                    }
+                                    String txHash = Texts.sha512_256(Texts.base64Decode(rawTx));
+                                    RawTransaction rawTransaction = Mappers.parseCborFromBase64(rawTx, new TypeReference<RawTransaction>() {
                                     });
-                                    if (tx != null) {
-                                        //status
-                                        if (transactionResult != null) {
-                                            TransactionResult.Error error = transactionResult.getError();
-                                            tx.setError(error);
-                                        }
-
-                                        tx.setTx_hash(txHash);
-                                        tx.setHeight(start);
-                                        tx.setTime(block.getTime());
-                                        tx.setTimestamp(block.getTime().toEpochSecond());
-                                        tx.setSignature(rawTransaction.getSignature());
-                                        String bech32Address = apiClient.pubkeyToBech32Address(tx.getSignature().getPublic_key());
-                                        if (Texts.isBlank(bech32Address)) {
-                                            throw new RuntimeException(String.format("address parse failed, %s", tx.getSignature().getPublic_key()));
-                                        }
-                                        tx.getSignature().setAddress(bech32Address);
-                                        Transaction.Body body = tx.getBody();
-                                        if (body != null) {
-                                            String bodyRawData = body.getUntrusted_raw_value();
-                                            if (Texts.isNotBlank(bodyRawData)) {
-                                                body.setUntrusted_raw_value(null);
-                                                Node node = Mappers.parseCborFromBase64(bodyRawData, new TypeReference<Node>() {
-                                                });
-                                                tx.setNode(node);
+                                    if (rawTransaction != null) {
+                                        Transaction tx = Mappers.parseCborFromBase64(rawTransaction.getUntrusted_raw_value(), new TypeReference<Transaction>() {
+                                        });
+                                        if (tx != null) {
+                                            //status
+                                            if (transactionResult != null) {
+                                                TransactionResult.Error error = transactionResult.getError();
+                                                tx.setError(error);
                                             }
 
-                                            //address
-                                            if (Texts.isNotBlank(body.getAccount())) {
-                                                String address = apiClient.base64ToBech32Address(body.getAccount());
-                                                if (Texts.isBlank(address)) {
-                                                    throw new RuntimeException(String.format("address parse failed, %s", body.getAccount()));
+                                            tx.setTx_hash(txHash);
+                                            tx.setHeight(start);
+                                            tx.setTime(block.getTime());
+                                            tx.setTimestamp(block.getTime().toEpochSecond());
+                                            tx.setSignature(rawTransaction.getSignature());
+                                            String bech32Address = apiClient.pubkeyToBech32Address(tx.getSignature().getPublic_key());
+                                            if (Texts.isBlank(bech32Address)) {
+                                                throw new RuntimeException(String.format("address parse failed, %s", tx.getSignature().getPublic_key()));
+                                            }
+                                            tx.getSignature().setAddress(bech32Address);
+                                            Transaction.Body body = tx.getBody();
+                                            if (body != null) {
+                                                String bodyRawData = body.getUntrusted_raw_value();
+                                                if (Texts.isNotBlank(bodyRawData)) {
+                                                    body.setUntrusted_raw_value(null);
+                                                    Node node = Mappers.parseCborFromBase64(bodyRawData, new TypeReference<Node>() {
+                                                    });
+                                                    tx.setNode(node);
                                                 }
-                                                body.setAccount(address);
-                                            }
-                                            if (Texts.isNotBlank(body.getTo())) {
-                                                String address = apiClient.base64ToBech32Address(body.getTo());
-                                                if (Texts.isBlank(address)) {
-                                                    throw new RuntimeException(String.format("address parse failed, %s", body.getTo()));
-                                                }
-                                                body.setTo(address);
-                                            }
-                                        }
-                                        txMap.put(tx.getTx_hash(), Mappers.map(tx));
 
-                                        //update account info
-                                        updateAccountInfo(tx);
+                                                //address
+                                                if (Texts.isNotBlank(body.getAccount())) {
+                                                    String address = apiClient.base64ToBech32Address(body.getAccount());
+                                                    if (Texts.isBlank(address)) {
+                                                        throw new RuntimeException(String.format("address parse failed, %s", body.getAccount()));
+                                                    }
+                                                    body.setAccount(address);
+                                                }
+                                                if (Texts.isNotBlank(body.getBeneficiary())) {
+                                                    String address = apiClient.base64ToBech32Address(body.getBeneficiary());
+                                                    if (Texts.isBlank(address)) {
+                                                        throw new RuntimeException(String.format("address parse failed, %s", body.getBeneficiary()));
+                                                    }
+                                                    body.setBeneficiary(address);
+                                                }
+                                                if (Texts.isNotBlank(body.getTo())) {
+                                                    String address = apiClient.base64ToBech32Address(body.getTo());
+                                                    if (Texts.isBlank(address)) {
+                                                        throw new RuntimeException(String.format("address parse failed, %s", body.getTo()));
+                                                    }
+                                                    body.setTo(address);
+                                                }
+                                            }
+                                            txMap.put(tx.getTx_hash(), Mappers.map(tx));
+
+                                            //update account info
+                                            updateAccountInfo(tx);
+                                        }
                                     }
                                 }
+                                block.setTxs(txMap.size());
                             }
-                            block.setTxs(txMap.size());
-                        }
 
-                        try {
                             //block
                             JestDao.index(elasticsearchClient, elasticsearchConfig.getBlockIndex(), Mappers.map(block), id);
                             log.info("block [{}] sync done.", start);
@@ -199,14 +206,13 @@ public class ScanChainService {
                                     log.info("transaction [{}] sync done, count: {} ", start, txMap.size());
                                 }
                             }
-                        } catch (Exception e) {
-                            log.error("error", e);
-                            break;
                         }
-
-                        start++;
-                        continue;
+                    } catch (Exception e) {
+                        log.error("error", e);
+                        break;
                     }
+                    start++;
+                    continue;
                 }
             }
             break;

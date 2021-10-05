@@ -51,6 +51,9 @@ public class Transaction {
         private String amount;
         //transfer
         private String to;
+        //allowance
+        private String beneficiary;
+        private String amount_change;
 
         //Escrow
         private String account;
@@ -73,6 +76,10 @@ public class Transaction {
 
         public String getAmount() {
             return Texts.numberFromBase64(amount);
+        }
+
+        public String getAmount_change() {
+            return Texts.numberFromBase64(amount_change);
         }
 
         public String getShares() {

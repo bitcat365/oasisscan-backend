@@ -43,17 +43,18 @@ public abstract class Mappers {
         base64Decoder = Base64.getDecoder();
     }
 
-    public static <T> T parseCborFromBase64(String base64, TypeReference<T> type) {
+    public static <T> T parseCborFromBase64(String base64, TypeReference<T> type) throws IOException {
         return parseCbor(base64Decoder.decode(base64), type);
     }
 
-    public static <T> T parseCbor(byte[] bytes, TypeReference<T> type) {
-        try {
-            return cborMapper.readValue(bytes, type);
-        } catch (IOException e) {
-            log.warn("parse cbor failure", e);
-            return null;
-        }
+    public static <T> T parseCbor(byte[] bytes, TypeReference<T> type) throws IOException {
+//        try {
+//            return cborMapper.readValue(bytes, type);
+//        } catch (IOException e) {
+//            log.warn("parse cbor failure", e);
+//            return null;
+//        }
+        return cborMapper.readValue(bytes, type);
     }
 
     /*

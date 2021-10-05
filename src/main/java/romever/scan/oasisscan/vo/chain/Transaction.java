@@ -55,6 +55,8 @@ public class Transaction {
         private String beneficiary;
         private String amount_change;
         private Boolean negative;
+        //withdraw
+        private String from;
 
         //Escrow
         private String account;

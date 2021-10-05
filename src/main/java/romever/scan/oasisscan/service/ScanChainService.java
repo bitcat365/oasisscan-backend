@@ -166,6 +166,13 @@ public class ScanChainService {
                                                     }
                                                     body.setBeneficiary(address);
                                                 }
+                                                if (Texts.isNotBlank(body.getFrom())) {
+                                                    String address = apiClient.base64ToBech32Address(body.getFrom());
+                                                    if (Texts.isBlank(address)) {
+                                                        throw new RuntimeException(String.format("address parse failed, %s", body.getFrom()));
+                                                    }
+                                                    body.setFrom(address);
+                                                }
                                                 if (Texts.isNotBlank(body.getTo())) {
                                                     String address = apiClient.base64ToBech32Address(body.getTo());
                                                     if (Texts.isBlank(address)) {

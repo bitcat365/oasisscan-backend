@@ -755,6 +755,12 @@ GET http://localhost:8181/chain/account/info/{address}
         "debonding": "4.0211",
         "total": "190047.6672",
         "nonce": 20
+        "allowances": [
+            {
+                "address": "oasis1qpgj8l300z3xcmwtwcue623zv6h9g7fftugx0q94",
+                "amount": "900.0000"
+            }
+        ]
     }
 }
 ```

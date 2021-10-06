@@ -28,6 +28,7 @@ import romever.scan.oasisscan.vo.response.AccountResponse;
 import romever.scan.oasisscan.vo.response.AccountValidatorResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -76,6 +77,17 @@ public class AccountService {
             AccountInfo.General general = accountInfo.getGeneral();
             if (general != null) {
                 response.setNonce(general.getNonce());
+                Map<String, String> allowanceMap = general.getAllowances();
+                if (!CollectionUtils.isEmpty(allowanceMap)) {
+                    List<AccountResponse.Allowance> allowanceList = Lists.newArrayList();
+                    for (Map.Entry<String, String> entry : allowanceMap.entrySet()) {
+                        AccountResponse.Allowance allowance = new AccountResponse.Allowance();
+                        allowance.setAddress(entry.getKey());
+                        allowance.setAmount(Texts.formatDecimals(String.valueOf(entry.getValue()), Constants.DECIMALS, 4));
+                        allowanceList.add(allowance);
+                    }
+                    response.setAllowances(allowanceList);
+                }
             }
         }
         return response;

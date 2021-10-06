@@ -1,5 +1,6 @@
 package romever.scan.oasisscan.vo.response;
 
+import com.google.common.collect.Lists;
 import lombok.Data;
 import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.entity.Account;
@@ -7,6 +8,7 @@ import romever.scan.oasisscan.utils.Numeric;
 import romever.scan.oasisscan.utils.Texts;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 public class AccountResponse {
@@ -16,8 +18,14 @@ public class AccountResponse {
     private String escrow = "0";
     private String debonding = "0";
     private String total = "0";
-
     private long nonce;
+    private List<Allowance> allowances = Lists.newArrayList();
+
+    @Data
+    public static class Allowance {
+        private String address;
+        private String amount;
+    }
 
     public static AccountResponse of(Account account, int scale) {
         AccountResponse response = new AccountResponse();

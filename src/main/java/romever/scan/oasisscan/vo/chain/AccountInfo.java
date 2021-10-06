@@ -3,6 +3,7 @@ package romever.scan.oasisscan.vo.chain;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class AccountInfo {
@@ -13,6 +14,7 @@ public class AccountInfo {
     public static class General {
         private String balance;
         private long nonce;
+        private Map<String, String> allowances;
     }
 
     @Data

@@ -2,6 +2,7 @@ package romever.scan.oasisscan.vo;
 
 public enum MethodEnum {
     StakingTransfer("staking.Transfer"),
+    StakingAllow("staking.Allow"),
     StakingAddEscrow("staking.AddEscrow"),
     StakingReclaimEscrow("staking.ReclaimEscrow"),
     StakingAmendCommissionSchedule("staking.AmendCommissionSchedule"),

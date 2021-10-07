@@ -48,14 +48,25 @@ public class ListTransactionResponse {
 
         MethodEnum methodEnum = MethodEnum.getEnumByName(transaction.getMethod());
         Transaction.Body body = transaction.getBody();
-        if (methodEnum != null && methodEnum.equals(MethodEnum.StakingTransfer) && body != null) {
-            String a = body.getAmount();
-            if (Texts.isBlank(a)) {
-                a = "0";
+        if (methodEnum != null && body != null) {
+            if (methodEnum.equals(MethodEnum.StakingTransfer)) {
+                String a = body.getAmount();
+                if (Texts.isBlank(a)) {
+                    a = "0";
+                }
+                double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
+                response.setAmount(Numeric.formatDouble(amount));
+                response.setTo(body.getTo());
+            } else if (methodEnum.equals(MethodEnum.StakingAllow)) {
+                String a = body.getAmount_change();
+                if (Texts.isBlank(a)) {
+                    a = "0";
+                }
+                double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
+                response.setAmount(Numeric.formatDouble(amount));
+                response.setTo(body.getBeneficiary());
+                response.setAdd(!body.getNegative());
             }
-            double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
-            response.setAmount(Numeric.formatDouble(amount));
-            response.setTo(body.getTo());
         }
 
         if (methodEnum != null && body != null) {

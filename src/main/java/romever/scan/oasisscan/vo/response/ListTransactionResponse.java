@@ -65,7 +65,9 @@ public class ListTransactionResponse {
                 double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
                 response.setAmount(Numeric.formatDouble(amount));
                 response.setTo(body.getBeneficiary());
-                response.setAdd(!body.getNegative());
+                if (body.getNegative() != null) {
+                    response.setAdd(!body.getNegative());
+                }
             }
         }
 

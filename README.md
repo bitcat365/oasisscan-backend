@@ -983,8 +983,14 @@ GET http://localhost:8181/runtime/list
     "code": 0,
     "data": {
         "list": [
-            "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
-            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            {
+                "name": null,
+                "runtimeId": "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI="
+            },
+            {
+                "name": null,
+                "runtimeId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            }
         ]
     }
 }

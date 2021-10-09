@@ -21,6 +21,7 @@
 * [account-debonding](#account-debonding)
 * [runtime-round-list](#runtime-round-list)
 * [runtime-round-info](#runtime-round-info)
+* [runtime-list](#runtime-list)
 
 ### validator stats
 
@@ -963,6 +964,28 @@ Params
         "io_root": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno=",
         "state_root": "PbxPXDxWgtm7gVlztThWxSICJhlDWp/z75RPKCJMLoI=",
         "messages_hash": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno="
+    }
+}
+```
+
+### runtime-list
+
+```
+// Request
+GET http://localhost:8181/runtime/list
+
+```
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
+            "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+        ]
     }
 }
 ```

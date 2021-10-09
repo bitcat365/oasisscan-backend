@@ -18,11 +18,14 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApiResult;
 import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.entity.ValidatorInfo;
+import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.vo.chain.Block;
 import romever.scan.oasisscan.vo.chain.RuntimeRound;
@@ -42,6 +45,8 @@ public class RuntimeService {
     private RestHighLevelClient elasticsearchClient;
     @Autowired
     private ElasticsearchConfig elasticsearchConfig;
+    @Autowired
+    private RuntimeRepository runtimeRepository;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult roundList(String runtimeId, int size, int page) {
@@ -97,5 +102,16 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    public List<String> runtimeList() {
+        List<String> list = Lists.newArrayList();
+        List<Runtime> runtimeList = runtimeRepository.findAll();
+        if (!CollectionUtils.isEmpty(runtimeList)) {
+            for (Runtime runtime : runtimeList) {
+                list.add(runtime.getRuntimeId());
+            }
+        }
+        return list;
     }
 }

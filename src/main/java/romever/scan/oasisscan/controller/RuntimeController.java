@@ -32,4 +32,9 @@ public class RuntimeController {
             @RequestParam(value = "round") long round) {
         return ApiResult.ok(runtimeService.roundInfo(id, round));
     }
+
+    @GetMapping("/list")
+    public ApiResult runtimeList() {
+        return ApiResult.list(runtimeService.runtimeList());
+    }
 }

@@ -30,6 +30,7 @@ import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.vo.chain.Block;
 import romever.scan.oasisscan.vo.chain.RuntimeRound;
 import romever.scan.oasisscan.vo.response.BlockDetailResponse;
+import romever.scan.oasisscan.vo.response.RuntimeResponse;
 import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
 
 import java.io.IOException;
@@ -104,12 +105,15 @@ public class RuntimeService {
         return response;
     }
 
-    public List<String> runtimeList() {
-        List<String> list = Lists.newArrayList();
+    public List<RuntimeResponse> runtimeList() {
+        List<RuntimeResponse> list = Lists.newArrayList();
         List<Runtime> runtimeList = runtimeRepository.findAll();
         if (!CollectionUtils.isEmpty(runtimeList)) {
             for (Runtime runtime : runtimeList) {
-                list.add(runtime.getRuntimeId());
+                RuntimeResponse response = new RuntimeResponse();
+                response.setName(runtime.getName());
+                response.setRuntimeId(runtime.getRuntimeId());
+                list.add(response);
             }
         }
         return list;

@@ -132,14 +132,31 @@ CREATE TABLE `system_property`
 
 CREATE TABLE `runtime`
 (
-    `id`                int(10) unsigned NOT NULL AUTO_INCREMENT,
-    `name`              varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
-    `runtime_id`        varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
-    `entity_id`         varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
-    `scan_round_height` int(10) unsigned NOT NULL        DEFAULT '0',
-    `ctime`             timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
-    `mtime`             timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
+    `id`                 int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `name`               varchar(200) COLLATE utf8mb4_bin DEFAULT NULL,
+    `runtime_id`         varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `entity_id`          varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `scan_round_height`  int(10) unsigned NOT NULL        DEFAULT '0',
+    `start_round_height` int(10) unsigned NOT NULL        DEFAULT '0',
+    `ctime`              timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
+    `mtime`              timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin;
+
+CREATE TABLE `runtime_stats`
+(
+    `id`         int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `runtime_id` varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `entity_id`    varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `height`     int(10) unsigned NOT NULL DEFAULT '0',
+    `round`      int(10) unsigned NOT NULL DEFAULT '0',
+    `stats_type` int(2) unsigned  NOT NULL DEFAULT '0',
+    `ctime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `mtime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uniq_all` (`runtime_id`, `entity_id`, `round`, `stats_type`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_bin;

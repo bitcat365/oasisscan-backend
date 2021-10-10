@@ -4,20 +4,19 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.Cacheable;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
-@Table(name = "runtime")
+@Table(name = "runtime_stats")
 @Cacheable
 @DynamicUpdate
 @DynamicInsert
-public class Runtime extends BaseEntity {
-    private String name;
+public class RuntimeStats extends BaseEntity {
     private String runtimeId;
     private String entityId;
-    private long scanRoundHeight;
-    private long startRoundHeight;
+    private long height;
+    private long round;
+    @Enumerated(value = EnumType.ORDINAL)
+    private RuntimeStatsType statsType;
 }

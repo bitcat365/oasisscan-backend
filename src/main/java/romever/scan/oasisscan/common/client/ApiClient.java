@@ -304,6 +304,21 @@ public class ApiClient {
         return null;
     }
 
+    public List<RoothashEvent> roothashEvents(Long height) {
+        String url = String.format("%s/api/roothash/events/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<List<RoothashEvent>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<RoothashEvent>>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws IOException {
         System.out.println(Texts.base64ToHex("Y2VJnoFJ21uoPCJnr21PshnxcgkUXNyc8Quou/74vpeqqJ/lXnPM1LlzfR4BBTMWboxgeVafhmg118Fc4h1TcuIggNhbzNy5dA/qx55X0W0NZUEB0rL7X6w5Q11nKOaSLnOVnK16uMwNn17Xy/HbaCGuHpHiYVQmH3f/K4JJbkA="));
 //        CBORFactory f = new CBORFactory();

@@ -150,6 +150,33 @@ public class TransactionService {
         return ApiResult.page(responses, page, size, total);
     }
 
+    public List<Transaction> getEsTransactionsByHeight(Long height) throws IOException {
+        List<Transaction> transactions = Lists.newArrayList();
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        if (height != null) {
+            boolQueryBuilder.filter(QueryBuilders.termQuery(TRANSACTION_HEIGHT, height));
+        }
+        if (boolQueryBuilder.hasClauses()) {
+            searchSourceBuilder.query(boolQueryBuilder);
+        }
+
+        searchSourceBuilder.size(10000);
+        searchSourceBuilder.trackTotalHits(true);
+
+        SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getTransactionIndex(), searchSourceBuilder);
+        if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+            SearchHits hits = searchResponse.getHits();
+            SearchHit[] searchHits = hits.getHits();
+            for (SearchHit hit : searchHits) {
+                Transaction tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<Transaction>() {
+                });
+                transactions.add(tx);
+            }
+        }
+        return transactions;
+    }
+
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public TransactionDetailResponse detail(String hash) {
         TransactionDetailResponse response = null;

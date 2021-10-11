@@ -130,8 +130,8 @@ public class RuntimeService {
         return list;
     }
 
-    //    @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-//    @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
+    @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
     public List<RuntimeStatsResponse> runtimeStats(String runtimeId) {
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
         List<String> entities = runtimeStatsRepository.entities(runtimeId);

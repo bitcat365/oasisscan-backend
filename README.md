@@ -997,7 +997,7 @@ GET http://localhost:8181/runtime/list
 }
 ```
 
-### runtime-round-info
+### runtime-stats
 
 ```
 // Request

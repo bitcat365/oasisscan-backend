@@ -22,6 +22,7 @@
 * [runtime-round-list](#runtime-round-list)
 * [runtime-round-info](#runtime-round-info)
 * [runtime-list](#runtime-list)
+* [runtime-stats](#runtime-stats)
 
 ### validator stats
 
@@ -990,6 +991,49 @@ GET http://localhost:8181/runtime/list
             {
                 "name": null,
                 "runtimeId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+            }
+        ]
+    }
+}
+```
+
+### runtime-round-info
+
+```
+// Request
+GET http://localhost:8181/runtime/stats
+
+```
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | runtime id |
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "entityId": "qg5I1u74cSaDfg9GA8SAvTxronahNfCXfj1tIjeV6hQ=",
+                "stats": {
+                    "elected": 14,
+                    "primary": 14,
+                    "backup": 0,
+                    "proposer": 14,
+                    "primary_invoked": 13,
+                    "primary_good_commit": 13,
+                    "prim_bad_commmit": 0,
+                    "bckp_invoked": 0,
+                    "bckp_good_commit": 0,
+                    "bckp_bad_commit": 0,
+                    "primary_missed": 0,
+                    "bckp_missed": 0,
+                    "proposer_missed": 0,
+                    "proposed_timeout": 0
+                }
             }
         ]
     }

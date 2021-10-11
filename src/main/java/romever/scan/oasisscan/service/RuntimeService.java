@@ -1,9 +1,11 @@
 package romever.scan.oasisscan.service;
 
+import com.alicp.jetcache.anno.CacheRefresh;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
@@ -24,18 +26,25 @@ import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Runtime;
+import romever.scan.oasisscan.entity.RuntimeStatsCount;
+import romever.scan.oasisscan.entity.RuntimeStatsType;
 import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.RuntimeRepository;
+import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.utils.Mappers;
+import romever.scan.oasisscan.vo.RuntimeHeaderTypeEnum;
+import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.Block;
 import romever.scan.oasisscan.vo.chain.RuntimeRound;
 import romever.scan.oasisscan.vo.response.BlockDetailResponse;
 import romever.scan.oasisscan.vo.response.RuntimeResponse;
 import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
+import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -48,6 +57,8 @@ public class RuntimeService {
     private ElasticsearchConfig elasticsearchConfig;
     @Autowired
     private RuntimeRepository runtimeRepository;
+    @Autowired
+    private RuntimeStatsRepository runtimeStatsRepository;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult roundList(String runtimeId, int size, int page) {
@@ -118,4 +129,52 @@ public class RuntimeService {
         }
         return list;
     }
+
+    //    @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+//    @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
+    public List<RuntimeStatsResponse> runtimeStats(String runtimeId) {
+        List<RuntimeStatsResponse> responses = Lists.newArrayList();
+        List<String> entities = runtimeStatsRepository.entities(runtimeId);
+        if (CollectionUtils.isEmpty(entities)) {
+            return responses;
+        }
+        RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
+        for (String entity : entities) {
+            List statsList = runtimeStatsRepository.statsByRuntimeId(runtimeId, entity);
+            if (CollectionUtils.isEmpty(statsList)) {
+                continue;
+            }
+            RuntimeStatsResponse response = new RuntimeStatsResponse();
+            response.setEntityId(entity);
+            Map<String, Long> statsMap = Maps.newLinkedHashMap();
+            for (RuntimeStatsType type : types) {
+                statsMap.put(type.name().toLowerCase(), 0L);
+            }
+            for (Object row : statsList) {
+                Object[] cells = (Object[]) row;
+                for (int i = 0; i < types.length; i++) {
+                    RuntimeStatsType type = types[i];
+                    if (i == (Integer) cells[0]) {
+                        long count = ((BigInteger) cells[1]).longValue();
+                        statsMap.put(type.name().toLowerCase(), count);
+                        break;
+                    }
+                }
+            }
+            response.setStats(statsMap);
+            responses.add(response);
+        }
+        responses.sort((r1, r2) -> {
+            Map<String, Long> map1 = r1.getStats();
+            Map<String, Long> map2 = r2.getStats();
+            long count1 = map1.get(types[0].name());
+            long count2 = map2.get(types[0].name());
+            if (count1 == count2) {
+                return r1.getEntityId().compareTo(r2.getEntityId());
+            }
+            return (int) (map2.get(types[0].name()) - map1.get(types[0].name()));
+        });
+        return responses;
+    }
+
 }

@@ -37,4 +37,9 @@ public class RuntimeController {
     public ApiResult runtimeList() {
         return ApiResult.list(runtimeService.runtimeList());
     }
+
+    @GetMapping("/stats")
+    public ApiResult runtimeStats(@RequestParam(value = "id") String id) {
+        return ApiResult.list(runtimeService.runtimeStats(id));
+    }
 }

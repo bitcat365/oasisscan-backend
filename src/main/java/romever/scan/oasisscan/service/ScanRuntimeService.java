@@ -259,31 +259,29 @@ public class ScanRuntimeService {
                                     saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.BCKP_INVOKED);
                                 }
                                 // Go over good commitments.
-                                if (_ev.getGood_compute_nodes() == null) {
-                                    continue;
-                                }
-                                for (String g : _ev.getGood_compute_nodes()) {
-                                    if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                        saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.PRIMARY_GOOD_COMMIT);
-                                        continue OUTER;
-                                    }
-                                    if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                        saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.BCKP_GOOD_COMMIT);
-                                        continue OUTER;
+                                if (_ev.getGood_compute_nodes() != null) {
+                                    for (String g : _ev.getGood_compute_nodes()) {
+                                        if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.PRIMARY_GOOD_COMMIT);
+                                            continue OUTER;
+                                        }
+                                        if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.BCKP_GOOD_COMMIT);
+                                            continue OUTER;
+                                        }
                                     }
                                 }
                                 // Go over bad commitments.
-                                if (_ev.getBad_compute_nodes() == null) {
-                                    continue;
-                                }
-                                for (String g : _ev.getBad_compute_nodes()) {
-                                    if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                        saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.PRIM_BAD_COMMMIT);
-                                        continue OUTER;
-                                    }
-                                    if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                        saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.BCKP_BAD_COMMIT);
-                                        continue OUTER;
+                                if (_ev.getBad_compute_nodes() != null) {
+                                    for (String g : _ev.getBad_compute_nodes()) {
+                                        if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.PRIM_BAD_COMMMIT);
+                                            continue OUTER;
+                                        }
+                                        if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, round, entityId, RuntimeStatsType.BCKP_BAD_COMMIT);
+                                            continue OUTER;
+                                        }
                                     }
                                 }
                                 // Neither good nor bad - missed commitment.

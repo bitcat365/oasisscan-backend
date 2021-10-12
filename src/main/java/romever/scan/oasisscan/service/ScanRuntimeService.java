@@ -181,9 +181,6 @@ public class ScanRuntimeService {
                 long round = executorPool.getRound();
                 RuntimeState.Committee committee = executorPool.getCommittee();
                 List<RuntimeState.Member> members = committee.getMembers();
-                if (members == null) {
-                    throw new RuntimeException(String.format("Members null. %s", scanHeight));
-                }
                 RuntimeState.Member currentScheduler = getTransactionScheduler(members, round);
                 // If new round, check for proposer timeout.
                 // Need to look at submitted transactions if round failure was caused by a proposer timeout.
@@ -195,6 +192,7 @@ public class ScanRuntimeService {
                     break;
                 }
                 boolean proposerTimeout = false;
+                boolean roundDiscrepancy = false;
                 if (!CollectionUtils.isEmpty(txs)) {
                     for (Transaction tx : txs) {
                         TransactionResult.Error error = tx.getError();
@@ -232,17 +230,13 @@ public class ScanRuntimeService {
                         if (!runtimeId.equalsIgnoreCase(ev.getRuntime_id())) {
                             continue;
                         }
-                        boolean roundDiscrepancy = false;
                         if (ev.getExecution_discrepancy() != null) {
                             roundDiscrepancy = true;
                         }
                         if (ev.getFinalized() != null) {
                             RoothashEvent.Finalized _ev = ev.getFinalized();
                             // Skip the empty finalized event that is triggered on initial round.
-                            if (_ev.getGood_compute_nodes() == null && _ev.getBad_compute_nodes() == null) {
-                                continue;
-                            }
-                            if (_ev.getGood_compute_nodes().size() == 0 && _ev.getBad_compute_nodes().size() == 0) {
+                            if (CollectionUtils.isEmpty(_ev.getGood_compute_nodes()) && CollectionUtils.isEmpty(_ev.getBad_compute_nodes()) && CollectionUtils.isEmpty(members)) {
                                 continue;
                             }
                             // Skip if epoch transition or suspended blocks.

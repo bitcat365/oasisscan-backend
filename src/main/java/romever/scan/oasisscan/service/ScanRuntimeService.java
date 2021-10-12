@@ -172,6 +172,10 @@ public class ScanRuntimeService {
                 for (Node node : nodes) {
                     nodeToEntity.put(node.getId(), node.getEntity_id());
                 }
+                RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
+                if (runtimeRound == null) {
+                    throw new RuntimeException(String.format("Runtime round api error. %s", scanHeight));
+                }
                 // If new round, check for proposer timeout.
                 // Need to look at submitted transactions if round failure was caused by a proposer timeout.
                 List<Transaction> txs = null;
@@ -182,7 +186,7 @@ public class ScanRuntimeService {
                     break;
                 }
                 boolean proposerTimeout = false;
-                if (!CollectionUtils.isEmpty(txs) && committee != null) {
+                if (!CollectionUtils.isEmpty(txs) && curRound != runtimeRound.getHeader().getRound() && committee != null) {
                     for (Transaction tx : txs) {
                         TransactionResult.Error error = tx.getError();
                         if (error != null) {
@@ -205,10 +209,6 @@ public class ScanRuntimeService {
                     }
                 }
 
-                RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
-                if (runtimeRound == null) {
-                    throw new RuntimeException(String.format("Runtime round api error. %s", scanHeight));
-                }
                 long headerType = runtimeRound.getHeader().getHeader_type();
                 // Go over events before updating potential new round committee info.
                 // Even if round transition happened at this height, all events emitted

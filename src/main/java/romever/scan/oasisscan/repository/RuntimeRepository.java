@@ -12,4 +12,6 @@ import java.util.Optional;
 public interface RuntimeRepository extends JpaRepository<Runtime, Integer>,
         JpaSpecificationExecutor<Runtime> {
     Optional<Runtime> findByRuntimeId(String entityId);
+
+    List<Runtime> findAllByOrderByStartRoundHeightAsc();
 }

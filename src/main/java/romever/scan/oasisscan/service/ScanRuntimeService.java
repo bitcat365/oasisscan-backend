@@ -150,7 +150,7 @@ public class ScanRuntimeService {
             return;
         }
 
-        List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAll();
+        List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAllByOrderByStartRoundHeightAsc();
         if (CollectionUtils.isEmpty(runtimes)) {
             return;
         }

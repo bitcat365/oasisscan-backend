@@ -167,12 +167,12 @@ public class RuntimeService {
         responses.sort((r1, r2) -> {
             Map<String, Long> map1 = r1.getStats();
             Map<String, Long> map2 = r2.getStats();
-            long count1 = map1.get(types[0].name());
-            long count2 = map2.get(types[0].name());
+            long count1 = map1.get(types[0].name().toLowerCase());
+            long count2 = map2.get(types[0].name().toLowerCase());
             if (count1 == count2) {
                 return r1.getEntityId().compareTo(r2.getEntityId());
             }
-            return (int) (map2.get(types[0].name()) - map1.get(types[0].name()));
+            return (int) (map2.get(types[0].name().toLowerCase()) - map1.get(types[0].name().toLowerCase()));
         });
         return responses;
     }

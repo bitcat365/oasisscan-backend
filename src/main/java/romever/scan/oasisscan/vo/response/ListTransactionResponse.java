@@ -68,6 +68,15 @@ public class ListTransactionResponse {
                 if (body.getNegative() != null) {
                     response.setAdd(!body.getNegative());
                 }
+            } else if (methodEnum.equals(MethodEnum.StakingWithdraw)) {
+                String a = body.getAmount();
+                if (Texts.isBlank(a)) {
+                    a = "0";
+                }
+                double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
+                response.setAmount(Numeric.formatDouble(amount));
+                response.setFrom(body.getFrom());
+                response.setTo(transaction.getSignature().getAddress());
             }
         }
 

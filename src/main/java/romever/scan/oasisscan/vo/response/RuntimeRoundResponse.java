@@ -15,6 +15,7 @@ public class RuntimeRoundResponse {
     private String io_root;
     private String state_root;
     private String messages_hash;
+    private boolean next;
 
     public static RuntimeRoundResponse of(RuntimeRound.Header round) {
         RuntimeRoundResponse response = new RuntimeRoundResponse();

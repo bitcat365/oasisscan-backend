@@ -146,9 +146,9 @@ public class ScanRuntimeService {
 
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 20 * 1000)
     public void scanRuntimeStats() {
-//        if (applicationConfig.isLocal()) {
-//            return;
-//        }
+        if (applicationConfig.isLocal()) {
+            return;
+        }
 
         List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAllByOrderByStartRoundHeightAsc();
         if (CollectionUtils.isEmpty(runtimes)) {

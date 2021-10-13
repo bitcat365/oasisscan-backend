@@ -104,6 +104,8 @@ public class RuntimeService {
                 });
                 if (header != null) {
                     response = RuntimeRoundResponse.of(header);
+                    long latestRound = latestRound(runtimeId);
+                    response.setNext(round < latestRound);
                 }
             }
         } catch (ElasticsearchException e) {
@@ -114,6 +116,35 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    private long latestRound(String runtimeId) {
+        long roundHeight = 0;
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.filter(QueryBuilders.termQuery(ESFields.RUNTIME_ROUND_NAMESPACE, runtimeId));
+        searchSourceBuilder.query(boolQueryBuilder);
+        searchSourceBuilder.sort(ESFields.RUNTIME_ROUND_ROUND, SortOrder.DESC);
+        searchSourceBuilder.size(1);
+        searchSourceBuilder.trackTotalHits(true);
+
+        try {
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                SearchHit[] searchHits = hits.getHits();
+                for (SearchHit hit : searchHits) {
+                    RuntimeRound.Header round = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeRound.Header>() {
+                    });
+                    if (round != null) {
+                        roundHeight = round.getRound();
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+        return roundHeight;
     }
 
     public List<RuntimeResponse> runtimeList() {

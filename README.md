@@ -947,8 +947,6 @@ Params
 |  ----  | ----  |
 | id  | runtime id |
 | round  | runtime round |
-| size  | option,default:5 |
-| page  | option,default:1 |
 
 ```
 
@@ -964,7 +962,8 @@ Params
         "previous_hash": "cRuVoUZ+Xivqtli6pdfIbXl8ZX0ZqX+mZ4WbLSwQFaQ=",
         "io_root": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno=",
         "state_root": "PbxPXDxWgtm7gVlztThWxSICJhlDWp/z75RPKCJMLoI=",
-        "messages_hash": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno="
+        "messages_hash": "xnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlno=",
+        "next": true
     }
 }
 ```

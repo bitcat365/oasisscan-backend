@@ -39,7 +39,9 @@ public class RuntimeController {
     }
 
     @GetMapping("/stats")
-    public ApiResult runtimeStats(@RequestParam(value = "id") String id) {
-        return ApiResult.list(runtimeService.runtimeStats(id));
+    public ApiResult runtimeStats(
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "sort", required = false, defaultValue = "0") int sort) {
+        return ApiResult.list(runtimeService.runtimeStats(id, sort));
     }
 }

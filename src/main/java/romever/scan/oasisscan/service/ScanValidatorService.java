@@ -322,7 +322,7 @@ public class ScanValidatorService {
         log.info("validator base info sync done.");
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public void saveValidator(long dbHeight, List<Node> nodes, RegistryGenesis registryGenesis) {
         List<ValidatorConsensus> consensusList = Lists.newArrayList();
         List<ValidatorInfo> validatorInfoList = Lists.newArrayList();

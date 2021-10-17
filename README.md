@@ -1008,6 +1008,26 @@ Params
 |  param   | description  |
 |  ----  | ----  |
 | id  | runtime id |
+| sort  | integer,default:0 |
+
+Sort
+
+|  field   | index  |
+|  ----  | ----  |
+|ELECTED|0|
+|PRIMARY|1|
+|BACKUP|2|
+|PROPOSER|3|
+|PRIMARY_INVOKED|4|
+|PRIMARY_GOOD_COMMIT|5|
+|PRIM_BAD_COMMMIT|6|
+|BCKP_INVOKED|7|
+|BCKP_GOOD_COMMIT|8|
+|BCKP_BAD_COMMIT|9|
+|PRIMARY_MISSED|10|
+|BCKP_MISSED|11|
+|PROPOSER_MISSED|12|
+|PROPOSED_TIMEOUT|13|
 ```
 
 // Response

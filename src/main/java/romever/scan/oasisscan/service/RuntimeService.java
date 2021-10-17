@@ -163,7 +163,7 @@ public class RuntimeService {
 
     @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
-    public List<RuntimeStatsResponse> runtimeStats(String runtimeId) {
+    public List<RuntimeStatsResponse> runtimeStats(String runtimeId, int sort) {
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
         List<String> entities = runtimeStatsRepository.entities(runtimeId);
         if (CollectionUtils.isEmpty(entities)) {
@@ -198,12 +198,12 @@ public class RuntimeService {
         responses.sort((r1, r2) -> {
             Map<String, Long> map1 = r1.getStats();
             Map<String, Long> map2 = r2.getStats();
-            long count1 = map1.get(types[0].name().toLowerCase());
-            long count2 = map2.get(types[0].name().toLowerCase());
+            long count1 = map1.get(types[sort].name().toLowerCase());
+            long count2 = map2.get(types[sort].name().toLowerCase());
             if (count1 == count2) {
                 return r1.getEntityId().compareTo(r2.getEntityId());
             }
-            return (int) (map2.get(types[0].name().toLowerCase()) - map1.get(types[0].name().toLowerCase()));
+            return (int) (map2.get(types[sort].name().toLowerCase()) - map1.get(types[sort].name().toLowerCase()));
         });
         return responses;
     }

@@ -39,8 +39,6 @@ public class Transaction {
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Body {
-        private String id;
-        private Long round;
         private Long epoch;
         private Object commits;
         private Object commit;
@@ -74,6 +72,23 @@ public class Transaction {
         //RegisterEntity
         private List<Signature> signatures;
         private String untrusted_raw_value;
+
+        //runtime
+        private Long v;
+        private String id;
+        private Long round;
+        private String entity_id;
+        private Object constraints;
+        private Object genesis;
+        private Long kind;
+        private Long tee_hardware;
+        private Object versions;
+        private Object executor;
+        private Object txn_scheduler;
+        private Object storage;
+        private Object admission_policy;
+        private Object staking;
+        private Object governance_model;
 
         private Signature signature;
 

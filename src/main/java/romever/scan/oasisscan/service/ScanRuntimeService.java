@@ -163,6 +163,7 @@ public class ScanRuntimeService {
             boolean roundDiscrepancy = false;
             RuntimeState.Committee committee = null;
             RuntimeState.Member currentScheduler = null;
+            boolean updateHeight = false;
             while (scanHeight < currentChainHeight) {
                 List<Node> nodes = apiClient.registryNodes(scanHeight);
                 if (nodes == null) {
@@ -201,8 +202,10 @@ public class ScanRuntimeService {
                             continue;
                         }
                         saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(tx.getSignature().getPublic_key()), RuntimeStatsType.PROPOSED_TIMEOUT);
+                        updateHeight = true;
                         if (currentScheduler != null) {
                             saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(currentScheduler.getPublic_key()), RuntimeStatsType.PROPOSER_MISSED);
+                            updateHeight = true;
                         }
                         proposerTimeout = true;
                         break;
@@ -242,20 +245,24 @@ public class ScanRuntimeService {
                                 // Primary workers are always required.
                                 if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
                                     saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_INVOKED);
+                                    updateHeight = true;
                                 }
                                 // In case of discrepancies backup workers were invoked as well.
                                 if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
                                     saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_INVOKED);
+                                    updateHeight = true;
                                 }
                                 // Go over good commitments.
                                 if (_ev.getGood_compute_nodes() != null) {
                                     for (String g : _ev.getGood_compute_nodes()) {
                                         if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
                                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_GOOD_COMMIT);
+                                            updateHeight = true;
                                             continue OUTER;
                                         }
                                         if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
                                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_GOOD_COMMIT);
+                                            updateHeight = true;
                                             continue OUTER;
                                         }
                                     }
@@ -265,10 +272,12 @@ public class ScanRuntimeService {
                                     for (String g : _ev.getBad_compute_nodes()) {
                                         if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
                                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIM_BAD_COMMMIT);
+                                            updateHeight = true;
                                             continue OUTER;
                                         }
                                         if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
                                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_BAD_COMMIT);
+                                            updateHeight = true;
                                             continue OUTER;
                                         }
                                     }
@@ -276,9 +285,11 @@ public class ScanRuntimeService {
                                 // Neither good nor bad - missed commitment.
                                 if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
                                     saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_MISSED);
+                                    updateHeight = true;
                                 }
                                 if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
                                     saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_MISSED);
+                                    updateHeight = true;
                                 }
                             }
                         }
@@ -322,23 +333,32 @@ public class ScanRuntimeService {
 
                         if (!seen.contains(pubKey)) {
                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.ELECTED);
+                            updateHeight = true;
                         }
                         seen.add(pubKey);
 
                         if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY);
+                            updateHeight = true;
                         }
                         if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BACKUP);
+                            updateHeight = true;
                         }
                         if (currentScheduler != null && pubKey.equalsIgnoreCase(currentScheduler.getPublic_key())) {
                             saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PROPOSER);
+                            updateHeight = true;
                         }
                     }
                 }
 
                 log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
                 scanHeight++;
+            }
+            if (optionalRuntimeStats.isPresent() && !updateHeight) {
+                RuntimeStats runtimeStats = optionalRuntimeStats.get();
+                runtimeStats.setHeight(scanHeight);
+                runtimeStatsRepository.save(runtimeStats);
             }
         }
     }

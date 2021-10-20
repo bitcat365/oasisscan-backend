@@ -157,7 +157,7 @@ public class ScanRuntimeService {
         long currentChainHeight = apiClient.getCurHeight();
         for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
             String runtimeId = runtime.getRuntimeId();
-            Optional<RuntimeStats> optionalRuntimeStats = runtimeStatsRepository.findFirstByRuntimeIdOrderByHeightDesc(runtimeId);
+            Optional<RuntimeStats> optionalRuntimeStats = runtimeStatsRepository.findFirstByRuntimeIdOrderByIdDesc(runtimeId);
             long scanHeight = optionalRuntimeStats.map(RuntimeStats::getHeight).orElseGet(runtime::getStartRoundHeight);
             long curRound = 0;
             boolean roundDiscrepancy = false;

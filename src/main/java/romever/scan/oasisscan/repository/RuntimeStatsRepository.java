@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public interface RuntimeStatsRepository extends JpaRepository<RuntimeStats, Integer>,
         JpaSpecificationExecutor<RuntimeStats> {
-    Optional<RuntimeStats> findFirstByRuntimeIdOrderByHeightDesc(String runtimeId);
+    Optional<RuntimeStats> findFirstByRuntimeIdOrderByIdDesc(String runtimeId);
 
     Optional<RuntimeStats> findByRuntimeIdAndEntityIdAndRoundAndStatsType(String runtimeId, String nodId, long round, RuntimeStatsType statsType);
 

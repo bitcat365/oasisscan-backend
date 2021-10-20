@@ -358,7 +358,8 @@ public class ScanRuntimeService {
             if (optionalRuntimeStats.isPresent() && !updateHeight) {
                 RuntimeStats runtimeStats = optionalRuntimeStats.get();
                 runtimeStats.setHeight(scanHeight);
-                runtimeStatsRepository.save(runtimeStats);
+                runtimeStatsRepository.saveAndFlush(runtimeStats);
+                log.info(String.format("runtime stats update height: %s, %s", runtimeId, scanHeight));
             }
         }
     }

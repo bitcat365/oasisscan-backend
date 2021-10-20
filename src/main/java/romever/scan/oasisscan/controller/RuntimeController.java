@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import romever.scan.oasisscan.common.ApiResult;
 import romever.scan.oasisscan.service.RuntimeService;
+import romever.scan.oasisscan.utils.Texts;
 
 @Slf4j
 @RestController
@@ -23,6 +24,7 @@ public class RuntimeController {
             @RequestParam(value = "id") String id,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+        id = Texts.hexToBase64(id);
         return runtimeService.roundList(id, size, page);
     }
 
@@ -30,6 +32,7 @@ public class RuntimeController {
     public ApiResult roundInfo(
             @RequestParam(value = "id") String id,
             @RequestParam(value = "round") long round) {
+        id = Texts.hexToBase64(id);
         return ApiResult.ok(runtimeService.roundInfo(id, round));
     }
 
@@ -42,6 +45,7 @@ public class RuntimeController {
     public ApiResult runtimeStats(
             @RequestParam(value = "id") String id,
             @RequestParam(value = "sort", required = false, defaultValue = "0") int sort) {
+        id = Texts.hexToBase64(id);
         return ApiResult.list(runtimeService.runtimeStats(id, sort));
     }
 }

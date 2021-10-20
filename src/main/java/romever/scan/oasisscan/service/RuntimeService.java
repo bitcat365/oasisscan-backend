@@ -32,6 +32,7 @@ import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.utils.Mappers;
+import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeHeaderTypeEnum;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.Block;
@@ -147,6 +148,7 @@ public class RuntimeService {
         return roundHeight;
     }
 
+    @CacheRefresh(refresh = 60, timeUnit = TimeUnit.SECONDS)
     public List<RuntimeResponse> runtimeList() {
         List<RuntimeResponse> list = Lists.newArrayList();
         List<Runtime> runtimeList = runtimeRepository.findAll();
@@ -154,7 +156,7 @@ public class RuntimeService {
             for (Runtime runtime : runtimeList) {
                 RuntimeResponse response = new RuntimeResponse();
                 response.setName(runtime.getName());
-                response.setRuntimeId(runtime.getRuntimeId());
+                response.setRuntimeId(Texts.base64ToHex(runtime.getRuntimeId()));
                 list.add(response);
             }
         }

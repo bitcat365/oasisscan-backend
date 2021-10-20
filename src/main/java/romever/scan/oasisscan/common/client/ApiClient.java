@@ -320,7 +320,8 @@ public class ApiClient {
     }
 
     public static void main(String[] args) throws IOException {
-        System.out.println(Texts.base64ToHex("Y2VJnoFJ21uoPCJnr21PshnxcgkUXNyc8Quou/74vpeqqJ/lXnPM1LlzfR4BBTMWboxgeVafhmg118Fc4h1TcuIggNhbzNy5dA/qx55X0W0NZUEB0rL7X6w5Q11nKOaSLnOVnK16uMwNn17Xy/HbaCGuHpHiYVQmH3f/K4JJbkA="));
+        System.out.println(Texts.base64ToHex("AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI="));
+        System.out.println(Texts.hexToBase64("00000000000000000000000000000000000070617263656c7374616700000002"));
 //        CBORFactory f = new CBORFactory();
 //        ObjectMapper mapper = new ObjectMapper(f);
 //        byte[] decodedBytes = Base64.getDecoder().decode("ok03EoPvJkXdt+qlD0RG5Qxk8GQ=");

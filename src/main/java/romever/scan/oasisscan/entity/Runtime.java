@@ -20,4 +20,5 @@ public class Runtime extends BaseEntity {
     private String entityId;
     private long scanRoundHeight;
     private long startRoundHeight;
+    private long statsHeight;
 }

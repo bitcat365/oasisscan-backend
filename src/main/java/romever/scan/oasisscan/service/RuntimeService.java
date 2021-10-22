@@ -164,23 +164,29 @@ public class RuntimeService {
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public List<RuntimeStatsResponse> runtimeStats(String runtimeId, int sort) {
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
-        List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeId(runtimeId);
-        if (CollectionUtils.isEmpty(statsInfoList)) {
+        List<String> entities = runtimeStatsInfoRepository.entities(runtimeId);
+        if (CollectionUtils.isEmpty(entities)) {
             return responses;
         }
 
         RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
-        for (RuntimeStatsInfo info : statsInfoList) {
+        for (String entity : entities) {
+            List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
+            if (CollectionUtils.isEmpty(statsInfoList)) {
+                return responses;
+            }
             RuntimeStatsResponse response = new RuntimeStatsResponse();
-            response.setEntityId(info.getEntityId());
+            response.setEntityId(entity);
             Map<String, Long> statsMap = Maps.newLinkedHashMap();
             for (RuntimeStatsType type : types) {
                 statsMap.put(type.name().toLowerCase(), 0L);
             }
-            for (RuntimeStatsType type : types) {
-                if (type == info.getStatsType()) {
-                    statsMap.put(type.name().toLowerCase(), info.getCount());
-                    break;
+            for (RuntimeStatsInfo info : statsInfoList) {
+                for (RuntimeStatsType type : types) {
+                    if (type == info.getStatsType()) {
+                        statsMap.put(type.name().toLowerCase(), info.getCount());
+                        break;
+                    }
                 }
             }
             response.setStats(statsMap);

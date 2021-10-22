@@ -15,7 +15,7 @@ public interface RuntimeStatsInfoRepository extends JpaRepository<RuntimeStatsIn
         JpaSpecificationExecutor<RuntimeStatsInfo> {
     Optional<RuntimeStatsInfo> findByRuntimeIdAndEntityIdAndStatsType(String runtimeId, String entityId, RuntimeStatsType statsType);
 
-    List<RuntimeStatsInfo> findByRuntimeId(String runtimeId);
+    List<RuntimeStatsInfo> findByRuntimeIdAndEntityId(String runtimeId, String entityId);
 
     @Query(value = "select distinct entity_id from runtime_stats_info where runtime_id=?1", nativeQuery = true)
     List<String> entities(String runtimeId);

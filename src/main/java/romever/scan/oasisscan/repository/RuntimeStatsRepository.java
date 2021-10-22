@@ -5,11 +5,9 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import romever.scan.oasisscan.entity.RuntimeStats;
-import romever.scan.oasisscan.entity.RuntimeStatsCount;
 import romever.scan.oasisscan.entity.RuntimeStatsType;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository

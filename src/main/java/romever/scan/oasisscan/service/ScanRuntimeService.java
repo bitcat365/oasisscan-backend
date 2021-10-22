@@ -16,8 +16,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ESFields;
@@ -25,18 +23,22 @@ import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.RuntimeStats;
+import romever.scan.oasisscan.entity.RuntimeStatsInfo;
 import romever.scan.oasisscan.entity.RuntimeStatsType;
 import romever.scan.oasisscan.repository.RuntimeRepository;
+import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.CommitteeRoleEnum;
 import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.RuntimeHeaderTypeEnum;
-import romever.scan.oasisscan.vo.chain.*;
 import romever.scan.oasisscan.vo.chain.Runtime;
+import romever.scan.oasisscan.vo.chain.*;
+import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,6 +60,8 @@ public class ScanRuntimeService {
     private RuntimeRepository runtimeRepository;
     @Autowired
     private RuntimeStatsRepository runtimeStatsRepository;
+    @Autowired
+    private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
 
     @Autowired
     private TransactionService transactionService;
@@ -350,6 +354,58 @@ public class ScanRuntimeService {
             romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
             _runtime.setStatsHeight(scanHeight);
             runtimeRepository.saveAndFlush(_runtime);
+        }
+    }
+
+    @Scheduled(fixedDelay = 30 * 1000, initialDelay = 30 * 1000)
+    public void scanRuntimeStatsInfo() {
+//        if (applicationConfig.isLocal()) {
+//            return;
+//        }
+
+        List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAllByOrderByStartRoundHeightAsc();
+        if (CollectionUtils.isEmpty(runtimes)) {
+            return;
+        }
+
+        for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
+            List<String> entities = runtimeStatsRepository.entities(runtime.getRuntimeId());
+            if (CollectionUtils.isEmpty(entities)) {
+                continue;
+            }
+            RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
+            for (String entity : entities) {
+                List statsList = runtimeStatsRepository.statsByRuntimeId(runtime.getRuntimeId(), entity);
+                if (CollectionUtils.isEmpty(statsList)) {
+                    continue;
+                }
+                List<RuntimeStatsInfo> statsInfoList = Lists.newArrayList();
+                for (Object row : statsList) {
+                    Object[] cells = (Object[]) row;
+                    for (int i = 0; i < types.length; i++) {
+                        RuntimeStatsType type = types[i];
+                        if (i == (Integer) cells[0]) {
+                            long count = ((BigInteger) cells[1]).longValue();
+
+                            RuntimeStatsInfo statsInfo;
+                            Optional<RuntimeStatsInfo> optional = runtimeStatsInfoRepository.findByRuntimeIdAndEntityIdAndStatsType(runtime.getRuntimeId(), entity, type);
+                            if (optional.isPresent()) {
+                                statsInfo = optional.get();
+                            } else {
+                                statsInfo = new RuntimeStatsInfo();
+                                statsInfo.setRuntimeId(runtime.getRuntimeId());
+                                statsInfo.setEntityId(entity);
+                            }
+                            statsInfo.setStatsType(type);
+                            statsInfo.setCount(count);
+                            runtimeStatsInfoRepository.save(statsInfo);
+
+                            break;
+                        }
+                    }
+                }
+                log.info(String.format("runtime stats info: %s,%s", runtime.getRuntimeId(), entity));
+            }
         }
     }
 

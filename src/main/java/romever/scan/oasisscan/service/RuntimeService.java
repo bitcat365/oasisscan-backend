@@ -26,26 +26,22 @@ import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Runtime;
-import romever.scan.oasisscan.entity.RuntimeStatsCount;
+import romever.scan.oasisscan.entity.RuntimeStatsInfo;
 import romever.scan.oasisscan.entity.RuntimeStatsType;
-import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.RuntimeRepository;
+import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
-import romever.scan.oasisscan.vo.RuntimeHeaderTypeEnum;
-import romever.scan.oasisscan.vo.chain.AccountInfo;
-import romever.scan.oasisscan.vo.chain.Block;
 import romever.scan.oasisscan.vo.chain.RuntimeRound;
-import romever.scan.oasisscan.vo.response.BlockDetailResponse;
 import romever.scan.oasisscan.vo.response.RuntimeResponse;
 import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
 import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -60,6 +56,8 @@ public class RuntimeService {
     private RuntimeRepository runtimeRepository;
     @Autowired
     private RuntimeStatsRepository runtimeStatsRepository;
+    @Autowired
+    private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult roundList(String runtimeId, int size, int page) {
@@ -163,35 +161,26 @@ public class RuntimeService {
         return list;
     }
 
-    @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
+    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public List<RuntimeStatsResponse> runtimeStats(String runtimeId, int sort) {
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
-        List<String> entities = runtimeStatsRepository.entities(runtimeId);
-        if (CollectionUtils.isEmpty(entities)) {
+        List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeId(runtimeId);
+        if (CollectionUtils.isEmpty(statsInfoList)) {
             return responses;
         }
+
         RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
-        for (String entity : entities) {
-            List statsList = runtimeStatsRepository.statsByRuntimeId(runtimeId, entity);
-            if (CollectionUtils.isEmpty(statsList)) {
-                continue;
-            }
+        for (RuntimeStatsInfo info : statsInfoList) {
             RuntimeStatsResponse response = new RuntimeStatsResponse();
-            response.setEntityId(entity);
+            response.setEntityId(info.getEntityId());
             Map<String, Long> statsMap = Maps.newLinkedHashMap();
             for (RuntimeStatsType type : types) {
                 statsMap.put(type.name().toLowerCase(), 0L);
             }
-            for (Object row : statsList) {
-                Object[] cells = (Object[]) row;
-                for (int i = 0; i < types.length; i++) {
-                    RuntimeStatsType type = types[i];
-                    if (i == (Integer) cells[0]) {
-                        long count = ((BigInteger) cells[1]).longValue();
-                        statsMap.put(type.name().toLowerCase(), count);
-                        break;
-                    }
+            for (RuntimeStatsType type : types) {
+                if (type == info.getStatsType()) {
+                    statsMap.put(type.name().toLowerCase(), info.getCount());
+                    break;
                 }
             }
             response.setStats(statsMap);

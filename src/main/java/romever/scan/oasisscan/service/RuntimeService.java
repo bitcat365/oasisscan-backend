@@ -28,9 +28,11 @@ import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.entity.RuntimeStatsInfo;
 import romever.scan.oasisscan.entity.RuntimeStatsType;
+import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsRepository;
+import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.chain.RuntimeRound;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -58,6 +61,8 @@ public class RuntimeService {
     private RuntimeStatsRepository runtimeStatsRepository;
     @Autowired
     private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
+    @Autowired
+    private ValidatorInfoRepository validatorInfoRepository;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult roundList(String runtimeId, int size, int page) {
@@ -177,6 +182,15 @@ public class RuntimeService {
             }
             RuntimeStatsResponse response = new RuntimeStatsResponse();
             response.setEntityId(entity);
+            //info
+            Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(entity);
+            if (optionalValidatorInfo.isPresent()) {
+                ValidatorInfo info = optionalValidatorInfo.get();
+                response.setName(info.getName());
+                response.setIcon(info.getIcon());
+            }
+
+            //stats
             Map<String, Long> statsMap = Maps.newLinkedHashMap();
             for (RuntimeStatsType type : types) {
                 statsMap.put(type.name().toLowerCase(), 0L);

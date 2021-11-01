@@ -7,6 +7,8 @@ import java.util.Map;
 @Data
 public class RuntimeStatsResponse {
     private String entityId;
+    private String name;
+    private String icon;
     private Map<String, Long> stats;
 
     @Data

@@ -247,6 +247,7 @@ public class ScanValidatorService {
      * Sync validator base info from github and keybase
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 60 * 1000)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public void syncValidatorInfo() {
         if (applicationConfig.isLocal()) {
             return;

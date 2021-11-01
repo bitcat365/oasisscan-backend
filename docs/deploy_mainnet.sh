@@ -5,4 +5,4 @@ cp target/oasisscan-prod.jar /mnt/oasis-scan/
 cd /mnt/oasis-scan/
 sh stop.sh
 sh start.sh
-tail -f logs/app.hz-oasis-scan.log
+tail -f logs/app.log

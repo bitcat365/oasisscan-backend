@@ -53,9 +53,9 @@
         </appender>
         <appender name="ROOT" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
-            <file>${log_dir}/app.${HOSTNAME:- }.log</file>
+            <file>${log_dir}/app.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${log_dir}/history/app.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
+                <fileNamePattern>${log_dir}/history/app.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
                 <totalSizeCap>${totalSizeCap}</totalSizeCap>
@@ -64,9 +64,9 @@
         </appender>
         <appender name="okhttp" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
-            <file>${log_dir}/okhttp.${HOSTNAME:- }.log</file>
+            <file>${log_dir}/okhttp.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${log_dir}/history/okhttp.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
+                <fileNamePattern>${log_dir}/history/okhttp.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
                 <totalSizeCap>${totalSizeCap}</totalSizeCap>
@@ -113,9 +113,9 @@
         </appender>
         <appender name="ROOT" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
-            <file>${log_dir}/app.${HOSTNAME:- }.log</file>
+            <file>${log_dir}/app.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${log_dir}/history/app.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
+                <fileNamePattern>${log_dir}/history/app.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
                 <totalSizeCap>${totalSizeCap}</totalSizeCap>
@@ -124,9 +124,9 @@
         </appender>
         <appender name="okhttp" class="ch.qos.logback.core.rolling.RollingFileAppender">
             <encoder><pattern>${FILE_LOG_PATTERN}</pattern></encoder>
-            <file>${log_dir}/okhttp.${HOSTNAME:- }.log</file>
+            <file>${log_dir}/okhttp.log</file>
             <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-                <fileNamePattern>${log_dir}/history/okhttp.${HOSTNAME:- }.%d.%i.log.gz</fileNamePattern>
+                <fileNamePattern>${log_dir}/history/okhttp.%d.%i.log.gz</fileNamePattern>
                 <maxFileSize>${maxSize}</maxFileSize>
                 <maxHistory>${maxHistory}</maxHistory>
                 <totalSizeCap>${totalSizeCap}</totalSizeCap>

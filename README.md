@@ -1037,6 +1037,8 @@ Sort
         "list": [
             {
                 "entityId": "qg5I1u74cSaDfg9GA8SAvTxronahNfCXfj1tIjeV6hQ=",
+                "name": null,
+                "icon": null,
                 "stats": {
                     "elected": 14,
                     "primary": 14,

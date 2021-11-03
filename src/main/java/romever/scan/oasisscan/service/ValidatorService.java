@@ -78,15 +78,14 @@ public class ValidatorService {
     private static final int STAT_LIMIT = 100;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public long getCurHeight() {
-        return apiClient.getCurHeight();
-    }
-
-    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public NetworkInfo networkInfo() {
         NetworkInfo networkInfo = dataAccess.networkInfo();
         if (networkInfo != null) {
-            networkInfo.setHeight(validatorService.getCurHeight());
+            Long height = apiClient.getCurHeight();
+            if (height == null) {
+                height = scanChainService.getEsHeight();
+            }
+            networkInfo.setHeight(height);
             if (networkInfo.getEscrow() != null) {
                 networkInfo.setEscrow(Texts.formatDecimals(networkInfo.getEscrow(), Constants.DECIMALS, 2));
             }

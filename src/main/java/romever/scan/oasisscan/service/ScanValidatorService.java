@@ -93,7 +93,10 @@ public class ScanValidatorService {
         long storeHeight = scanChainService.getStoreHeight();
         List<ValidatorInfo> validatorInfos = validatorInfoRepository.findByOrderByEscrowDesc();
         if (!CollectionUtils.isEmpty(validatorInfos)) {
-            long curHeight = apiClient.getCurHeight();
+            Long curHeight = apiClient.getCurHeight();
+            if (curHeight == null) {
+                return;
+            }
             long currentEpoch = apiClient.epoch(curHeight);
             RegistryGenesis registryGenesis = apiClient.registryGenesis(null);
             List<ValidatorInfo> list = Lists.newArrayList();

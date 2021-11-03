@@ -148,6 +148,9 @@ public class ScanRuntimeService {
         }
     }
 
+    /**
+     * See https://github.com/oasisprotocol/tools/tree/main/runtime-stats
+     */
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 20 * 1000)
     public void scanRuntimeStats() {
         if (applicationConfig.isLocal()) {
@@ -379,7 +382,6 @@ public class ScanRuntimeService {
                 if (CollectionUtils.isEmpty(statsList)) {
                     continue;
                 }
-                List<RuntimeStatsInfo> statsInfoList = Lists.newArrayList();
                 for (Object row : statsList) {
                     Object[] cells = (Object[]) row;
                     for (int i = 0; i < types.length; i++) {

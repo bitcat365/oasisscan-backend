@@ -24,6 +24,7 @@ import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApiResult;
 import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
+import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.entity.RuntimeStatsInfo;
@@ -51,6 +52,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class RuntimeService {
 
+    @Autowired
+    private ApiClient apiClient;
     @Autowired
     private RestHighLevelClient elasticsearchClient;
     @Autowired
@@ -188,6 +191,11 @@ public class RuntimeService {
                 ValidatorInfo info = optionalValidatorInfo.get();
                 response.setName(info.getName());
                 response.setIcon(info.getIcon());
+                String address = info.getEntityAddress();
+                if (Texts.isBlank(address)) {
+                    address = apiClient.pubkeyToBech32Address(entity);
+                }
+                response.setAddress(address);
             }
 
             //stats

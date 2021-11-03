@@ -1038,6 +1038,8 @@ Sort
             {
                 "entityId": "qg5I1u74cSaDfg9GA8SAvTxronahNfCXfj1tIjeV6hQ=",
                 "name": null,
+                "address": "oasis1qrtle8dp3me9cac3mekxcnyq9qhsn6r67q32sazp",
+                "validator": false,
                 "icon": null,
                 "stats": {
                     "elected": 14,

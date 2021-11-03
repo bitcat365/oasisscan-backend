@@ -44,7 +44,7 @@ public class DashboardController {
         long epoch = apiClient.epoch(curHeight);
         long totalTxs = transactionService.totalTransactions();
 
-        response.setCurHeight(curHeight);
+        response.setCurHeight(networkInfo.getHeight());
         response.setCurEpoch(epoch);
         response.setTotalTxs(totalTxs);
         response.setTotalEscrow(networkInfo.getEscrow());

@@ -187,16 +187,18 @@ public class RuntimeService {
             response.setEntityId(entity);
             //info
             Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(entity);
+            String address = null;
             if (optionalValidatorInfo.isPresent()) {
                 ValidatorInfo info = optionalValidatorInfo.get();
                 response.setName(info.getName());
                 response.setIcon(info.getIcon());
-                String address = info.getEntityAddress();
-                if (Texts.isBlank(address)) {
-                    address = apiClient.pubkeyToBech32Address(entity);
-                }
-                response.setAddress(address);
+                address = info.getEntityAddress();
             }
+
+            if (Texts.isBlank(address)) {
+                address = apiClient.pubkeyToBech32Address(entity);
+            }
+            response.setAddress(address);
 
             //stats
             Map<String, Long> statsMap = Maps.newLinkedHashMap();

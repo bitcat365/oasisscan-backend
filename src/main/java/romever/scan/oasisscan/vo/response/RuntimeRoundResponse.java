@@ -20,6 +20,7 @@ public class RuntimeRoundResponse {
     public static RuntimeRoundResponse of(RuntimeRound.Header round) {
         RuntimeRoundResponse response = new RuntimeRoundResponse();
         BeanUtils.copyProperties(round, response);
+        response.setTimestamp(round.getTimestamp().toEpochSecond());
         return response;
     }
 }

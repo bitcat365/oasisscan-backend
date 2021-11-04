@@ -112,7 +112,7 @@ public class ScanRuntimeService {
             long scanHeight = runtime.getScanRoundHeight();
             if (scanHeight == 0) {
                 RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
-                long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp();
+                long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp().toEpochSecond();
                 Long genesisHeight = getGenesisRoundHeight(genesisTime);
                 if (genesisHeight == null) {
                     throw new RuntimeException(String.format("Genesis Height can not found. %s", runtimeId));

@@ -1,5 +1,6 @@
 package romever.scan.oasisscan.vo.chain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class RuntimeRound {
         private long version;
         private String namespace;
         private long round;
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
         private long timestamp;
         private long header_type;
         private String previous_hash;

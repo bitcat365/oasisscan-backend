@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class Node {
     private ConsensusInfo consensus;
-    private long roles;
+    private Object roles;
     private long expiration;
     private String id;
     private String entity_id;

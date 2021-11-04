@@ -71,9 +71,9 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
     public void scanRuntime() {
-        if (applicationConfig.isLocal()) {
-            return;
-        }
+//        if (applicationConfig.isLocal()) {
+//            return;
+//        }
 
         List<Runtime> runtimes = apiClient.runtimes(null);
         if (CollectionUtils.isEmpty(runtimes)) {
@@ -97,9 +97,9 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 10 * 1000)
     public void scanRuntimeRound() throws IOException {
-        if (applicationConfig.isLocal()) {
-            return;
-        }
+//        if (applicationConfig.isLocal()) {
+//            return;
+//        }
 
         List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAll();
         if (CollectionUtils.isEmpty(runtimes)) {
@@ -130,7 +130,7 @@ public class ScanRuntimeService {
             while (scanHeight < currentChainHeight) {
                 RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
                 if (runtimeRound == null) {
-                    throw new RuntimeException(String.format("Runtime round api error. %s", runtimeId));
+                    throw new RuntimeException(String.format("Runtime round api error. %s, %s", runtimeId, scanHeight));
                 }
                 RuntimeRound.Header header = runtimeRound.getHeader();
                 String id = header.getNamespace() + "_" + header.getRound();
@@ -175,7 +175,7 @@ public class ScanRuntimeService {
             while (scanHeight < currentChainHeight) {
                 List<Node> nodes = apiClient.registryNodes(scanHeight);
                 if (nodes == null) {
-                    throw new RuntimeException(String.format("Registry nodes api error. %s", scanHeight));
+                    throw new RuntimeException(String.format("Registry nodes api error. %s, %s", runtimeId, scanHeight));
                 }
                 Map<String, String> nodeToEntity = Maps.newHashMap();
                 for (Node node : nodes) {

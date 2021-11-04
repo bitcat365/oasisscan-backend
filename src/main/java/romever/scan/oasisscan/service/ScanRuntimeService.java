@@ -71,9 +71,9 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
     public void scanRuntime() {
-//        if (applicationConfig.isLocal()) {
-//            return;
-//        }
+        if (applicationConfig.isLocal()) {
+            return;
+        }
 
         List<Runtime> runtimes = apiClient.runtimes(null);
         if (CollectionUtils.isEmpty(runtimes)) {
@@ -97,9 +97,9 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 30 * 1000, initialDelay = 10 * 1000)
     public void scanRuntimeRound() throws IOException {
-//        if (applicationConfig.isLocal()) {
-//            return;
-//        }
+        if (applicationConfig.isLocal()) {
+            return;
+        }
 
         List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAll();
         if (CollectionUtils.isEmpty(runtimes)) {

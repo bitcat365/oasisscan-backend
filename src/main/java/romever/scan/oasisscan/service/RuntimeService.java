@@ -162,7 +162,7 @@ public class RuntimeService {
             for (Runtime runtime : runtimeList) {
                 RuntimeResponse response = new RuntimeResponse();
                 response.setName(runtime.getName());
-                response.setRuntimeId(Texts.base64ToHex(runtime.getRuntimeId()));
+                response.setRuntimeId(runtime.getRuntimeId());
                 list.add(response);
             }
         }

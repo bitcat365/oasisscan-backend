@@ -348,15 +348,15 @@ public class ScanRuntimeService {
 
                 log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
                 scanHeight++;
-            }
 
-            Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-            if (!optionalRuntime.isPresent()) {
-                throw new RuntimeException("Runtime db read error.");
+                Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                if (!optionalRuntime.isPresent()) {
+                    throw new RuntimeException("Runtime db read error.");
+                }
+                romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
+                _runtime.setStatsHeight(scanHeight);
+                runtimeRepository.saveAndFlush(_runtime);
             }
-            romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
-            _runtime.setStatsHeight(scanHeight);
-            runtimeRepository.saveAndFlush(_runtime);
         }
     }
 

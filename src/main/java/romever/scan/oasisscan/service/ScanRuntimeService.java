@@ -95,7 +95,7 @@ public class ScanRuntimeService {
     /**
      * Scan runtimes round and save in elasticsearch
      */
-    @Scheduled(fixedDelay = 30 * 1000, initialDelay = 10 * 1000)
+    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
     public void scanRuntimeRound() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
@@ -151,7 +151,7 @@ public class ScanRuntimeService {
     /**
      * See https://github.com/oasisprotocol/tools/tree/main/runtime-stats
      */
-    @Scheduled(fixedDelay = 30 * 1000, initialDelay = 20 * 1000)
+    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
     public void scanRuntimeStats() {
         if (applicationConfig.isLocal()) {
             return;

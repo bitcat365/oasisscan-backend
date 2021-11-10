@@ -2,7 +2,7 @@ package romever.scan.oasisscan.vo.response;
 
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
-import romever.scan.oasisscan.vo.chain.RuntimeRound;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 
 @Data
 public class RuntimeRoundResponse {

@@ -1,4 +1,4 @@
-package romever.scan.oasisscan.vo.chain;
+package romever.scan.oasisscan.vo.chain.runtime;
 
 import lombok.Data;
 

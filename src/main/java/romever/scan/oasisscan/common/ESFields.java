@@ -23,4 +23,8 @@ public interface ESFields {
     //runtime
     String RUNTIME_ROUND_NAMESPACE = "namespace";
     String RUNTIME_ROUND_ROUND = "round";
+
+    //runtime transaction
+    String RUNTIME_TRANSACTION_ID = "runtime_id";
+    String RUNTIME_TRANSACTION_ROUND = "round";
 }

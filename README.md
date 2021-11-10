@@ -1062,3 +1062,42 @@ Sort
     }
 }
 ```
+
+### runtime-transactions
+
+```
+// Request
+GET http://localhost:8181/runtime/transaction/list
+
+```
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| size  | option,default:10 |
+| page  | option,default:1 |
+| id  | runtime id |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+                "tx_hash": "0x4bea2e805d3a3feb62bcdb4fb04b3268141abc698c143f80b37cf54a29149838",
+                "round": 1202,
+                "result": true,
+                "timestamp": 1636049829,
+                "type": "evm"
+            }
+        ],
+        "page": 1,
+        "size": 10,
+        "maxPage": 28,
+        "totalSize": 278
+    }
+}
+```

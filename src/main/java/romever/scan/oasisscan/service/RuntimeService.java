@@ -4,6 +4,7 @@ import com.alicp.jetcache.anno.CacheRefresh;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -36,17 +38,22 @@ import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
-import romever.scan.oasisscan.vo.chain.RuntimeRound;
-import romever.scan.oasisscan.vo.response.RuntimeResponse;
-import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
-import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
+import romever.scan.oasisscan.vo.MethodEnum;
+import romever.scan.oasisscan.vo.chain.Transaction;
+import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
+import romever.scan.oasisscan.vo.response.*;
+import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import static romever.scan.oasisscan.common.ESFields.*;
 
 @Slf4j
 @Service
@@ -230,6 +237,53 @@ public class RuntimeService {
             return (int) (map2.get(types[sort].name().toLowerCase()) - map1.get(types[sort].name().toLowerCase()));
         });
         return responses;
+    }
+
+    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    public ApiResult runtimeTransactions(int size, int page, String runtimeId) {
+        long total = 0;
+        List<ListRuntimeTransactionResponse> responses = Lists.newArrayList();
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_ID, runtimeId));
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.DESC);
+        searchSourceBuilder.from(size * (page - 1));
+        searchSourceBuilder.size(size);
+        searchSourceBuilder.trackTotalHits(true);
+
+        try {
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                total = hits.getTotalHits().value;
+                SearchHit[] searchHits = hits.getHits();
+                for (SearchHit hit : searchHits) {
+                    JsonNode jsonHit = Mappers.parseJson(hit.getSourceAsString());
+                    String type = jsonHit.path("type").asText();
+                    AbstractRuntimeTransaction tx;
+                    if (type.equalsIgnoreCase("evm")) {
+                        tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
+                        });
+                    } else {
+                        tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
+                        });
+                    }
+
+                    if (tx != null) {
+                        ListRuntimeTransactionResponse response = new ListRuntimeTransactionResponse();
+                        BeanUtils.copyProperties(tx, response);
+                        responses.add(response);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+
+        return ApiResult.page(responses, page, size, total);
     }
 
 }

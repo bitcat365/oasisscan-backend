@@ -62,3 +62,4 @@ elasticsearch:
   block-index: block_test
   transaction-index: transaction_test
   runtime-round-index: runtime_round_test
+  runtime-transaction-index: runtime_transaction_test

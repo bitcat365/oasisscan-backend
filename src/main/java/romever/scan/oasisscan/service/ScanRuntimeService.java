@@ -33,9 +33,10 @@ import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.CommitteeRoleEnum;
 import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.RuntimeHeaderTypeEnum;
-import romever.scan.oasisscan.vo.chain.Runtime;
+import romever.scan.oasisscan.vo.chain.runtime.Runtime;
 import romever.scan.oasisscan.vo.chain.*;
-import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeState;
 
 import java.io.IOException;
 import java.math.BigInteger;

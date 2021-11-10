@@ -23,6 +23,7 @@
 * [runtime-round-info](#runtime-round-info)
 * [runtime-list](#runtime-list)
 * [runtime-stats](#runtime-stats)
+* [runtime-transactions](#runtime-transactions)
 
 ### validator stats
 

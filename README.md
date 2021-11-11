@@ -1125,8 +1125,8 @@ consensus transaction
 {
     "code": 0,
     "data": {
-        "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
-        "tx_hash": "55354c5be461418cf950d6a2830f5b27d7a76c38d1cb263922603480af29fe79",
+        "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+        "txHash": "55354c5be461418cf950d6a2830f5b27d7a76c38d1cb263922603480af29fe79",
         "round": 1764,
         "result": true,
         "message": "null",
@@ -1147,8 +1147,8 @@ evm transaction
 {
     "code": 0,
     "data": {
-        "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
-        "tx_hash": "0x83e613a6219ede8bf8f89c7c9fbc7f864c9097554b07cb5c4a94af4bf0095b53",
+        "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+        "txHash": "0x83e613a6219ede8bf8f89c7c9fbc7f864c9097554b07cb5c4a94af4bf0095b53",
         "round": 1754,
         "result": true,
         "message": "AAAAAAAAAAAAAAAApYTOzdAj85OqqBJ3srgcqL45UZc=",

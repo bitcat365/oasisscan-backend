@@ -43,6 +43,8 @@ import static romever.scan.oasisscan.common.ESFields.RUNTIME_TRANSACTION_ROUND;
 @Service
 public class ScanRuntimeTransactionService {
     @Autowired
+    private ApplicationConfig applicationConfig;
+    @Autowired
     private ApiClient apiClient;
     @Autowired
     private RestHighLevelClient elasticsearchClient;
@@ -54,6 +56,10 @@ public class ScanRuntimeTransactionService {
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
     public void scanTransaction() {
+        if (applicationConfig.isLocal()) {
+            return;
+        }
+
         String emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
         String runtimeId = emerald;
         RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);

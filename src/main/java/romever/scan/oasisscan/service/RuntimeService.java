@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApiResult;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
@@ -326,7 +327,7 @@ public class RuntimeService {
                             if (!CollectionUtils.isEmpty(amounts)) {
                                 String amount = amounts.get(0);
                                 if (Texts.isNotBlank(amount)) {
-                                    ctx.setAmount(Texts.numberFromBase64(amount));
+                                    ctx.setAmount(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
                                 }
                             }
                             response.setCtx(ctx);

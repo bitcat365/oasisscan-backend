@@ -1136,7 +1136,7 @@ consensus transaction
             "method": "consensus.Deposit",
             "from": "oasis1qr9ugwvu337v9hcwuc982ccphd0y9yqd4y4gwkgz",
             "to": "oasis1qz9dwcj9vn9q5w47cenw6dhsqmn49fdapgn4nzjq",
-            "amount": "2123000000000000000",
+            "amount": "2.123",
             "nonce": 0
         },
         "etx": null

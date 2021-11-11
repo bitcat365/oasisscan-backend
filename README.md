@@ -24,6 +24,7 @@
 * [runtime-list](#runtime-list)
 * [runtime-stats](#runtime-stats)
 * [runtime-transactions](#runtime-transactions)
+* [runtime-transaction-info](#runtime-transaction-info)
 
 ### validator stats
 
@@ -1099,6 +1100,70 @@ Params
         "size": 10,
         "maxPage": 28,
         "totalSize": 278
+    }
+}
+```
+
+### runtime-transaction-info
+
+```
+// Request
+GET http://localhost:8181/runtime/transaction/info
+
+```
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | runtime id |
+| hash  | tx hash |
+
+```
+
+// Response
+consensus transaction
+{
+    "code": 0,
+    "data": {
+        "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+        "tx_hash": "55354c5be461418cf950d6a2830f5b27d7a76c38d1cb263922603480af29fe79",
+        "round": 1764,
+        "result": true,
+        "message": "null",
+        "timestamp": 1636646196,
+        "type": "consensus",
+        "ctx": {
+            "method": "consensus.Deposit",
+            "from": "oasis1qr9ugwvu337v9hcwuc982ccphd0y9yqd4y4gwkgz",
+            "to": "oasis1qz9dwcj9vn9q5w47cenw6dhsqmn49fdapgn4nzjq",
+            "amount": "2123000000000000000",
+            "nonce": 0
+        },
+        "etx": null
+    }
+}
+
+evm transaction
+{
+    "code": 0,
+    "data": {
+        "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+        "tx_hash": "0x83e613a6219ede8bf8f89c7c9fbc7f864c9097554b07cb5c4a94af4bf0095b53",
+        "round": 1754,
+        "result": true,
+        "message": "AAAAAAAAAAAAAAAApYTOzdAj85OqqBJ3srgcqL45UZc=",
+        "timestamp": 1636644459,
+        "type": "evm",
+        "ctx": null,
+        "etx": {
+            "from": "0x8ac3195aeca398aac7882520dd19d3c7c5e69e46",
+            "to": "0x8c421cd16d55248cce8e36d1d68682cf1373ee78",
+            "nonce": 61,
+            "gasPrice": 0,
+            "gasLimit": 2354836,
+            "data": "c9c65396000000000000000000000000e6c87c360c24efc6fef4dcefed5607b0adacf936000000000000000000000000ca8a7b55a04a9fde7ae7bf128384fa330f81a19c",
+            "value": "0"
+        }
     }
 }
 ```

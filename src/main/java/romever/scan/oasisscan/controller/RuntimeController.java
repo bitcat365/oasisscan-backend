@@ -53,4 +53,10 @@ public class RuntimeController {
             @RequestParam(value = "id") String id) {
         return runtimeService.runtimeTransactions(size, page, id);
     }
+
+    @GetMapping("/transaction/info")
+    public ApiResult runtimeStats(
+            @RequestParam(value = "id") String id, @RequestParam(value = "hash") String hash) {
+        return ApiResult.ok(runtimeService.transactionInfo(id, hash));
+    }
 }

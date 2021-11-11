@@ -1,9 +1,11 @@
 package romever.scan.oasisscan.vo.chain.runtime;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class RuntimeTransaction extends AbstractRuntimeTransaction {
     private long v;
@@ -30,6 +32,7 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
     @Data
     public static class Signature {
         private String ed25519;
+        private String address;
     }
 
     @Data

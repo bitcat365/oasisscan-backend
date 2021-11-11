@@ -9,4 +9,6 @@ public interface Constants {
 
     String SCAN_HEIGHT_PROPERTY = "scan_height";
     String DB_HEIGHT_PROPERTY = "db_height";
+
+    int EMERALD_DECIMALS = 18;
 }

@@ -38,14 +38,13 @@ import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
-import romever.scan.oasisscan.vo.MethodEnum;
-import romever.scan.oasisscan.vo.chain.Transaction;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.*;
 import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
+import romever.scan.oasisscan.vo.response.runtime.RuntimeTransactionResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -284,6 +283,65 @@ public class RuntimeService {
         }
 
         return ApiResult.page(responses, page, size, total);
+    }
+
+    /**
+     * transaction detail
+     *
+     * @param runtimeId
+     * @param txHash
+     * @return
+     */
+    public RuntimeTransactionResponse transactionInfo(String runtimeId, String txHash) {
+        RuntimeTransactionResponse response = null;
+        String esId = runtimeId + "_" + txHash;
+        try {
+            GetResponse getResponse = JestDao.get(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), esId);
+            if (getResponse.isExists()) {
+                JsonNode jsonHit = Mappers.parseJson(getResponse.getSourceAsString());
+                String type = jsonHit.path("type").asText();
+                if (type.equalsIgnoreCase("evm")) {
+                    EmeraldTransaction tx = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
+                    });
+                    if (tx != null) {
+                        response = new RuntimeTransactionResponse();
+                        BeanUtils.copyProperties(tx, response);
+                        RuntimeTransactionResponse.Ethereum etx = new RuntimeTransactionResponse.Ethereum();
+                        BeanUtils.copyProperties(tx, etx);
+                        response.setEtx(etx);
+                    }
+                } else {
+                    RuntimeTransaction tx = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
+                    });
+                    if (tx != null) {
+                        response = new RuntimeTransactionResponse();
+                        BeanUtils.copyProperties(tx, response);
+                        List<RuntimeTransaction.Si> sis = tx.getAi().getSi();
+                        if (!CollectionUtils.isEmpty(sis)) {
+                            RuntimeTransactionResponse.Consensus ctx = new RuntimeTransactionResponse.Consensus();
+                            ctx.setFrom(sis.get(0).getAddress_spec().getSignature().getAddress());
+                            ctx.setTo(tx.getCall().getBody().getTo());
+                            ctx.setMethod(tx.getCall().getMethod());
+                            List<String> amounts = tx.getCall().getBody().getAmount();
+                            if (!CollectionUtils.isEmpty(amounts)) {
+                                String amount = amounts.get(0);
+                                if (Texts.isNotBlank(amount)) {
+                                    ctx.setAmount(Texts.numberFromBase64(amount));
+                                }
+                            }
+                            response.setCtx(ctx);
+                        }
+                    }
+                }
+            }
+        } catch (ElasticsearchException e) {
+            if (e.status() == RestStatus.NOT_FOUND) {
+                log.warn("transaction {} not found.", esId);
+            }
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+        return response;
     }
 
 }

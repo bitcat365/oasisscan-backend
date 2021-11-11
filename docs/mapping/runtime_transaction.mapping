@@ -52,6 +52,9 @@ PUT /runtime_transaction_main
                                         "properties": {
                                             "ed25519": {
                                                 "type": "keyword"
+                                            },
+                                            "address": {
+                                                "type": "keyword"
                                             }
                                         }
                                     }

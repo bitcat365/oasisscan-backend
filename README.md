@@ -1088,8 +1088,8 @@ Params
     "data": {
         "list": [
             {
-                "runtime_id": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
-                "tx_hash": "0x4bea2e805d3a3feb62bcdb4fb04b3268141abc698c143f80b37cf54a29149838",
+                "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+                "txHash": "0x4bea2e805d3a3feb62bcdb4fb04b3268141abc698c143f80b37cf54a29149838",
                 "round": 1202,
                 "result": true,
                 "timestamp": 1636049829,

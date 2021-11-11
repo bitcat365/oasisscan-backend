@@ -275,6 +275,8 @@ public class RuntimeService {
                     if (tx != null) {
                         ListRuntimeTransactionResponse response = new ListRuntimeTransactionResponse();
                         BeanUtils.copyProperties(tx, response);
+                        response.setRuntimeId(tx.getRuntime_id());
+                        response.setTxHash(tx.getTx_hash());
                         responses.add(response);
                     }
                 }
@@ -307,6 +309,8 @@ public class RuntimeService {
                     if (tx != null) {
                         response = new RuntimeTransactionResponse();
                         BeanUtils.copyProperties(tx, response);
+                        response.setRuntimeId(tx.getRuntime_id());
+                        response.setTxHash(tx.getTx_hash());
                         RuntimeTransactionResponse.Ethereum etx = new RuntimeTransactionResponse.Ethereum();
                         BeanUtils.copyProperties(tx, etx);
                         response.setEtx(etx);
@@ -317,6 +321,8 @@ public class RuntimeService {
                     if (tx != null) {
                         response = new RuntimeTransactionResponse();
                         BeanUtils.copyProperties(tx, response);
+                        response.setRuntimeId(tx.getRuntime_id());
+                        response.setTxHash(tx.getTx_hash());
                         List<RuntimeTransaction.Si> sis = tx.getAi().getSi();
                         if (!CollectionUtils.isEmpty(sis)) {
                             RuntimeTransactionResponse.Consensus ctx = new RuntimeTransactionResponse.Consensus();

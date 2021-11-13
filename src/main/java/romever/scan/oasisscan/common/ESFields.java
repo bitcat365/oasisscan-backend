@@ -27,4 +27,5 @@ public interface ESFields {
     //runtime transaction
     String RUNTIME_TRANSACTION_ID = "runtime_id";
     String RUNTIME_TRANSACTION_ROUND = "round";
+    String RUNTIME_TRANSACTION_TX_HASH = "tx_hash";
 }

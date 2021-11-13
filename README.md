@@ -804,6 +804,7 @@ note：result is the key parameter required to jump to the target type page
 | transaction  | transaction |
 | validator  | validator |
 | account  | account |
+| runtime-transaction  | runtime-transaction |
 
 
 ### account-delegations

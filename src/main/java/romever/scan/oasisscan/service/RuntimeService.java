@@ -12,6 +12,7 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
@@ -349,6 +350,20 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    public boolean transactionExist(String txHash) {
+        boolean exist = false;
+        try {
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
+            CountResponse countResponse = JestDao.count(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), boolQueryBuilder);
+            long count = countResponse.getCount();
+            exist = count > 0;
+        } catch (IOException e) {
+            log.error("error", e);
+        }
+        return exist;
     }
 
 }

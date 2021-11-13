@@ -5,7 +5,8 @@ public enum SearchType {
     Block("block"),
     Validator("validator"),
     Account("account"),
-    None("none");
+    None("none"),
+    RuntimeTransaction("runtime-transaction"),;
 
     private final String name;
 

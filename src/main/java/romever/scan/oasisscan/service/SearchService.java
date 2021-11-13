@@ -29,9 +29,12 @@ public class SearchService {
     private BlockService blockService;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private RuntimeService runtimeService;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public SearchResponse search(String key) {
+        boolean found = false;
         SearchResponse response = new SearchResponse();
         response.setKey(key);
 
@@ -43,14 +46,17 @@ public class SearchService {
                 if (validatorInfoRepository.findByEntityAddress(key).isPresent()) {
                     result = key;
                     searchType = SearchType.Validator;
+                    found = true;
                 } else {
                     Optional<ValidatorInfo> optional = validatorInfoRepository.findByNodeAddress(key);
                     if (optional.isPresent()) {
                         result = optional.get().getEntityAddress();
                         searchType = SearchType.Validator;
+                        found = true;
                     } else {
                         result = key;
                         searchType = SearchType.Account;
+                        found = true;
                     }
                 }
             }
@@ -59,12 +65,14 @@ public class SearchService {
             if (optional.isPresent()) {
                 result = optional.get().getEntityAddress();
                 searchType = SearchType.Validator;
+                found = true;
             }
         } else if (Texts.isNumeric(key)) {
             long height = Long.parseLong(key);
             if (blockService.detail(height) != null) {
                 result = key;
                 searchType = SearchType.Block;
+                found = true;
             }
         } else {
             String hash = key;
@@ -73,13 +81,18 @@ public class SearchService {
                 if (transactionService.detail(hash) != null) {
                     result = key;
                     searchType = SearchType.Transaction;
+                    found = true;
+                } else if (runtimeService.transactionExist(hash)) {
+                    result = key;
+                    searchType = SearchType.RuntimeTransaction;
+                    found = true;
                 } else {
                     //block
                     hash = Texts.hexToBase64(hash);
                 }
             }
             //block
-            if (Texts.isBase64(hash)) {
+            if (Texts.isBase64(hash) && !found) {
                 BlockDetailResponse blockDetailResponse = blockService.detail(hash);
                 if (blockDetailResponse != null) {
                     result = String.valueOf(blockDetailResponse.getHeight());

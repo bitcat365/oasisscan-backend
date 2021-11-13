@@ -657,6 +657,9 @@ public abstract class Texts {
     }
 
     public static boolean isHex(String str) {
+        if (str.startsWith("0x")) {
+            str = str.replace("0x", "");
+        }
         String pattern = "^[0-9A-Fa-f]+$";
         return Pattern.compile(pattern).matcher(str).matches();
     }

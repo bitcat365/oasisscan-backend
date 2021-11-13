@@ -13,6 +13,7 @@ import romever.scan.oasisscan.vo.SearchType;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.response.BlockDetailResponse;
 import romever.scan.oasisscan.vo.response.SearchResponse;
+import romever.scan.oasisscan.vo.response.runtime.RuntimeTransactionResponse;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -82,8 +83,9 @@ public class SearchService {
                     result = key;
                     searchType = SearchType.Transaction;
                     found = true;
-                } else if (runtimeService.transactionExist(hash)) {
-                    result = key;
+                } else if (runtimeService.transactionInfo(hash) != null) {
+                    RuntimeTransactionResponse r = runtimeService.transactionInfo(hash);
+                    result = r.getRuntimeId() + "_" + r.getTxHash();
                     searchType = SearchType.RuntimeTransaction;
                     found = true;
                 } else {

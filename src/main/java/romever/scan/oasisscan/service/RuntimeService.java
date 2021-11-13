@@ -352,18 +352,42 @@ public class RuntimeService {
         return response;
     }
 
-    public boolean transactionExist(String txHash) {
-        boolean exist = false;
+    @Cached(expire = 15, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    public RuntimeTransactionResponse transactionInfo(String txHash) {
+        RuntimeTransactionResponse response = null;
         try {
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
-            CountResponse countResponse = JestDao.count(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), boolQueryBuilder);
-            long count = countResponse.getCount();
-            exist = count > 0;
+            searchSourceBuilder.query(boolQueryBuilder);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                SearchHit[] searchHits = hits.getHits();
+                for (SearchHit hit : searchHits) {
+                    JsonNode jsonHit = Mappers.parseJson(hit.getSourceAsString());
+                    String type = jsonHit.path("type").asText();
+                    AbstractRuntimeTransaction tx;
+                    if (type.equalsIgnoreCase("evm")) {
+                        tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
+                        });
+                    } else {
+                        tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
+                        });
+                    }
+
+                    if (tx != null) {
+                        response = new RuntimeTransactionResponse();
+                        BeanUtils.copyProperties(tx, response);
+                        response.setRuntimeId(tx.getRuntime_id());
+                        response.setTxHash(tx.getTx_hash());
+                    }
+                }
+            }
         } catch (IOException e) {
             log.error("error", e);
         }
-        return exist;
+        return response;
     }
 
 }

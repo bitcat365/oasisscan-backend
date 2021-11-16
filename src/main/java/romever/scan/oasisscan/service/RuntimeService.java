@@ -74,9 +74,18 @@ public class RuntimeService {
     private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
     @Autowired
     private ValidatorInfoRepository validatorInfoRepository;
+    @Autowired
+    private RuntimeService runtimeService;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult roundList(String runtimeId, int size, int page) {
+        //get runtime info
+        String runtimeName = "unknown";
+        Runtime runtimeInfo = runtimeService.getRuntimeInfo(runtimeId);
+        if (runtimeInfo != null) {
+            runtimeName = runtimeInfo.getName();
+        }
+
         long total = 0;
         List<RuntimeRoundResponse> roundList = Lists.newArrayList();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -98,7 +107,9 @@ public class RuntimeService {
                     RuntimeRound.Header round = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeRound.Header>() {
                     });
                     if (round != null) {
-                        roundList.add(RuntimeRoundResponse.of(round));
+                        RuntimeRoundResponse response = RuntimeRoundResponse.of(round);
+                        response.setRuntimeName(runtimeName);
+                        roundList.add(response);
                     }
                 }
             }
@@ -109,7 +120,13 @@ public class RuntimeService {
         return ApiResult.page(roundList, page, size, total);
     }
 
-    public RuntimeRoundResponse roundInfo(String runtimeId, long round) {
+    public RuntimeRoundResponse roundInfo(String runtimeId, long round) {//get runtime info
+        String runtimeName = "unknown";
+        Runtime runtimeInfo = runtimeService.getRuntimeInfo(runtimeId);
+        if (runtimeInfo != null) {
+            runtimeName = runtimeInfo.getName();
+        }
+
         RuntimeRoundResponse response = null;
         String esId = runtimeId + "_" + round;
         try {
@@ -121,6 +138,7 @@ public class RuntimeService {
                     response = RuntimeRoundResponse.of(header);
                     long latestRound = latestRound(runtimeId);
                     response.setNext(round < latestRound);
+                    response.setRuntimeName(runtimeName);
                 }
             }
         } catch (ElasticsearchException e) {
@@ -241,13 +259,16 @@ public class RuntimeService {
     }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public ApiResult runtimeTransactions(int size, int page, String runtimeId) {
+    public ApiResult runtimeTransactions(int size, int page, String runtimeId, Long round) {
         long total = 0;
         List<ListRuntimeTransactionResponse> responses = Lists.newArrayList();
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_ID, runtimeId));
+        if (round != null) {
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_ROUND, round));
+        }
         searchSourceBuilder.query(boolQueryBuilder);
 
         searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.DESC);
@@ -388,6 +409,12 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    public Runtime getRuntimeInfo(String runtimeId) {
+        Optional<Runtime> optional = runtimeRepository.findByRuntimeId(runtimeId);
+        return optional.orElse(null);
     }
 
 }

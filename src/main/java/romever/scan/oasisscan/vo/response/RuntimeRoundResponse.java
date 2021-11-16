@@ -7,7 +7,8 @@ import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 @Data
 public class RuntimeRoundResponse {
     private long version;
-    private String namespace;
+    private String runtimeId;
+    private String runtimeName;
     private long round;
     private long timestamp;
     private long header_type;
@@ -21,6 +22,7 @@ public class RuntimeRoundResponse {
         RuntimeRoundResponse response = new RuntimeRoundResponse();
         BeanUtils.copyProperties(round, response);
         response.setTimestamp(round.getTimestamp().toEpochSecond());
+        response.setRuntimeId(round.getNamespace());
         return response;
     }
 }

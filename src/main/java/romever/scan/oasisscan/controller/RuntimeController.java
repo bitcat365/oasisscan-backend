@@ -50,8 +50,9 @@ public class RuntimeController {
     public ApiResult runtimeStats(
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "id") String id) {
-        return runtimeService.runtimeTransactions(size, page, id);
+            @RequestParam(value = "id") String id,
+            @RequestParam(value = "round", required = false) Long round) {
+        return runtimeService.runtimeTransactions(size, page, id, round);
     }
 
     @GetMapping("/transaction/info")

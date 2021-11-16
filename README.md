@@ -1,4 +1,5 @@
 # oasisscan-api
+
 * [validator-stats](#validator-stats)
 * [validator-list](#validator-list)
 * [validator-info](#validator-info)
@@ -67,6 +68,7 @@ GET http://localhost:8181/validator/stats?address=oasis1qzskk72k92y4duc47lqcsxhz
 GET http://localhost:8181/validator/list
 
 ```
+
 Params
 
 |  param   | description  |
@@ -75,7 +77,6 @@ Params
 | sort  | asc,desc, default:desc |
 | page  | default:1 |
 | pageSize  | default:300 |
-
 
 ```
 
@@ -218,6 +219,7 @@ GET http://localhost:8181/dashboard/network
 GET http://localhost:8181/chain/transactions
 
 ```
+
 Params
 
 |  param   | description  |
@@ -227,7 +229,6 @@ Params
 | height  | option |
 | address  | option |
 | method  | option |
-
 
 ```
 
@@ -261,13 +262,13 @@ Params
 GET http://localhost:8181/chain/blocks
 
 ```
+
 Params
 
 |  param   | description  |
 |  ----  | ----  |
 | size  | option,default:10 |
 | page  | option,default:1 |
-
 
 ```
 
@@ -314,12 +315,12 @@ Params
 GET http://localhost:8181/chain/block/{height}
 
 ```
+
 Params
 
 |  param   | description  |
 |  ----  | ----  |
 | height  | height |
-
 
 ```
 
@@ -345,6 +346,7 @@ Params
 GET http://localhost:8181/chain/transaction/{hash}
 
 ```
+
 Params
 
 |  param   | description  |
@@ -463,6 +465,7 @@ GET http://localhost:8181/chain/transactionhistory
 GET http://localhost:8181/chain/getBlockByProposer
 
 ```
+
 Params
 
 |  param   | description  |
@@ -524,6 +527,7 @@ GET http://localhost:8181/chain/account/info/{account}
 GET http://localhost:8181/chain/powerevent
 
 ```
+
 Params
 
 |  param   | description  |
@@ -610,6 +614,7 @@ Params
 GET http://localhost:8181/validator/delegators
 
 ```
+
 Params
 
 |  param   | description  |
@@ -669,6 +674,7 @@ Params
 GET http://localhost:8181/validator/escrowstats
 
 ```
+
 Params
 
 |  param   | description  |
@@ -702,6 +708,7 @@ Params
 GET http://localhost:8181/chain/account/list
 
 ```
+
 Params
 
 |  param   | description  |
@@ -741,7 +748,6 @@ Params
 }
 ```
 
-
 ### account-info
 
 ```
@@ -776,6 +782,7 @@ GET http://localhost:8181/chain/account/info/{address}
 GET http://localhost:8181/chain/search
 
 ```
+
 Params
 
 |  param   | description  |
@@ -794,8 +801,8 @@ Params
     }
 }
 ```
-note：result is the key parameter required to jump to the target type page
 
+note：result is the key parameter required to jump to the target type page
 
 |  type   | description  |
 |  ----  | ----  |
@@ -806,7 +813,6 @@ note：result is the key parameter required to jump to the target type page
 | account  | account |
 | runtime-transaction  | runtime-transaction |
 
-
 ### account-delegations
 
 ```
@@ -814,6 +820,7 @@ note：result is the key parameter required to jump to the target type page
 GET http://localhost:8181/chain/account/delegations
 
 ```
+
 Params
 
 |  param   | description  |
@@ -859,6 +866,7 @@ Params
 GET http://localhost:8181/chain/account/debonding
 
 ```
+
 Params
 
 |  param   | description  |
@@ -902,6 +910,7 @@ Params
 GET http://localhost:8181/runtime/round/list
 
 ```
+
 Params
 
 |  param   | description  |
@@ -919,7 +928,8 @@ Params
         "list": [
             {
                 "version": 0,
-                "namespace": "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
+                "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+                "runtimeName": "Emerald",
                 "round": 16,
                 "timestamp": 1629225107,
                 "header_type": 1,
@@ -944,6 +954,7 @@ Params
 GET http://localhost:8181/runtime/round/info
 
 ```
+
 Params
 
 |  param   | description  |
@@ -958,7 +969,8 @@ Params
     "code": 0,
     "data": {
         "version": 0,
-        "namespace": "AAAAAAAAAAAAAAAAAAAAAAAAcGFyY2Vsc3RhZwAAAAI=",
+        "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+        "runtimeName": "Emerald",
         "round": 3,
         "timestamp": 1629224541,
         "header_type": 1,
@@ -1006,6 +1018,7 @@ GET http://localhost:8181/runtime/list
 GET http://localhost:8181/runtime/stats
 
 ```
+
 Params
 
 |  param   | description  |
@@ -1031,6 +1044,7 @@ Sort
 |BCKP_MISSED|11|
 |PROPOSER_MISSED|12|
 |PROPOSED_TIMEOUT|13|
+
 ```
 
 // Response
@@ -1073,6 +1087,7 @@ Sort
 GET http://localhost:8181/runtime/transaction/list
 
 ```
+
 Params
 
 |  param   | description  |
@@ -1080,6 +1095,7 @@ Params
 | size  | option,default:10 |
 | page  | option,default:1 |
 | id  | runtime id |
+| round  | option,runtime round |
 
 ```
 
@@ -1112,6 +1128,7 @@ Params
 GET http://localhost:8181/runtime/transaction/info
 
 ```
+
 Params
 
 |  param   | description  |

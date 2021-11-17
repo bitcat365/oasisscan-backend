@@ -149,7 +149,7 @@ public class ScanRuntimeTransactionService {
                     });
                     String result = resultJson.fieldNames().next();
                     transaction.setResult("ok".equalsIgnoreCase(result));
-                    transaction.setMessage(resultJson.path(result).asText());
+                    transaction.setMessage(resultJson.path(result).toString());
 
                     String esId = runtimeId + "_" + txHash;
                     txMap.put(esId, Mappers.map(transaction));

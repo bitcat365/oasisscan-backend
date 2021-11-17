@@ -40,6 +40,7 @@ import romever.scan.oasisscan.repository.RuntimeStatsRepository;
 import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
+import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
@@ -361,6 +362,9 @@ public class RuntimeService {
                             response.setCtx(ctx);
                         }
                     }
+                    if (response != null) {
+                        response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
+                    }
                 }
             }
         } catch (ElasticsearchException e) {
@@ -402,6 +406,7 @@ public class RuntimeService {
                         BeanUtils.copyProperties(tx, response);
                         response.setRuntimeId(tx.getRuntime_id());
                         response.setTxHash(tx.getTx_hash());
+                        response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
                     }
                 }
             }

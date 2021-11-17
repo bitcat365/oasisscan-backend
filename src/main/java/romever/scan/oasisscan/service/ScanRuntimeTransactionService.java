@@ -28,6 +28,7 @@ import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
+import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 
@@ -112,7 +113,7 @@ public class ScanRuntimeTransactionService {
                             emeraldTransaction.setValue(signedResult.getValue().toString());
                         }
                         transaction = emeraldTransaction;
-                        transaction.setType("evm");
+                        transaction.setType(RuntimeTransactionType.EVM.getType());
                     } else {
                         transaction = Mappers.parseCborFromBase64(raw, new TypeReference<RuntimeTransaction>() {
                         });
@@ -125,7 +126,7 @@ public class ScanRuntimeTransactionService {
                             throw new RuntimeException(String.format("address parse failed, %s", body.getTo()));
                         }
                         body.setTo(address);
-                        transaction.setType("consensus");
+                        transaction.setType(RuntimeTransactionType.CONSENSUS.getType());
 
                         List<RuntimeTransaction.Si> sis = runtimeTransaction.getAi().getSi();
                         if (!CollectionUtils.isEmpty(sis)) {

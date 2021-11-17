@@ -300,6 +300,7 @@ public class RuntimeService {
                         BeanUtils.copyProperties(tx, response);
                         response.setRuntimeId(tx.getRuntime_id());
                         response.setTxHash(tx.getTx_hash());
+                        response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
                         responses.add(response);
                     }
                 }
@@ -362,9 +363,9 @@ public class RuntimeService {
                             response.setCtx(ctx);
                         }
                     }
-                    if (response != null) {
-                        response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
-                    }
+                }
+                if (response != null) {
+                    response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
                 }
             }
         } catch (ElasticsearchException e) {

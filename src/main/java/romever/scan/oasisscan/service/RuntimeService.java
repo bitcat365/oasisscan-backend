@@ -236,11 +236,11 @@ public class RuntimeService {
 
             //stats
             List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
+            Map<String, Long> statsMap = Maps.newLinkedHashMap();
+            for (RuntimeStatsType type : types) {
+                statsMap.put(type.name().toLowerCase(), 0L);
+            }
             if (!CollectionUtils.isEmpty(statsInfoList)) {
-                Map<String, Long> statsMap = Maps.newLinkedHashMap();
-                for (RuntimeStatsType type : types) {
-                    statsMap.put(type.name().toLowerCase(), 0L);
-                }
                 for (RuntimeStatsInfo info : statsInfoList) {
                     for (RuntimeStatsType type : types) {
                         if (type == info.getStatsType()) {
@@ -249,8 +249,8 @@ public class RuntimeService {
                         }
                     }
                 }
-                response.setStats(statsMap);
             }
+            response.setStats(statsMap);
             responses.add(response);
         }
         responses.sort((r1, r2) -> {

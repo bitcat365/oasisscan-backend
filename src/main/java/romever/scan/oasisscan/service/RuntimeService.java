@@ -320,6 +320,12 @@ public class RuntimeService {
      * @return
      */
     public RuntimeTransactionResponse transactionInfo(String runtimeId, String txHash) {
+        String runtimeName = "unknown";
+        Runtime runtimeInfo = runtimeService.getRuntimeInfo(runtimeId);
+        if (runtimeInfo != null) {
+            runtimeName = runtimeInfo.getName();
+        }
+
         RuntimeTransactionResponse response = null;
         String esId = runtimeId + "_" + txHash;
         try {
@@ -366,6 +372,7 @@ public class RuntimeService {
                 }
                 if (response != null) {
                     response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
+                    response.setRuntimeName(runtimeName);
                 }
             }
         } catch (ElasticsearchException e) {

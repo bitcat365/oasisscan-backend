@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class RuntimeTransactionResponse {
     private String runtimeId;
+    private String runtimeName;
     private String txHash;
     private long round;
     private boolean result;

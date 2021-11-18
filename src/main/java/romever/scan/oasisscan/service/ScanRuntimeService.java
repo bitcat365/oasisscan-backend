@@ -22,9 +22,11 @@ import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.RuntimeNode;
 import romever.scan.oasisscan.entity.RuntimeStats;
 import romever.scan.oasisscan.entity.RuntimeStatsInfo;
 import romever.scan.oasisscan.entity.RuntimeStatsType;
+import romever.scan.oasisscan.repository.RuntimeNodeRepository;
 import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
 import romever.scan.oasisscan.repository.RuntimeStatsRepository;
@@ -63,6 +65,8 @@ public class ScanRuntimeService {
     private RuntimeStatsRepository runtimeStatsRepository;
     @Autowired
     private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
+    @Autowired
+    private RuntimeNodeRepository runtimeNodeRepository;
 
     @Autowired
     private TransactionService transactionService;
@@ -186,9 +190,19 @@ public class ScanRuntimeService {
                 if (nodes == null) {
                     throw new RuntimeException(String.format("Registry nodes api error. %s, %s", runtimeId, scanHeight));
                 }
+                //save node entity map
                 Map<String, String> nodeToEntity = Maps.newHashMap();
                 for (Node node : nodes) {
                     nodeToEntity.put(node.getId(), node.getEntity_id());
+                    //save in db
+                    Optional<RuntimeNode> optionalRuntimeNode = runtimeNodeRepository.findByRuntimeIdAndNodeId(runtimeId, node.getId());
+                    if (!optionalRuntimeNode.isPresent()) {
+                        RuntimeNode runtimeNode = new RuntimeNode();
+                        runtimeNode.setRuntimeId(runtimeId);
+                        runtimeNode.setNodeId(node.getId());
+                        runtimeNode.setEntityId(node.getEntity_id());
+                        runtimeNodeRepository.save(runtimeNode);
+                    }
                 }
                 RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
                 if (runtimeRound == null) {

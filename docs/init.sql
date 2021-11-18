@@ -164,15 +164,27 @@ CREATE TABLE `runtime_stats`
 
 CREATE TABLE `runtime_stats_info`
 (
-    `id`           int(10) unsigned NOT NULL AUTO_INCREMENT,
-    `runtime_id`   varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
-    `entity_id`    varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
-    `stats_type`   int(2) unsigned  NOT NULL DEFAULT '0',
-    `count`        int(10) unsigned NOT NULL DEFAULT '0',
-    `ctime`        timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `mtime`        timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `id`         int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `runtime_id` varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `entity_id`  varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `stats_type` int(2) unsigned  NOT NULL DEFAULT '0',
+    `count`      int(10) unsigned NOT NULL DEFAULT '0',
+    `ctime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `mtime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uniq_all` (`runtime_id`, `entity_id`, `stats_type`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_bin;
+
+CREATE TABLE `runtime_node`
+(
+    `id`         int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `runtime_id` varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `node_id`    varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `entity_id`  varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE KEY `uniq_all` (`runtime_id`, `node_id`, `entity_id`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_bin;

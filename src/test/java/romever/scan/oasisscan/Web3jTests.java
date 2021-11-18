@@ -19,7 +19,8 @@ public class Web3jTests {
 
     @Test
     public void test1() {
-        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
+//        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
+        System.out.println(Texts.base64ToHex("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4ZkRnJkjd8s="));
     }
 
     public static void main(String[] args) throws IOException, SignatureException {

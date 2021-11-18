@@ -11,6 +11,7 @@ public class RuntimeStatsResponse {
     private String address;
     private boolean validator;
     private String icon;
+    private boolean status;
     private Map<String, Long> stats;
 
     @Data

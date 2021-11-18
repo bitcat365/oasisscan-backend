@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
@@ -30,17 +31,13 @@ import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.*;
 import romever.scan.oasisscan.entity.Runtime;
-import romever.scan.oasisscan.entity.RuntimeStatsInfo;
-import romever.scan.oasisscan.entity.RuntimeStatsType;
-import romever.scan.oasisscan.entity.ValidatorInfo;
-import romever.scan.oasisscan.repository.RuntimeRepository;
-import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
-import romever.scan.oasisscan.repository.RuntimeStatsRepository;
-import romever.scan.oasisscan.repository.ValidatorInfoRepository;
+import romever.scan.oasisscan.repository.*;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
+import romever.scan.oasisscan.vo.chain.Node;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
@@ -53,6 +50,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static romever.scan.oasisscan.common.ESFields.*;
@@ -70,9 +68,9 @@ public class RuntimeService {
     @Autowired
     private RuntimeRepository runtimeRepository;
     @Autowired
-    private RuntimeStatsRepository runtimeStatsRepository;
-    @Autowired
     private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
+    @Autowired
+    private RuntimeNodeRepository runtimeNodeRepository;
     @Autowired
     private ValidatorInfoRepository validatorInfoRepository;
     @Autowired
@@ -199,17 +197,22 @@ public class RuntimeService {
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public List<RuntimeStatsResponse> runtimeStats(String runtimeId, int sort) {
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
-        List<String> entities = runtimeStatsInfoRepository.entities(runtimeId);
+        List<String> entities = runtimeNodeRepository.entities(runtimeId);
         if (CollectionUtils.isEmpty(entities)) {
             return responses;
         }
 
+        List<Node> nodes = apiClient.registryNodes(null);
+        if (CollectionUtils.isEmpty(nodes)) {
+            return responses;
+        }
+        Set<String> onlineNodeSet = Sets.newHashSet();
+        for (Node node : nodes) {
+            onlineNodeSet.add(node.getEntity_id());
+        }
+
         RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
         for (String entity : entities) {
-            List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
-            if (CollectionUtils.isEmpty(statsInfoList)) {
-                return responses;
-            }
             RuntimeStatsResponse response = new RuntimeStatsResponse();
             response.setEntityId(entity);
             //info
@@ -229,21 +232,25 @@ public class RuntimeService {
             }
             response.setAddress(address);
             response.setValidator(validator);
+            response.setStatus(onlineNodeSet.contains(entity));
 
             //stats
-            Map<String, Long> statsMap = Maps.newLinkedHashMap();
-            for (RuntimeStatsType type : types) {
-                statsMap.put(type.name().toLowerCase(), 0L);
-            }
-            for (RuntimeStatsInfo info : statsInfoList) {
+            List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
+            if (!CollectionUtils.isEmpty(statsInfoList)) {
+                Map<String, Long> statsMap = Maps.newLinkedHashMap();
                 for (RuntimeStatsType type : types) {
-                    if (type == info.getStatsType()) {
-                        statsMap.put(type.name().toLowerCase(), info.getCount());
-                        break;
+                    statsMap.put(type.name().toLowerCase(), 0L);
+                }
+                for (RuntimeStatsInfo info : statsInfoList) {
+                    for (RuntimeStatsType type : types) {
+                        if (type == info.getStatsType()) {
+                            statsMap.put(type.name().toLowerCase(), info.getCount());
+                            break;
+                        }
                     }
                 }
+                response.setStats(statsMap);
             }
-            response.setStats(statsMap);
             responses.add(response);
         }
         responses.sort((r1, r2) -> {

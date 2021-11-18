@@ -183,6 +183,8 @@ CREATE TABLE `runtime_node`
     `runtime_id` varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
     `node_id`    varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
     `entity_id`  varchar(200)     NOT NULL COLLATE utf8mb4_bin COMMENT '',
+    `ctime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `mtime`      timestamp(3)     NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE KEY `uniq_all` (`runtime_id`, `node_id`, `entity_id`)
 ) ENGINE = InnoDB

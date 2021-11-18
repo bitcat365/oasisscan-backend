@@ -1058,6 +1058,7 @@ Sort
                 "address": "oasis1qrtle8dp3me9cac3mekxcnyq9qhsn6r67q32sazp",
                 "validator": false,
                 "icon": null,
+                "status": true,
                 "stats": {
                     "elected": 14,
                     "primary": 14,

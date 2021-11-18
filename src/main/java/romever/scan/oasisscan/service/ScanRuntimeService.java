@@ -194,16 +194,25 @@ public class ScanRuntimeService {
                 Map<String, String> nodeToEntity = Maps.newHashMap();
                 for (Node node : nodes) {
                     nodeToEntity.put(node.getId(), node.getEntity_id());
-                    //save in db
-                    Optional<RuntimeNode> optionalRuntimeNode = runtimeNodeRepository.findByRuntimeIdAndNodeId(runtimeId, node.getId());
-                    if (!optionalRuntimeNode.isPresent()) {
-                        RuntimeNode runtimeNode = new RuntimeNode();
-                        runtimeNode.setRuntimeId(runtimeId);
-                        runtimeNode.setNodeId(node.getId());
-                        runtimeNode.setEntityId(node.getEntity_id());
-                        runtimeNodeRepository.save(runtimeNode);
+                    List<Node.Runtime> runtimeList = node.getRuntimes();
+                    if (CollectionUtils.isEmpty(runtimeList)) {
+                        continue;
+                    }
+                    for (Node.Runtime r : runtimeList) {
+                        if (r.getId().equalsIgnoreCase(runtimeId)) {
+                            //save in db
+                            Optional<RuntimeNode> optionalRuntimeNode = runtimeNodeRepository.findByRuntimeIdAndNodeId(runtimeId, node.getId());
+                            if (!optionalRuntimeNode.isPresent()) {
+                                RuntimeNode runtimeNode = new RuntimeNode();
+                                runtimeNode.setRuntimeId(runtimeId);
+                                runtimeNode.setNodeId(node.getId());
+                                runtimeNode.setEntityId(node.getEntity_id());
+                                runtimeNodeRepository.save(runtimeNode);
+                            }
+                        }
                     }
                 }
+
                 RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
                 if (runtimeRound == null) {
                     throw new RuntimeException(String.format("Runtime round api error. %s", scanHeight));

@@ -61,7 +61,16 @@ public class ScanRuntimeTransactionService {
             return;
         }
 
-        String emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
+        String emerald = null;
+        if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
+            emerald = "000000000000000000000000000000000000000000000000e2eaa99fc008f87f";
+        } else if ("test".equalsIgnoreCase(applicationConfig.getEnv())) {
+            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
+        }
+        if (Texts.isBlank(emerald)) {
+            return;
+        }
+
         String runtimeId = emerald;
         RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
         if (runtimeState == null) {

@@ -43,7 +43,7 @@ public class RuntimeController {
     public ApiResult runtimeStats(
             @RequestParam(value = "id") String id,
             @RequestParam(value = "sort", required = false, defaultValue = "0") int sort) {
-        return ApiResult.list(runtimeService.runtimeStats(id, sort));
+        return ApiResult.ok(runtimeService.runtimeStats(id, sort));
     }
 
     @GetMapping("/transaction/list")

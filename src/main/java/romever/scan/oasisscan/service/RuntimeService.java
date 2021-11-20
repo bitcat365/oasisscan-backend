@@ -195,16 +195,18 @@ public class RuntimeService {
     }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public List<RuntimeStatsResponse> runtimeStats(String runtimeId, int sort) {
+    public ListRuntimeStatsResponse runtimeStats(String runtimeId, int sort) {
+        ListRuntimeStatsResponse listResponse = new ListRuntimeStatsResponse();
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
+        listResponse.setList(responses);
         List<String> entities = runtimeNodeRepository.entities(runtimeId);
         if (CollectionUtils.isEmpty(entities)) {
-            return responses;
+            return listResponse;
         }
 
         List<Node> nodes = apiClient.registryNodes(null);
         if (CollectionUtils.isEmpty(nodes)) {
-            return responses;
+            return listResponse;
         }
         Set<String> onlineNodeSet = Sets.newHashSet();
         for (Node node : nodes) {
@@ -212,6 +214,7 @@ public class RuntimeService {
         }
 
         RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
+        int online = 0;
         for (String entity : entities) {
             RuntimeStatsResponse response = new RuntimeStatsResponse();
             response.setEntityId(entity);
@@ -232,7 +235,10 @@ public class RuntimeService {
             }
             response.setAddress(address);
             response.setValidator(validator);
-            response.setStatus(onlineNodeSet.contains(entity));
+            if (onlineNodeSet.contains(entity)) {
+                online++;
+                response.setStatus(onlineNodeSet.contains(entity));
+            }
 
             //stats
             List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
@@ -263,7 +269,10 @@ public class RuntimeService {
             }
             return (int) (map2.get(types[sort].name().toLowerCase()) - map1.get(types[sort].name().toLowerCase()));
         });
-        return responses;
+        listResponse.setList(responses);
+        listResponse.setOnline(online);
+        listResponse.setOffline(responses.size() - online);
+        return listResponse;
     }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)

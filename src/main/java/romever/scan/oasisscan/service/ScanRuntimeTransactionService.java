@@ -130,11 +130,13 @@ public class ScanRuntimeTransactionService {
 
                         RuntimeTransaction runtimeTransaction = (RuntimeTransaction) transaction;
                         RuntimeTransaction.Body body = runtimeTransaction.getCall().getBody();
-                        String address = apiClient.base64ToBech32Address(body.getTo());
-                        if (Texts.isBlank(address)) {
-                            throw new RuntimeException(String.format("address parse failed, %s", body.getTo()));
+                        if (Texts.isNotBlank(body.getTo())) {
+                            String address = apiClient.base64ToBech32Address(body.getTo());
+                            if (Texts.isBlank(address)) {
+                                throw new RuntimeException(String.format("address parse failed, %s", body.getTo()));
+                            }
+                            body.setTo(address);
                         }
-                        body.setTo(address);
                         transaction.setType(RuntimeTransactionType.CONSENSUS.getType());
 
                         List<RuntimeTransaction.Si> sis = runtimeTransaction.getAi().getSi();
@@ -174,7 +176,7 @@ public class ScanRuntimeTransactionService {
                     }
 
                 } catch (Exception e) {
-                    log.error("error", e);
+                    log.error(String.format("error, %s", scanRound), e);
                     return;
                 }
             }

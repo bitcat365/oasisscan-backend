@@ -24,41 +24,41 @@ public class Web3jTests {
     }
 
     public static void main(String[] args) throws IOException, SignatureException {
-//        String code = "gljRo2F2AWJhaaJic2mBomVub25jZQJsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIAuZHaGU6xLSfSjndixDLwObOl1sD7lWDyexjDViLxYwY2ZlZaNjZ2FzGcNQZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQCK12JFZMoKOr7GZu028AbnUqW9CmZhbW91bnSCSBEgDHZE1QAAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQICGDTt+di3LFMJXLrt3iXeAcyJp4jjIm+u9YwraoB3oECP+OL70gFRnHDzdyKVxV7SrRpsU1FOp8G5FyeJvVwg=";
-//        JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
-//        });
-//
-//        System.out.println(rawJson);
-//        String raw = "";
-//        String type = "";
-//        if (rawJson.isArray()) {
-//            raw = rawJson.get(0).asText();
-//            type = rawJson.get(1).toString();
-//            System.out.println(raw);
-//        }
-//
-//        if (type.contains("evm")) {
-//            String hex = Texts.base64ToHex(raw);
-//            RawTransaction rawTransaction = TransactionDecoder.decode(hex);
-//            System.out.println(Hash.sha3(hex));
-//            System.out.println(rawTransaction.getNonce());
-//            System.out.println(rawTransaction.getGasLimit());
-//            System.out.println(rawTransaction.getTo());
-//            System.out.println(rawTransaction.getData());
-//            System.out.println(rawTransaction.getType());
-//            System.out.println(rawTransaction.getValue());
-//            System.out.println(rawTransaction.getGasPrice());
-//
-//            if (rawTransaction instanceof SignedRawTransaction) {
-//                SignedRawTransaction signedResult = (SignedRawTransaction) rawTransaction;
-//                System.out.println(signedResult.getChainId());
-//                System.out.println(signedResult.getFrom());
-//            }
-//        } else {
-//            RuntimeTransaction runtimeTransaction = Mappers.parseCborFromBase64(raw, new TypeReference<RuntimeTransaction>() {
-//            });
-//            System.out.println(Mappers.json(runtimeTransaction));
-//        }
+        String code = "gliwo2F2AWJhaaJic2mBomVub25jZQBsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIJmv+TxYZCL9nToQ1gOlkq4hBIcJ5zNmpjfP64B7jMNQY2ZlZaNjZ2FzGSwNZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmhZmFtb3VudIJAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQMMyAMM4R/p5IGJG/BsLEBJKKvmCPaZNOvOy6Di5OY4pfSdtMYXrfrCMViXTBN4Nxc5q+Ig35IAEX6Sw4ZXr7QU=";
+        JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
+        });
+
+        System.out.println(rawJson);
+        String raw = "";
+        String type = "";
+        if (rawJson.isArray()) {
+            raw = rawJson.get(0).asText();
+            type = rawJson.get(1).toString();
+            System.out.println(raw);
+        }
+
+        if (type.contains("evm")) {
+            String hex = Texts.base64ToHex(raw);
+            RawTransaction rawTransaction = TransactionDecoder.decode(hex);
+            System.out.println(Hash.sha3(hex));
+            System.out.println(rawTransaction.getNonce());
+            System.out.println(rawTransaction.getGasLimit());
+            System.out.println(rawTransaction.getTo());
+            System.out.println(rawTransaction.getData());
+            System.out.println(rawTransaction.getType());
+            System.out.println(rawTransaction.getValue());
+            System.out.println(rawTransaction.getGasPrice());
+
+            if (rawTransaction instanceof SignedRawTransaction) {
+                SignedRawTransaction signedResult = (SignedRawTransaction) rawTransaction;
+                System.out.println(signedResult.getChainId());
+                System.out.println(signedResult.getFrom());
+            }
+        } else {
+            RuntimeTransaction runtimeTransaction = Mappers.parseCborFromBase64(raw, new TypeReference<RuntimeTransaction>() {
+            });
+            System.out.println(Mappers.json(runtimeTransaction));
+        }
 
         String test = "oWRmYWlso2Rjb2RlAmZtb2R1bGVjZXZtZ21lc3NhZ2V4HGV4ZWN1dGlvbiBmYWlsZWQ6IG91dCBvZiBnYXM=";
         JsonNode j1 = Mappers.parseCborFromBase64(test, new TypeReference<JsonNode>() {

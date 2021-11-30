@@ -33,6 +33,9 @@ public class ChainController {
             @RequestParam(value = "height", required = false) Long height,
             @RequestParam(value = "address", required = false) String address,
             @RequestParam(value = "method", required = false) String method) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return transactionService.transactions(size, page, height, address, method);
     }
 
@@ -41,6 +44,9 @@ public class ChainController {
     public ApiResult latestBlocks(
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return blockService.latestBlocks(size, page);
     }
 
@@ -72,6 +78,9 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page
     ) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return blockService.proposerBlocks(proposer, address, size, page);
     }
 
@@ -80,6 +89,9 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "5") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address", required = false) String address) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return transactionService.powerEvent(size, page, address);
     }
 
@@ -92,6 +104,9 @@ public class ChainController {
     public ApiResult accountList(
             @RequestParam(value = "size", required = false, defaultValue = "100") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return accountService.accountList(page, size);
     }
 
@@ -100,6 +115,9 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "5") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address") String address) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return accountService.debondings(address, page, size);
     }
 
@@ -109,6 +127,9 @@ public class ChainController {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "all", required = false, defaultValue = "false") boolean all,
             @RequestParam(value = "address") String address) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return accountService.delegations(address, all, page, size);
     }
 

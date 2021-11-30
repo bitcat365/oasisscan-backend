@@ -24,6 +24,9 @@ public class RuntimeController {
             @RequestParam(value = "id") String id,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return runtimeService.roundList(id, size, page);
     }
 
@@ -52,6 +55,9 @@ public class RuntimeController {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "id") String id,
             @RequestParam(value = "round", required = false) Long round) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
         return runtimeService.runtimeTransactions(size, page, id, round);
     }
 

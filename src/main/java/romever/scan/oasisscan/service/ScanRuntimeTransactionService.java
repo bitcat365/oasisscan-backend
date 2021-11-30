@@ -176,7 +176,7 @@ public class ScanRuntimeTransactionService {
                     }
 
                 } catch (Exception e) {
-                    log.error(String.format("error, %s", scanRound), e);
+                    log.error(String.format("error, %s, %s", runtimeId, scanRound), e);
                     return;
                 }
             }

@@ -33,6 +33,7 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
     public static class Signature {
         private String ed25519;
         private String address;
+        private String secp256k1eth;
     }
 
     @Data

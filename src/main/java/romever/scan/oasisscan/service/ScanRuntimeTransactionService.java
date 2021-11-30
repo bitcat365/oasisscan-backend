@@ -143,11 +143,13 @@ public class ScanRuntimeTransactionService {
                         if (!CollectionUtils.isEmpty(sis)) {
                             for (RuntimeTransaction.Si si : sis) {
                                 RuntimeTransaction.Signature signature = si.getAddress_spec().getSignature();
-                                String addressSi = apiClient.pubkeyToBech32Address(signature.getEd25519());
-                                if (Texts.isBlank(addressSi)) {
-                                    throw new RuntimeException(String.format("address parse failed, %s", signature.getEd25519()));
+                                if (signature.getEd25519() != null) {
+                                    String addressSi = apiClient.pubkeyToBech32Address(signature.getEd25519());
+                                    if (Texts.isBlank(addressSi)) {
+                                        throw new RuntimeException(String.format("address parse failed, %s", signature.getEd25519()));
+                                    }
+                                    signature.setAddress(addressSi);
                                 }
-                                signature.setAddress(addressSi);
                             }
                         }
                     }

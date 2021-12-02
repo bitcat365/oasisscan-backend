@@ -25,7 +25,12 @@ public class BlockDetailResponse {
     public static BlockDetailResponse of(Block block, Map<String, ValidatorInfo> tmAddressMap) {
         BlockDetailResponse response = new BlockDetailResponse();
         response.setHeight(block.getHeight());
-        response.setHash(Texts.base64ToHex(block.getHash()));
+        if (Texts.isHex(block.getHash())) {
+            response.setHash(block.getHash());
+        } else {
+            response.setHash(Texts.base64ToHex(block.getHash()));
+        }
+
         Block.MetaData.BlockHeader header = block.getMetadata().getHeader();
         if (header != null) {
             response.setProposer(header.getProposer_address());

@@ -72,7 +72,7 @@ public class AccountService {
         if (accountInfo != null) {
             Optional<Account> optional = accountRepository.findByAddress(address);
             if (optional.isPresent()) {
-                response = AccountResponse.of(optional.get(), 4);
+                response = AccountResponse.of(optional.get(), Constants.DECIMALS);
             }
             AccountInfo.General general = accountInfo.getGeneral();
             if (general != null) {
@@ -83,7 +83,7 @@ public class AccountService {
                     for (Map.Entry<String, String> entry : allowanceMap.entrySet()) {
                         AccountResponse.Allowance allowance = new AccountResponse.Allowance();
                         allowance.setAddress(entry.getKey());
-                        allowance.setAmount(Texts.formatDecimals(String.valueOf(entry.getValue()), Constants.DECIMALS, 4));
+                        allowance.setAmount(Texts.formatDecimals(String.valueOf(entry.getValue()), Constants.DECIMALS, Constants.DECIMALS));
                         allowanceList.add(allowance);
                     }
                     response.setAllowances(allowanceList);
@@ -138,7 +138,7 @@ public class AccountService {
                 String validatorAddress = d.getValidator();
                 Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
                 AccountValidatorResponse response = new AccountValidatorResponse();
-                double shares = Double.parseDouble(Texts.formatDecimals(d.getShares(), Constants.DECIMALS, 2));
+                double shares = Double.parseDouble(Texts.formatDecimals(d.getShares(), Constants.DECIMALS, Constants.DECIMALS));
                 if (optional.isPresent()) {
                     ValidatorInfo validatorInfo = optional.get();
                     response.setValidatorAddress(validatorAddress);
@@ -146,14 +146,14 @@ public class AccountService {
                     response.setIcon(validatorInfo.getIcon());
                     response.setActive(validatorInfo.getNodes() == 1);
                     //tokens = shares * balance / total_shares
-                    double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, 2));
-                    double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, 2));
-                    double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 2);
-                    response.setShares(Numeric.formatDouble(shares));
-                    response.setAmount(Numeric.formatDouble(amount));
+                    double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, Constants.DECIMALS));
+                    double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, Constants.DECIMALS));
+                    double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, Constants.DECIMALS);
+                    response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
+                    response.setAmount(Numeric.formatDouble(amount, Constants.DECIMALS));
                 } else {
-                    response.setShares(Numeric.formatDouble(shares));
-                    response.setAmount(Numeric.formatDouble(shares));
+                    response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
+                    response.setAmount(Numeric.formatDouble(shares, Constants.DECIMALS));
                     response.setEntityAddress(validatorAddress);
                 }
                 responses.add(response);

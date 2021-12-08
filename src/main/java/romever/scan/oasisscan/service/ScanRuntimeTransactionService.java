@@ -112,7 +112,7 @@ public class ScanRuntimeTransactionService {
                     String type = rawJson.get(1).toString();
                     AbstractRuntimeTransaction transaction;
                     String txHash;
-                    if (type.contains("evm")) {
+                    if (type.contains("evm.ethereum")) {
                         String hex = Texts.base64ToHex(raw);
                         txHash = Hash.sha3(hex);
                         EmeraldTransaction emeraldTransaction = new EmeraldTransaction();

@@ -17,6 +17,8 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.web3j.crypto.Hash;
 import org.web3j.crypto.RawTransaction;
@@ -62,6 +64,7 @@ public class ScanRuntimeTransactionService {
      * Currently only scan emerald transactions
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public void scanTransaction() {
         if (applicationConfig.isLocal()) {
             return;

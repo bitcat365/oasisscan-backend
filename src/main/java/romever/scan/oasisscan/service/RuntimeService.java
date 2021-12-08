@@ -275,7 +275,15 @@ public class RuntimeService {
         return listResponse;
     }
 
-    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    /**
+     * runtime transaction list
+     *
+     * @param size
+     * @param page
+     * @param runtimeId
+     * @param round
+     * @return
+     */
     public ApiResult runtimeTransactions(int size, int page, String runtimeId, Long round) {
         long total = 0;
         List<ListRuntimeTransactionResponse> responses = Lists.newArrayList();

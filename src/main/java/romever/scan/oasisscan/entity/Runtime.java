@@ -21,4 +21,5 @@ public class Runtime extends BaseEntity {
     private long scanRoundHeight;
     private long startRoundHeight;
     private long statsHeight;
+    private long scanTxHeight;
 }

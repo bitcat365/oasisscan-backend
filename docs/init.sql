@@ -139,6 +139,7 @@ CREATE TABLE `runtime`
     `scan_round_height`  int(10) unsigned NOT NULL        DEFAULT '0',
     `start_round_height` int(10) unsigned NOT NULL        DEFAULT '0',
     `stats_height`       int(10) unsigned NOT NULL        DEFAULT '0',
+    `scan_tx_height`     int(10) unsigned NOT NULL        DEFAULT '0',
     `ctime`              timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
     `mtime`              timestamp(3)     NOT NULL        DEFAULT CURRENT_TIMESTAMP(3),
     PRIMARY KEY (`id`) USING BTREE

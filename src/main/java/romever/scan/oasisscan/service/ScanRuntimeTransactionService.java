@@ -26,6 +26,8 @@ import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.Runtime;
+import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
@@ -35,6 +37,7 @@ import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static romever.scan.oasisscan.common.ESFields.RUNTIME_TRANSACTION_ID;
 import static romever.scan.oasisscan.common.ESFields.RUNTIME_TRANSACTION_ROUND;
@@ -51,6 +54,9 @@ public class ScanRuntimeTransactionService {
     private RestHighLevelClient elasticsearchClient;
     @Autowired
     private ElasticsearchConfig elasticsearchConfig;
+
+    @Autowired
+    private RuntimeRepository runtimeRepository;
 
     /**
      * Currently only scan emerald transactions
@@ -78,7 +84,7 @@ public class ScanRuntimeTransactionService {
         }
 
         long currentRound = runtimeState.getLast_normal_round();
-        Long scanRound = getEsRound(runtimeId);
+        Long scanRound = getScanRound(runtimeId);
         if (scanRound == null) {
             return;
         }
@@ -177,14 +183,32 @@ public class ScanRuntimeTransactionService {
                         }
                     }
 
+                    //save scan height
+                    Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                    if (optionalRuntime.isPresent()) {
+                        Runtime runtime = optionalRuntime.get();
+                        runtime.setScanTxHeight(scanRound);
+                        runtimeRepository.save(runtime);
+                    }
+
                 } catch (Exception e) {
-                    log.error(String.format("error, %s, %s", runtimeId, scanRound), e);
+                    log.error(String.format("error, %s, %s, %s", runtimeId, scanRound, r.getTx()), e);
                     return;
                 }
             }
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
         }
     }
+
+    private Long getScanRound(String runtimeId) {
+        Long storeHeight = null;
+        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+        if (optionalRuntime.isPresent()) {
+            storeHeight = optionalRuntime.get().getScanTxHeight();
+        }
+        return storeHeight;
+    }
+
 
     private Long getEsRound(String runtimeId) {
         Long storeHeight = null;

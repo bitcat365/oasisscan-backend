@@ -191,14 +191,13 @@ public class ScanRuntimeTransactionService {
                         runtimeRepository.save(runtime);
                     }
 
-                    scanRound++;
-
                 } catch (Exception e) {
                     log.error(String.format("error, %s, %s, %s", runtimeId, scanRound, r.getTx()), e);
                     return;
                 }
             }
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
+            scanRound++;
         }
     }
 

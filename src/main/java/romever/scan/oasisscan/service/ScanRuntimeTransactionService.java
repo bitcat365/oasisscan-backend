@@ -91,7 +91,7 @@ public class ScanRuntimeTransactionService {
         if (scanRound != 0) {
             scanRound++;
         }
-        while (scanRound <= currentRound) {
+        for (; scanRound <= currentRound; scanRound++) {
             List<RuntimeTransactionWithResult> list = apiClient.runtimeTransactionsWithResults(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(list)) {
                 log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, 0));
@@ -197,7 +197,6 @@ public class ScanRuntimeTransactionService {
                 }
             }
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
-            scanRound++;
         }
     }
 

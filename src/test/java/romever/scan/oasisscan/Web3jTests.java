@@ -3,28 +3,34 @@ package romever.scan.oasisscan;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.SignedRawTransaction;
-import org.web3j.crypto.TransactionDecoder;
+import org.web3j.crypto.*;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.security.SignatureException;
 
 public class Web3jTests {
 
     @Test
-    public void test1() {
+    public void test1() throws IOException {
 //        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
-        System.out.println(Texts.base64ToHex("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4ZkRnJkjd8s="));
+        System.out.println(Texts.base64ToHex("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE"));
+        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
+        }));
+
+        String hexCompressed = Texts.base64ToHex("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE");
+        byte[] c = Texts.hexStringToByteArray(hexCompressed);
+        byte[] uc = Texts.compressedToUncompressed(c);
+        String address = Keys.toChecksumAddress(Keys.getAddress(new BigInteger(Texts.toHex(uc), 16))).toLowerCase();
+        System.out.println(address);
     }
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "glkBbPkBaQSAgxq2L5Q3xh9OQFdreSzgbREQ6ZxBw+754IC5AQTo4zcAAAAAAAAAAAAAAAAAeSKW4qFebOtfUDneyueh8lsAsLAAAAAAAAAAAAAAAADFJPrsoEfwst6askUBQgiBbu1ORwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABvBbWdOyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAeABpUZjzWgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbneZ03wcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHdmzzEwgX6AAAAAAAAAAAAAAAAXIaA3Ol5Mu30oUGEzoGI7L+6WR8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYbCTm4MBSk6gCaFl4A+6EjE0ltAlLhAMvdlFTJA2O4sUDG3czYVAGMygXrrG+7Y0EBhfijtMZXzjfzjmd0I6NuH2trnmjAbL6vuBoWZtb2R1bGVvZXZtLmV0aGVyZXVtLnYw";
+        String code = "gljYo2F2AWJhaaJic2mBomVub25jZRdsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhbHNlY3AyNTZrMWV0aFghAwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BEY2ZlZaNjZ2FzGcNQZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQDLxDmcjHzC3w7mCnVjAbteQpANqWZhbW91bnSCSBTREg17FgAAQGZtZXRob2RyY29uc2Vuc3VzLldpdGhkcmF3gaFpc2lnbmF0dXJlWEcwRQIhAKGkMfZEcdVDVfJ2sFSrEr6wWNkJFnOmWxEe49Za2fdpAiAPtGjXQvP8nLzEhRkfXDoRXHSRBCLzjmi1FNak8GExTw==";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
 

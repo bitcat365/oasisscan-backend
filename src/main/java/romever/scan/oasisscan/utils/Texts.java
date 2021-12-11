@@ -14,7 +14,10 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECParameterSpec;
+import org.bouncycastle.math.ec.ECPoint;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.util.HtmlUtils;
 
@@ -670,5 +673,20 @@ public abstract class Texts {
 
     public static String hexToBase64(String hex) {
         return base64Encode(hexStringToByteArray(hex));
+    }
+
+    private static final ECParameterSpec SPEC = ECNamedCurveTable.getParameterSpec("secp256k1");
+    public static byte[] compressedToUncompressed(byte[] compKey) throws IOException {
+        ECPoint point = SPEC.getCurve().decodePoint(compKey);
+        byte[] x = point.getXCoord().getEncoded();
+        byte[] y = point.getYCoord().getEncoded();
+        return concat(x, y);
+    }
+
+    public static byte[] concat(byte[] a, byte[] b) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.write(a);
+        outputStream.write(b);
+        return outputStream.toByteArray();
     }
 }

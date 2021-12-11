@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.web3j.crypto.Hash;
-import org.web3j.crypto.RawTransaction;
-import org.web3j.crypto.SignedRawTransaction;
-import org.web3j.crypto.TransactionDecoder;
+import org.web3j.crypto.*;
 import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
@@ -37,6 +34,7 @@ import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -152,12 +150,19 @@ public class ScanRuntimeTransactionService {
                         if (!CollectionUtils.isEmpty(sis)) {
                             for (RuntimeTransaction.Si si : sis) {
                                 RuntimeTransaction.Signature signature = si.getAddress_spec().getSignature();
-                                if (signature.getEd25519() != null) {
+                                if (Texts.isNotBlank(signature.getEd25519())) {
                                     String addressSi = apiClient.pubkeyToBech32Address(signature.getEd25519());
                                     if (Texts.isBlank(addressSi)) {
                                         throw new RuntimeException(String.format("address parse failed, %s", signature.getEd25519()));
                                     }
                                     signature.setAddress(addressSi);
+                                }
+                                if (Texts.isNotBlank(signature.getSecp256k1eth())) {
+                                    String hexCompressed = Texts.base64ToHex(signature.getSecp256k1eth());
+                                    byte[] c = Texts.hexStringToByteArray(hexCompressed);
+                                    byte[] uc = Texts.compressedToUncompressed(c);
+                                    String address = Keys.toChecksumAddress(Keys.getAddress(new BigInteger(Texts.toHex(uc), 16))).toLowerCase();
+                                    signature.setAddress(address);
                                 }
                             }
                         }
@@ -240,7 +245,5 @@ public class ScanRuntimeTransactionService {
             log.error("error", e);
         }
         return storeHeight;
-
-
     }
 }

@@ -380,6 +380,7 @@ public class RuntimeService {
                         List<RuntimeTransaction.Si> sis = tx.getAi().getSi();
                         if (!CollectionUtils.isEmpty(sis)) {
                             RuntimeTransactionResponse.Consensus ctx = new RuntimeTransactionResponse.Consensus();
+                            ctx.setNonce(sis.get(0).getNonce());
                             ctx.setFrom(sis.get(0).getAddress_spec().getSignature().getAddress());
                             ctx.setTo(tx.getCall().getBody().getTo());
                             ctx.setMethod(tx.getCall().getMethod());

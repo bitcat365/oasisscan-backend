@@ -16,6 +16,8 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ESFields;
@@ -101,6 +103,7 @@ public class ScanRuntimeService {
      * Scan runtimes round and save in elasticsearch
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public void scanRuntimeRound() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
@@ -130,7 +133,7 @@ public class ScanRuntimeService {
                 }
                 romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
                 _runtime.setStartRoundHeight(genesisHeight);
-                runtimeRepository.saveAndFlush(_runtime);
+                runtimeRepository.save(_runtime);
             }
             while (scanHeight < currentChainHeight) {
                 RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
@@ -147,7 +150,7 @@ public class ScanRuntimeService {
                 }
                 romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
                 _runtime.setScanRoundHeight(scanHeight);
-                runtimeRepository.saveAndFlush(_runtime);
+                runtimeRepository.save(_runtime);
                 scanHeight++;
             }
         }

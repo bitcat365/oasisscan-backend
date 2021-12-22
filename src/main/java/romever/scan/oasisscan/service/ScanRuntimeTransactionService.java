@@ -182,7 +182,7 @@ public class ScanRuntimeTransactionService {
 
                     //events
                     List<RuntimeTransactionWithResult.PlainEvent> events = r.getEvents();
-                    if (!CollectionUtils.isEmpty(events)) {
+                    if (!CollectionUtils.isEmpty(events) && !type.contains("evm.ethereum")) {
                         List<AbstractRuntimeTransaction.Event> runtimeEvents = Lists.newArrayList();
                         for (RuntimeTransactionWithResult.PlainEvent event : events) {
                             AbstractRuntimeTransaction.Event runtimeEvent = new AbstractRuntimeTransaction.Event();

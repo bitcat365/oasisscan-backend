@@ -35,9 +35,10 @@ public class Web3jTests {
     }
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gaNidG9VAPXvDY9uJ38SFSdn8kyQZOS7FROBZGZyb21VAO1D91JQJv1Tegv1JEiLfFSfA5glZmFtb3VudIJIFNESDXsWAABA";
+        String code = "o2J0b1UA9e8Nj24nfxIVJ2fyTJBk5LsVE4FkZnJvbVUAJwu0GyGMNH+O/5E6oMwRBLI+bxVmYW1vdW50gkBA";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
+        System.out.println(rawJson);
         List<AbstractRuntimeTransaction.EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
         });
         System.out.println(eventLogs);

@@ -198,12 +198,14 @@ public class ScanRuntimeTransactionService {
 
                             String value = event.getValue();
                             List<AbstractRuntimeTransaction.EventLog> eventLogs = Lists.newArrayList();
-                            if (value.startsWith("{")) {
-                                eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<AbstractRuntimeTransaction.EventLog>() {
-                                }));
-                            } else {
+                            JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
+                            });
+                            if (eventJson.isArray()) {
                                 eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
                                 });
+                            } else {
+                                eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<AbstractRuntimeTransaction.EventLog>() {
+                                }));
                             }
                             if (!CollectionUtils.isEmpty(eventLogs)) {
                                 for (AbstractRuntimeTransaction.EventLog log : eventLogs) {

@@ -1161,7 +1161,21 @@ consensus transaction
             "amount": "2.123",
             "nonce": 0
         },
-        "etx": null
+        "etx": null,
+        "events": [
+            {
+                "type": "deposit",
+                "logs": [
+                    {
+                        "from": "oasis1qrk58a6j2qn065m6p06jgjyt032f7qucy5wqeqpt",
+                        "to": "oasis1qr677rv0dcnh7ys4yanlynysvnjtk9gnsyhvm6ln",
+                        "amount": [
+                            "1.5"
+                        ]
+                    }
+                ]
+            }
+        ]
     }
 }
 

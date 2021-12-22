@@ -392,6 +392,28 @@ public class RuntimeService {
                                 }
                             }
                             response.setCtx(ctx);
+
+                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
+                            if (!CollectionUtils.isEmpty(events)) {
+                                for (AbstractRuntimeTransaction.Event event : events) {
+                                    List<AbstractRuntimeTransaction.EventLog> logs = event.getLogs();
+                                    if (CollectionUtils.isEmpty(logs)) {
+                                        continue;
+                                    }
+                                    for (AbstractRuntimeTransaction.EventLog eventLog : logs) {
+                                        List<String> hexAmounts = eventLog.getAmount();
+                                        List<String> numberAmounts = Lists.newArrayList();
+                                        if (!CollectionUtils.isEmpty(hexAmounts)) {
+                                            String amount = hexAmounts.get(0);
+                                            if (Texts.isNotBlank(amount)) {
+                                                numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+                                            }
+                                        }
+                                        eventLog.setAmount(numberAmounts);
+                                    }
+                                }
+                                response.setEvents(tx.getEvents());
+                            }
                         }
                     }
                 }
@@ -440,6 +462,28 @@ public class RuntimeService {
                         response.setRuntimeId(tx.getRuntime_id());
                         response.setTxHash(tx.getTx_hash());
                         response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
+
+                        List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
+                        if (!CollectionUtils.isEmpty(events)) {
+                            for (AbstractRuntimeTransaction.Event event : events) {
+                                List<AbstractRuntimeTransaction.EventLog> logs = event.getLogs();
+                                if (CollectionUtils.isEmpty(logs)) {
+                                    continue;
+                                }
+                                for (AbstractRuntimeTransaction.EventLog eventLog : logs) {
+                                    List<String> amounts = eventLog.getAmount();
+                                    List<String> numberAmounts = Lists.newArrayList();
+                                    if (!CollectionUtils.isEmpty(amounts)) {
+                                        String amount = amounts.get(0);
+                                        if (Texts.isNotBlank(amount)) {
+                                            numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+                                        }
+                                    }
+                                    eventLog.setAmount(numberAmounts);
+                                }
+                            }
+                            response.setEvents(tx.getEvents());
+                        }
                     }
                 }
             }

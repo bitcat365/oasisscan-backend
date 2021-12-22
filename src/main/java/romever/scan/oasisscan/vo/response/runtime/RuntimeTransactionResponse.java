@@ -1,6 +1,9 @@
 package romever.scan.oasisscan.vo.response.runtime;
 
 import lombok.Data;
+import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+
+import java.util.List;
 
 @Data
 public class RuntimeTransactionResponse {
@@ -15,6 +18,8 @@ public class RuntimeTransactionResponse {
 
     private Consensus ctx;
     private Ethereum etx;
+
+    private List<AbstractRuntimeTransaction.Event> events;
 
     @Data
     public static class Consensus {

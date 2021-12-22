@@ -5,22 +5,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 import org.web3j.crypto.*;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
+import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SignatureException;
+import java.util.List;
 
 public class Web3jTests {
 
     @Test
     public void test1() throws IOException {
 //        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
-        System.out.println(Texts.base64ToHex("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE"));
-        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
-        }));
+        String s = "YWNjb3VudHMAAAAB";
+        System.out.println(Texts.base64ToHex(s));
+        System.out.println(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64("FNESDXsWAAA=")), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+//        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
+//        }));
 
         String hexCompressed = Texts.base64ToHex("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE");
         byte[] c = Texts.hexStringToByteArray(hexCompressed);
@@ -30,9 +35,12 @@ public class Web3jTests {
     }
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gljYo2F2AWJhaaJic2mBomVub25jZRdsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhbHNlY3AyNTZrMWV0aFghAwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BEY2ZlZaNjZ2FzGcNQZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQDLxDmcjHzC3w7mCnVjAbteQpANqWZhbW91bnSCSBTREg17FgAAQGZtZXRob2RyY29uc2Vuc3VzLldpdGhkcmF3gaFpc2lnbmF0dXJlWEcwRQIhAKGkMfZEcdVDVfJ2sFSrEr6wWNkJFnOmWxEe49Za2fdpAiAPtGjXQvP8nLzEhRkfXDoRXHSRBCLzjmi1FNak8GExTw==";
+        String code = "gaNidG9VAPXvDY9uJ38SFSdn8kyQZOS7FROBZGZyb21VAO1D91JQJv1Tegv1JEiLfFSfA5glZmFtb3VudIJIFNESDXsWAABA";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
+        List<AbstractRuntimeTransaction.EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
+        });
+        System.out.println(eventLogs);
 
         System.out.println(rawJson);
         String raw = "";

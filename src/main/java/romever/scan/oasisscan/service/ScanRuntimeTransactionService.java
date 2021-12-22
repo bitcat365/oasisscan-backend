@@ -2,6 +2,7 @@ package romever.scan.oasisscan.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.web3j.crypto.*;
 import romever.scan.oasisscan.common.ApplicationConfig;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
@@ -177,6 +179,46 @@ public class ScanRuntimeTransactionService {
                     String result = resultJson.fieldNames().next();
                     transaction.setResult("ok".equalsIgnoreCase(result));
                     transaction.setMessage(resultJson.path(result).toString());
+
+                    //events
+                    List<RuntimeTransactionWithResult.PlainEvent> events = r.getEvents();
+                    if (!CollectionUtils.isEmpty(events)) {
+                        List<AbstractRuntimeTransaction.Event> runtimeEvents = Lists.newArrayList();
+                        for (RuntimeTransactionWithResult.PlainEvent event : events) {
+                            AbstractRuntimeTransaction.Event runtimeEvent = new AbstractRuntimeTransaction.Event();
+                            String key = event.getKey();
+                            String keyHex = Texts.base64ToHex(key);
+                            String eventType = "";
+                            if (keyHex.contains(Constants.RUNTIME_TX_DEPOSIT_HEX)) {
+                                eventType = "deposit";
+                            } else if (keyHex.contains(Constants.RUNTIME_TX_WITHDRAW_HEX)) {
+                                eventType = "withdraw";
+                            }
+                            runtimeEvent.setType(eventType);
+
+                            String value = event.getValue();
+                            List<AbstractRuntimeTransaction.EventLog> eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
+                            });
+                            if (!CollectionUtils.isEmpty(eventLogs)) {
+                                for (AbstractRuntimeTransaction.EventLog log : eventLogs) {
+                                    String from = apiClient.base64ToBech32Address(log.getFrom());
+                                    if (Texts.isBlank(from)) {
+                                        throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                    }
+                                    log.setFrom(from);
+
+                                    String to = apiClient.base64ToBech32Address(log.getTo());
+                                    if (Texts.isBlank(to)) {
+                                        throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                    }
+                                    log.setTo(to);
+                                }
+                                runtimeEvent.setLogs(eventLogs);
+                            }
+                            runtimeEvents.add(runtimeEvent);
+                        }
+                        transaction.setEvents(runtimeEvents);
+                    }
 
                     String esId = runtimeId + "_" + txHash;
                     txMap.put(esId, Mappers.map(transaction));

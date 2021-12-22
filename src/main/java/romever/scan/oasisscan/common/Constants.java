@@ -11,4 +11,7 @@ public interface Constants {
     String DB_HEIGHT_PROPERTY = "db_height";
 
     int EMERALD_DECIMALS = 18;
+
+    String RUNTIME_TX_DEPOSIT_HEX = "6163636f756e747300000001";
+    String RUNTIME_TX_WITHDRAW_HEX = "6163636f756e747300000002";
 }

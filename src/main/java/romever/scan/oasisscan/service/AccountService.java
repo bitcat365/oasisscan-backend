@@ -46,6 +46,8 @@ public class AccountService {
     private ApiClient apiClient;
     @Autowired
     private ValidatorInfoRepository validatorInfoRepository;
+    @Autowired
+    private ScanValidatorService scanValidatorService;
 
     @Cached(expire = 60, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult accountList(int page, int size) {
@@ -70,9 +72,13 @@ public class AccountService {
         response.setAddress(address);
         AccountInfo accountInfo = apiClient.accountInfo(address, null);
         if (accountInfo != null) {
-            Optional<Account> optional = accountRepository.findByAddress(address);
-            if (optional.isPresent()) {
-                response = AccountResponse.of(optional.get(), Constants.DECIMALS);
+//            Optional<Account> optional = accountRepository.findByAddress(address);
+//            if (optional.isPresent()) {
+//                response = AccountResponse.of(optional.get(), Constants.DECIMALS);
+//            }
+            Account accountDb = scanValidatorService.getAccount(address, accountInfo);
+            if (accountDb != null) {
+                response = AccountResponse.of(accountDb, Constants.DECIMALS);
             }
             AccountInfo.General general = accountInfo.getGeneral();
             if (general != null) {

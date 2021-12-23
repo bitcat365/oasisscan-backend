@@ -16,6 +16,7 @@ import romever.scan.oasisscan.service.TransactionService;
 import romever.scan.oasisscan.service.ValidatorService;
 import romever.scan.oasisscan.vo.response.DashboardNetworkResponse;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class DashboardController {
 
     @GetMapping("/network")
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public ApiResult network() {
+    public ApiResult network() throws IOException {
         DashboardNetworkResponse response = new DashboardNetworkResponse();
 
         NetworkInfo networkInfo = validatorService.networkInfo();

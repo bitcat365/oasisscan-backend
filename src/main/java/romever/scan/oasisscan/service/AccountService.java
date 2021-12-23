@@ -70,31 +70,35 @@ public class AccountService {
     public AccountResponse accountInfo(String address) {
         AccountResponse response = new AccountResponse();
         response.setAddress(address);
-        AccountInfo accountInfo = apiClient.accountInfo(address, null);
-        if (accountInfo != null) {
+        try {
+            AccountInfo accountInfo = apiClient.accountInfo(address, null);
+            if (accountInfo != null) {
 //            Optional<Account> optional = accountRepository.findByAddress(address);
 //            if (optional.isPresent()) {
 //                response = AccountResponse.of(optional.get(), Constants.DECIMALS);
 //            }
-            Account accountDb = scanValidatorService.getAccount(address, accountInfo);
-            if (accountDb != null) {
-                response = AccountResponse.of(accountDb, Constants.DECIMALS);
-            }
-            AccountInfo.General general = accountInfo.getGeneral();
-            if (general != null) {
-                response.setNonce(general.getNonce());
-                Map<String, String> allowanceMap = general.getAllowances();
-                if (!CollectionUtils.isEmpty(allowanceMap)) {
-                    List<AccountResponse.Allowance> allowanceList = Lists.newArrayList();
-                    for (Map.Entry<String, String> entry : allowanceMap.entrySet()) {
-                        AccountResponse.Allowance allowance = new AccountResponse.Allowance();
-                        allowance.setAddress(entry.getKey());
-                        allowance.setAmount(Texts.formatDecimals(String.valueOf(entry.getValue()), Constants.DECIMALS, Constants.DECIMALS));
-                        allowanceList.add(allowance);
+                Account accountDb = scanValidatorService.getAccount(address, accountInfo);
+                if (accountDb != null) {
+                    response = AccountResponse.of(accountDb, Constants.DECIMALS);
+                }
+                AccountInfo.General general = accountInfo.getGeneral();
+                if (general != null) {
+                    response.setNonce(general.getNonce());
+                    Map<String, String> allowanceMap = general.getAllowances();
+                    if (!CollectionUtils.isEmpty(allowanceMap)) {
+                        List<AccountResponse.Allowance> allowanceList = Lists.newArrayList();
+                        for (Map.Entry<String, String> entry : allowanceMap.entrySet()) {
+                            AccountResponse.Allowance allowance = new AccountResponse.Allowance();
+                            allowance.setAddress(entry.getKey());
+                            allowance.setAmount(Texts.formatDecimals(String.valueOf(entry.getValue()), Constants.DECIMALS, Constants.DECIMALS));
+                            allowanceList.add(allowance);
+                        }
+                        response.setAllowances(allowanceList);
                     }
-                    response.setAllowances(allowanceList);
                 }
             }
+        } catch (Exception e) {
+            log.error("", e);
         }
         return response;
     }
@@ -102,28 +106,33 @@ public class AccountService {
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult debondings(String delegator, int page, int size) {
         List<AccountDebondingResponse> responses = Lists.newArrayList();
-        long total = debondingRepository.countByDelegator(delegator);
-        long currentEpoch = apiClient.epoch(null);
-        if (total > 0) {
-            PageRequest pageRequest = PageRequest.of(page - 1, size);
-            List<Debonding> list = debondingRepository.findByDelegatorOrderByDebondEndAsc(delegator, pageRequest);
-            if (!CollectionUtils.isEmpty(list)) {
-                for (Debonding debonding : list) {
-                    String validatorAddress = debonding.getValidator();
-                    Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
-                    if (optional.isPresent()) {
-                        ValidatorInfo validatorInfo = optional.get();
-                        AccountDebondingResponse response = new AccountDebondingResponse();
-                        response.setValidatorAddress(validatorAddress);
-                        response.setValidatorName(validatorInfo.getName());
-                        response.setIcon(validatorInfo.getIcon());
-                        response.setDebondEnd(debonding.getDebondEnd());
-                        response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
-                        response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
-                        responses.add(response);
+        long total = 0;
+        try {
+            total = debondingRepository.countByDelegator(delegator);
+            long currentEpoch = apiClient.epoch(null);
+            if (total > 0) {
+                PageRequest pageRequest = PageRequest.of(page - 1, size);
+                List<Debonding> list = debondingRepository.findByDelegatorOrderByDebondEndAsc(delegator, pageRequest);
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (Debonding debonding : list) {
+                        String validatorAddress = debonding.getValidator();
+                        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
+                        if (optional.isPresent()) {
+                            ValidatorInfo validatorInfo = optional.get();
+                            AccountDebondingResponse response = new AccountDebondingResponse();
+                            response.setValidatorAddress(validatorAddress);
+                            response.setValidatorName(validatorInfo.getName());
+                            response.setIcon(validatorInfo.getIcon());
+                            response.setDebondEnd(debonding.getDebondEnd());
+                            response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
+                            response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
+                            responses.add(response);
+                        }
                     }
                 }
             }
+        } catch (Exception e) {
+            log.error("", e);
         }
         return ApiResult.page(responses, page, size, total);
     }

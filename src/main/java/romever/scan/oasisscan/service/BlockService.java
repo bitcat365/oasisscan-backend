@@ -153,49 +153,53 @@ public class BlockService {
     public ApiResult proposerBlocks(String entityId, String address, int size, int page) {
         long total = 0;
         List<BlockDetailResponse> responses = Lists.newArrayList();
-        if (Texts.isBlank(address)) {
-            address = apiClient.pubkeyToBech32Address(entityId);
+        try {
             if (Texts.isBlank(address)) {
-                throw new RuntimeException(String.format("address parse failed, %s", entityId));
-            }
-        }
-
-        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(address);
-        if (optional.isPresent()) {
-            List<ValidatorConsensus> consensusList = validatorConsensusRepository.findByEntityId(optional.get().getEntityId());
-            if (!CollectionUtils.isEmpty(consensusList)) {
-                List<String> tmAddressList = Lists.newArrayList();
-                for (ValidatorConsensus consensus : consensusList) {
-                    String tmAddress = Texts.hexToBase64(apiClient.pubkeyToTendermintAddress(consensus.getConsensusId()));
-                    tmAddressList.add(tmAddress);
+                address = apiClient.pubkeyToBech32Address(entityId);
+                if (Texts.isBlank(address)) {
+                    throw new RuntimeException(String.format("address parse failed, %s", entityId));
                 }
+            }
 
-                SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-                BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-                boolQueryBuilder.filter(QueryBuilders.termsQuery(BLOCK_PROPOSER_ADDRESS, tmAddressList));
-
-                searchSourceBuilder.query(boolQueryBuilder);
-                searchSourceBuilder.from(size * (page - 1));
-                searchSourceBuilder.size(size);
-                searchSourceBuilder.sort(BLOCK_HEIGHT, SortOrder.DESC);
-                searchSourceBuilder.trackTotalHits(true);
-
-                try {
-                    SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getBlockIndex(), searchSourceBuilder);
-                    if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
-                        Map<String, ValidatorInfo> tmAddressMap = blockService.tmAddressNodeMap();
-
-                        SearchHits hits = searchResponse.getHits();
-                        total = hits.getTotalHits().value;
-                        SearchHit[] searchHits = hits.getHits();
-                        for (SearchHit hit : searchHits) {
-                            Mappers.parseJson(hit.getSourceAsString(), Block.class).ifPresent(block -> responses.add(BlockDetailResponse.of(block, tmAddressMap)));
-                        }
+            Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(address);
+            if (optional.isPresent()) {
+                List<ValidatorConsensus> consensusList = validatorConsensusRepository.findByEntityId(optional.get().getEntityId());
+                if (!CollectionUtils.isEmpty(consensusList)) {
+                    List<String> tmAddressList = Lists.newArrayList();
+                    for (ValidatorConsensus consensus : consensusList) {
+                        String tmAddress = Texts.hexToBase64(apiClient.pubkeyToTendermintAddress(consensus.getConsensusId()));
+                        tmAddressList.add(tmAddress);
                     }
-                } catch (IOException e) {
-                    log.error("error", e);
+
+                    SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+                    BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+                    boolQueryBuilder.filter(QueryBuilders.termsQuery(BLOCK_PROPOSER_ADDRESS, tmAddressList));
+
+                    searchSourceBuilder.query(boolQueryBuilder);
+                    searchSourceBuilder.from(size * (page - 1));
+                    searchSourceBuilder.size(size);
+                    searchSourceBuilder.sort(BLOCK_HEIGHT, SortOrder.DESC);
+                    searchSourceBuilder.trackTotalHits(true);
+
+                    try {
+                        SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getBlockIndex(), searchSourceBuilder);
+                        if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                            Map<String, ValidatorInfo> tmAddressMap = blockService.tmAddressNodeMap();
+
+                            SearchHits hits = searchResponse.getHits();
+                            total = hits.getTotalHits().value;
+                            SearchHit[] searchHits = hits.getHits();
+                            for (SearchHit hit : searchHits) {
+                                Mappers.parseJson(hit.getSourceAsString(), Block.class).ifPresent(block -> responses.add(BlockDetailResponse.of(block, tmAddressMap)));
+                            }
+                        }
+                    } catch (IOException e) {
+                        log.error("error", e);
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.error("", e);
         }
         return ApiResult.page(responses, page, size, total);
     }

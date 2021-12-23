@@ -81,7 +81,12 @@ public class ValidatorService {
     public NetworkInfo networkInfo() {
         NetworkInfo networkInfo = dataAccess.networkInfo();
         if (networkInfo != null) {
-            Long height = apiClient.getCurHeight();
+            Long height = null;
+            try {
+                height = apiClient.getCurHeight();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (height == null) {
                 height = scanChainService.getEsHeight();
             }
@@ -97,123 +102,127 @@ public class ValidatorService {
     @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
     public ValidatorResponse validatorInfo(String entityId, String address) {
         ValidatorResponse response = new ValidatorResponse();
-//        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityId(entityId);
-        ValidatorInfoRank info = dataAccess.getValidatorInfo(entityId, address);
-        long currentEpoch = apiClient.epoch(null);
-        if (info != null) {
-            response = formatValidator(info);
-        } else {
-            return null;
-        }
-        if (Texts.isBlank(address)) {
-            address = apiClient.pubkeyToBech32Address(entityId);
+        try {
+            //        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityId(entityId);
+            ValidatorInfoRank info = dataAccess.getValidatorInfo(entityId, address);
+            long currentEpoch = apiClient.epoch(null);
+            if (info != null) {
+                response = formatValidator(info);
+            } else {
+                return null;
+            }
             if (Texts.isBlank(address)) {
-                throw new RuntimeException(String.format("address parse failed, %s", entityId));
-            }
-        }
-        AccountInfo accountInfo = apiClient.accountInfo(address, null);
-        if (accountInfo != null) {
-            AccountInfo.General general = accountInfo.getGeneral();
-            if (general != null) {
-                response.setNonce(general.getNonce());
-            }
-            AccountInfo.Escrow escrow = accountInfo.getEscrow();
-            if (escrow != null) {
-                AccountInfo.Active active = escrow.getActive();
-                if (active != null) {
-                    response.setEscrow(Texts.formatDecimals(active.getBalance(), Constants.DECIMALS, 2));
-                    response.setTotalShares(Texts.formatDecimals(active.getTotal_shares(), Constants.DECIMALS, 2));
+                address = apiClient.pubkeyToBech32Address(entityId);
+                if (Texts.isBlank(address)) {
+                    throw new RuntimeException(String.format("address parse failed, %s", entityId));
                 }
+            }
+            AccountInfo accountInfo = apiClient.accountInfo(address, null);
+            if (accountInfo != null) {
+                AccountInfo.General general = accountInfo.getGeneral();
+                if (general != null) {
+                    response.setNonce(general.getNonce());
+                }
+                AccountInfo.Escrow escrow = accountInfo.getEscrow();
+                if (escrow != null) {
+                    AccountInfo.Active active = escrow.getActive();
+                    if (active != null) {
+                        response.setEscrow(Texts.formatDecimals(active.getBalance(), Constants.DECIMALS, 2));
+                        response.setTotalShares(Texts.formatDecimals(active.getTotal_shares(), Constants.DECIMALS, 2));
+                    }
 
-                AccountInfo.CommissionSchedule commissionSchedule = escrow.getCommission_schedule();
-                if (commissionSchedule != null) {
-                    //bounds
-                    List<ValidatorResponse.Bound> boundsResponse = Lists.newArrayList();
-                    List<AccountInfo.Bound> bounds = commissionSchedule.getBounds();
-                    if (!CollectionUtils.isEmpty(bounds)) {
-                        for (AccountInfo.Bound bound : bounds) {
-                            ValidatorResponse.Bound boundResponse = new ValidatorResponse.Bound();
-                            boundResponse.setStart(bound.getStart());
-                            boundResponse.setMin(Numeric.divide(Double.parseDouble(bound.getRate_min()), Constants.RATE_DECIMALS, 4));
-                            boundResponse.setMax(Numeric.divide(Double.parseDouble(bound.getRate_max()), Constants.RATE_DECIMALS, 4));
-                            if (bound.getStart() <= currentEpoch) {
-                                if (boundsResponse.size() == 0) {
+                    AccountInfo.CommissionSchedule commissionSchedule = escrow.getCommission_schedule();
+                    if (commissionSchedule != null) {
+                        //bounds
+                        List<ValidatorResponse.Bound> boundsResponse = Lists.newArrayList();
+                        List<AccountInfo.Bound> bounds = commissionSchedule.getBounds();
+                        if (!CollectionUtils.isEmpty(bounds)) {
+                            for (AccountInfo.Bound bound : bounds) {
+                                ValidatorResponse.Bound boundResponse = new ValidatorResponse.Bound();
+                                boundResponse.setStart(bound.getStart());
+                                boundResponse.setMin(Numeric.divide(Double.parseDouble(bound.getRate_min()), Constants.RATE_DECIMALS, 4));
+                                boundResponse.setMax(Numeric.divide(Double.parseDouble(bound.getRate_max()), Constants.RATE_DECIMALS, 4));
+                                if (bound.getStart() <= currentEpoch) {
+                                    if (boundsResponse.size() == 0) {
+                                        boundsResponse.add(boundResponse);
+                                    } else {
+                                        boundsResponse.set(0, boundResponse);
+                                    }
+                                } else if (bound.getStart() > currentEpoch && boundsResponse.size() < 5) {
                                     boundsResponse.add(boundResponse);
                                 } else {
-                                    boundsResponse.set(0, boundResponse);
+                                    break;
                                 }
-                            } else if (bound.getStart() > currentEpoch && boundsResponse.size() < 5) {
-                                boundsResponse.add(boundResponse);
-                            } else {
-                                break;
                             }
+                            response.setBound(boundsResponse.get(0));
                         }
-                        response.setBound(boundsResponse.get(0));
-                    }
-                    response.setBounds(boundsResponse);
+                        response.setBounds(boundsResponse);
 
-                    //rate
-                    List<ValidatorResponse.Rate> ratesResponse = Lists.newArrayList();
-                    List<AccountInfo.Rate> rates = commissionSchedule.getRates();
-                    if (!CollectionUtils.isEmpty(rates)) {
-                        for (AccountInfo.Rate rate : rates) {
-                            ValidatorResponse.Rate rateResponse = new ValidatorResponse.Rate();
-                            rateResponse.setStart(rate.getStart());
-                            rateResponse.setRate(Numeric.divide(Double.parseDouble(rate.getRate()), Constants.RATE_DECIMALS, 4));
-                            if (rate.getStart() <= currentEpoch) {
-                                if (ratesResponse.size() == 0) {
+                        //rate
+                        List<ValidatorResponse.Rate> ratesResponse = Lists.newArrayList();
+                        List<AccountInfo.Rate> rates = commissionSchedule.getRates();
+                        if (!CollectionUtils.isEmpty(rates)) {
+                            for (AccountInfo.Rate rate : rates) {
+                                ValidatorResponse.Rate rateResponse = new ValidatorResponse.Rate();
+                                rateResponse.setStart(rate.getStart());
+                                rateResponse.setRate(Numeric.divide(Double.parseDouble(rate.getRate()), Constants.RATE_DECIMALS, 4));
+                                if (rate.getStart() <= currentEpoch) {
+                                    if (ratesResponse.size() == 0) {
+                                        ratesResponse.add(rateResponse);
+                                    } else {
+                                        ratesResponse.set(0, rateResponse);
+                                    }
+                                } else if (rate.getStart() > currentEpoch && ratesResponse.size() < 5) {
                                     ratesResponse.add(rateResponse);
                                 } else {
-                                    ratesResponse.set(0, rateResponse);
+                                    break;
                                 }
-                            } else if (rate.getStart() > currentEpoch && ratesResponse.size() < 5) {
-                                ratesResponse.add(rateResponse);
-                            } else {
-                                break;
                             }
+                            response.setCommission(ratesResponse.get(0).getRate());
                         }
-                        response.setCommission(ratesResponse.get(0).getRate());
+                        response.setRates(ratesResponse);
                     }
-                    response.setRates(ratesResponse);
                 }
             }
-        }
 
-        double selfShares = 0;
-        Map<String, Delegations> delegationsMap = apiClient.delegations(address, null);
-        if (!CollectionUtils.isEmpty(delegationsMap)) {
-            for (Map.Entry<String, Delegations> entry : delegationsMap.entrySet()) {
-                String entity = entry.getKey();
-                Delegations delegations = entry.getValue();
-                double shares = Double.parseDouble(Texts.formatDecimals(delegations.getShares(), Constants.DECIMALS, 2));
-                if (entity.equals(address)) {
-                    selfShares = Numeric.add(selfShares, shares);
-                    break;
+            double selfShares = 0;
+            Map<String, Delegations> delegationsMap = apiClient.delegations(address, null);
+            if (!CollectionUtils.isEmpty(delegationsMap)) {
+                for (Map.Entry<String, Delegations> entry : delegationsMap.entrySet()) {
+                    String entity = entry.getKey();
+                    Delegations delegations = entry.getValue();
+                    double shares = Double.parseDouble(Texts.formatDecimals(delegations.getShares(), Constants.DECIMALS, 2));
+                    if (entity.equals(address)) {
+                        selfShares = Numeric.add(selfShares, shares);
+                        break;
+                    }
                 }
             }
-        }
-        //tokens = shares * balance / total_shares
-        double balance = Double.parseDouble(response.getEscrow());
-        double totalShares = Double.parseDouble(response.getTotalShares());
-        double otherShares = Numeric.subtract(totalShares, selfShares);
-        double selfAmount = 0;
-        double otherAmount = 0;
-        if (totalShares > 0) {
-            selfAmount = Numeric.divide(Numeric.multiply(selfShares, balance), totalShares, 2);
-            otherAmount = Numeric.divide(Numeric.multiply(otherShares, balance), totalShares, 2);
-        }
+            //tokens = shares * balance / total_shares
+            double balance = Double.parseDouble(response.getEscrow());
+            double totalShares = Double.parseDouble(response.getTotalShares());
+            double otherShares = Numeric.subtract(totalShares, selfShares);
+            double selfAmount = 0;
+            double otherAmount = 0;
+            if (totalShares > 0) {
+                selfAmount = Numeric.divide(Numeric.multiply(selfShares, balance), totalShares, 2);
+                otherAmount = Numeric.divide(Numeric.multiply(otherShares, balance), totalShares, 2);
+            }
 
-        ValidatorResponse.EscrowStatus escrowSharesStatus = new ValidatorResponse.EscrowStatus();
-        escrowSharesStatus.setSelf(Numeric.formatDouble(selfShares));
-        escrowSharesStatus.setOther(Numeric.formatDouble(otherShares));
-        escrowSharesStatus.setTotal(Numeric.formatDouble(Numeric.add(selfShares, otherShares)));
-        ValidatorResponse.EscrowStatus escrowAmountStatus = new ValidatorResponse.EscrowStatus();
-        escrowAmountStatus.setSelf(Numeric.formatDouble(selfAmount));
-        escrowAmountStatus.setOther(Numeric.formatDouble(otherAmount));
-        escrowAmountStatus.setTotal(Numeric.formatDouble(Numeric.add(selfAmount, otherAmount)));
-        response.setEscrowSharesStatus(escrowSharesStatus);
-        response.setEscrowAmountStatus(escrowAmountStatus);
-
+            ValidatorResponse.EscrowStatus escrowSharesStatus = new ValidatorResponse.EscrowStatus();
+            escrowSharesStatus.setSelf(Numeric.formatDouble(selfShares));
+            escrowSharesStatus.setOther(Numeric.formatDouble(otherShares));
+            escrowSharesStatus.setTotal(Numeric.formatDouble(Numeric.add(selfShares, otherShares)));
+            ValidatorResponse.EscrowStatus escrowAmountStatus = new ValidatorResponse.EscrowStatus();
+            escrowAmountStatus.setSelf(Numeric.formatDouble(selfAmount));
+            escrowAmountStatus.setOther(Numeric.formatDouble(otherAmount));
+            escrowAmountStatus.setTotal(Numeric.formatDouble(Numeric.add(selfAmount, otherAmount)));
+            response.setEscrowSharesStatus(escrowSharesStatus);
+            response.setEscrowAmountStatus(escrowAmountStatus);
+        } catch (Exception e) {
+            log.error("", e);
+            return null;
+        }
         return response;
     }
 
@@ -325,98 +334,109 @@ public class ValidatorService {
     @CacheRefresh(refresh = 30, timeUnit = TimeUnit.SECONDS)
     public ValidatorStatsResponse validatorStats(String entityId, String address) {
         ValidatorStatsResponse response = new ValidatorStatsResponse();
-        if (Texts.isBlank(address)) {
-            address = apiClient.pubkeyToBech32Address(entityId);
+        try {
             if (Texts.isBlank(address)) {
-                throw new RuntimeException(String.format("address parse failed, %s", entityId));
+                address = apiClient.pubkeyToBech32Address(entityId);
+                if (Texts.isBlank(address)) {
+                    throw new RuntimeException(String.format("address parse failed, %s", entityId));
+                }
             }
-        }
 
-        List<ValidatorStatsResponse.Stats> proposals = Lists.newArrayList();
-        List<ValidatorStatsResponse.Stats> signs = Lists.newArrayList();
+            List<ValidatorStatsResponse.Stats> proposals = Lists.newArrayList();
+            List<ValidatorStatsResponse.Stats> signs = Lists.newArrayList();
 
-        long height = scanChainService.getEsHeight();
-        if (height > 0) {
-            Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(address);
-            if (optional.isPresent()) {
-                List<ValidatorConsensus> consensusList = validatorConsensusRepository.findByEntityId(optional.get().getEntityId());
-                if (!CollectionUtils.isEmpty(consensusList)) {
-                    List<String> tmAddressList = Lists.newArrayList();
-                    for (ValidatorConsensus consensus : consensusList) {
-                        String tmAddress = Texts.hexToBase64(apiClient.pubkeyToTendermintAddress(consensus.getConsensusId()));
-                        tmAddressList.add(tmAddress);
-                    }
-
-                    List<Long> proposalsList = getStats(tmAddressList, STAT_LIMIT, true);
-                    List<Long> signsList = getStats(tmAddressList, STAT_LIMIT, false);
-
-                    for (long i = height; i > height - STAT_LIMIT; i--) {
-                        ValidatorStatsResponse.Stats stats = new ValidatorStatsResponse.Stats();
-                        stats.setHeight(i);
-                        stats.setBlock(false);
-                        if (!CollectionUtils.isEmpty(proposalsList)) {
-                            if (proposalsList.contains(i)) {
-                                stats.setBlock(true);
-                            }
+            long height = scanChainService.getEsHeight();
+            if (height > 0) {
+                Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(address);
+                if (optional.isPresent()) {
+                    List<ValidatorConsensus> consensusList = validatorConsensusRepository.findByEntityId(optional.get().getEntityId());
+                    if (!CollectionUtils.isEmpty(consensusList)) {
+                        List<String> tmAddressList = Lists.newArrayList();
+                        for (ValidatorConsensus consensus : consensusList) {
+                            String tmAddress = Texts.hexToBase64(apiClient.pubkeyToTendermintAddress(consensus.getConsensusId()));
+                            tmAddressList.add(tmAddress);
                         }
-                        proposals.add(stats);
-                    }
-                    height -= 1;
-                    for (long i = height; i > height - STAT_LIMIT; i--) {
-                        ValidatorStatsResponse.Stats stats = new ValidatorStatsResponse.Stats();
-                        stats.setHeight(i);
-                        stats.setBlock(false);
-                        if (!CollectionUtils.isEmpty(signsList)) {
-                            if (signsList.contains(i)) {
-                                stats.setBlock(true);
+
+                        List<Long> proposalsList = getStats(tmAddressList, STAT_LIMIT, true);
+                        List<Long> signsList = getStats(tmAddressList, STAT_LIMIT, false);
+
+                        for (long i = height; i > height - STAT_LIMIT; i--) {
+                            ValidatorStatsResponse.Stats stats = new ValidatorStatsResponse.Stats();
+                            stats.setHeight(i);
+                            stats.setBlock(false);
+                            if (!CollectionUtils.isEmpty(proposalsList)) {
+                                if (proposalsList.contains(i)) {
+                                    stats.setBlock(true);
+                                }
                             }
+                            proposals.add(stats);
                         }
-                        signs.add(stats);
+                        height -= 1;
+                        for (long i = height; i > height - STAT_LIMIT; i--) {
+                            ValidatorStatsResponse.Stats stats = new ValidatorStatsResponse.Stats();
+                            stats.setHeight(i);
+                            stats.setBlock(false);
+                            if (!CollectionUtils.isEmpty(signsList)) {
+                                if (signsList.contains(i)) {
+                                    stats.setBlock(true);
+                                }
+                            }
+                            signs.add(stats);
+                        }
                     }
                 }
             }
+            response.setProposals(proposals);
+            response.setSigns(signs);
+        } catch (Exception e) {
+            log.error("", e);
+            return null;
         }
-        response.setProposals(proposals);
-        response.setSigns(signs);
+
         return response;
     }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult delegators(String entityId, String validatorAddress, int page, int size) {
-        if (Texts.isBlank(validatorAddress)) {
-            validatorAddress = apiClient.pubkeyToBech32Address(entityId);
-            if (Texts.isBlank(validatorAddress)) {
-                throw new RuntimeException(String.format("address parse failed, %s", entityId));
-            }
-        }
-        long total = delegatorRepository.countByValidator(validatorAddress);
         List<DelegatorsResponse> responses = Lists.newArrayList();
-        if (total > 0) {
-            ValidatorResponse validatorResponse = validatorService.validatorInfo(entityId, validatorAddress);
-            PageRequest pageRequest = PageRequest.of(page - 1, size);
-            Page<Delegator> delegators = delegatorRepository.findByValidator(validatorAddress, pageRequest);
-            for (Delegator delegator : delegators) {
-                DelegatorsResponse response = new DelegatorsResponse();
-                response.setEntityId(delegator.getDelegator());
-                response.setAddress(delegator.getDelegator());
-
-                double totalShares = Double.parseDouble(validatorResponse.getTotalShares());
-                double escrow = Double.parseDouble(validatorResponse.getEscrow());
-                double shares = Double.parseDouble(Texts.formatDecimals(delegator.getShares(), Constants.DECIMALS, 2));
-                //tokens = shares * balance / total_shares
-                double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 2);
-                double percent = Numeric.divide(shares, totalShares, 4);
-
-                response.setAmount(Numeric.formatDouble(amount));
-                response.setShares(Numeric.formatDouble(shares));
-                response.setPercent(percent);
-                response.setSelf(delegator.getDelegator().equals(validatorAddress));
-
-                responses.add(response);
+        long total = 0;
+        try {
+            if (Texts.isBlank(validatorAddress)) {
+                validatorAddress = apiClient.pubkeyToBech32Address(entityId);
+                if (Texts.isBlank(validatorAddress)) {
+                    throw new RuntimeException(String.format("address parse failed, %s", entityId));
+                }
             }
+            total = delegatorRepository.countByValidator(validatorAddress);
+            if (total > 0) {
+                ValidatorResponse validatorResponse = validatorService.validatorInfo(entityId, validatorAddress);
+                PageRequest pageRequest = PageRequest.of(page - 1, size);
+                Page<Delegator> delegators = delegatorRepository.findByValidator(validatorAddress, pageRequest);
+                for (Delegator delegator : delegators) {
+                    DelegatorsResponse response = new DelegatorsResponse();
+                    response.setEntityId(delegator.getDelegator());
+                    response.setAddress(delegator.getDelegator());
 
-            Comparator<DelegatorsResponse> comparator = (c1, c2) -> Double.compare(Double.parseDouble(c2.getShares()), Double.parseDouble(c1.getShares()));
-            responses.sort(comparator);
+                    double totalShares = Double.parseDouble(validatorResponse.getTotalShares());
+                    double escrow = Double.parseDouble(validatorResponse.getEscrow());
+                    double shares = Double.parseDouble(Texts.formatDecimals(delegator.getShares(), Constants.DECIMALS, 2));
+                    //tokens = shares * balance / total_shares
+                    double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 2);
+                    double percent = Numeric.divide(shares, totalShares, 4);
+
+                    response.setAmount(Numeric.formatDouble(amount));
+                    response.setShares(Numeric.formatDouble(shares));
+                    response.setPercent(percent);
+                    response.setSelf(delegator.getDelegator().equals(validatorAddress));
+
+                    responses.add(response);
+                }
+
+                Comparator<DelegatorsResponse> comparator = (c1, c2) -> Double.compare(Double.parseDouble(c2.getShares()), Double.parseDouble(c1.getShares()));
+                responses.sort(comparator);
+            }
+        } catch (Exception e) {
+            log.error("", e);
         }
         return ApiResult.page(responses, page, size, total);
     }

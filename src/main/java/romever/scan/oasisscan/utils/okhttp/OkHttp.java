@@ -15,6 +15,7 @@ import romever.scan.oasisscan.utils.Mappers;
 import javax.net.ssl.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class OkHttp {
     private static final int WRITE_TIMEOUT = 30;
     private static final int READ_TIMEOUT = 30;
 
-//    private static OkHttpClient client = getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);
+    //    private static OkHttpClient client = getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);
     private boolean del = false;
     private OkHttpClient client;
 
@@ -142,10 +143,12 @@ public class OkHttp {
         this.post = true;
         return this;
     }
+
     public OkHttp get() {
         this.post = false;
         return this;
     }
+
     public OkHttp del() {
         this.del = true;
         return this;
@@ -294,7 +297,7 @@ public class OkHttp {
         return this;
     }
 
-    public <T> T exec(TypeReference<T> typeReference) {
+    public <T> T exec(TypeReference<T> typeReference) throws IOException {
         String content = exec();
         if (StringUtils.isEmpty(content)) {
             return null;
@@ -303,7 +306,7 @@ public class OkHttp {
 
     }
 
-    public <T> T exec(TypeReference<T> typeReference, boolean fail) {
+    public <T> T exec(TypeReference<T> typeReference, boolean fail) throws IOException {
         String content = exec(fail);
         if (StringUtils.isEmpty(content)) {
             return null;
@@ -319,7 +322,7 @@ public class OkHttp {
      * @param <T>
      * @return
      */
-    public <T> T exec(Class<T> c) {
+    public <T> T exec(Class<T> c) throws IOException {
         String content = exec();
         if (StringUtils.isEmpty(content)) {
             return null;
@@ -328,7 +331,7 @@ public class OkHttp {
         return op.get();
     }
 
-    public <T> T exec(Class<T> c, boolean fail) {
+    public <T> T exec(Class<T> c, boolean fail) throws IOException {
         String content = exec(fail);
         if (StringUtils.isEmpty(content)) {
             return null;
@@ -359,7 +362,7 @@ public class OkHttp {
         return null;
     }
 
-    public String exec() {
+    public String exec() throws IOException {
         perpare();
 
         request = builder.build();
@@ -382,7 +385,7 @@ public class OkHttp {
 
     }
 
-    public String exec(boolean fail) {
+    public String exec(boolean fail) throws IOException {
         perpare();
 
         request = builder.build();
@@ -421,16 +424,16 @@ public class OkHttp {
                 builder.post(formBody.build());
             }
         }
-        if(del){
+        if (del) {
             if (!StringUtils.isEmpty(requestBody)) {
                 builder.delete(requestBody);
-            } else{
+            } else {
                 builder.delete();
             }
         }
     }
 
-    private String execute(boolean fail) {
+    private String execute(boolean fail) throws IOException {
         Call call = client.newCall(request);
         try (Response response = call.execute()) {
             setResponse(response);
@@ -446,8 +449,9 @@ public class OkHttp {
         } catch (IOException e) {
             log.error("request {} {} {}", request.url().toString(), request.headers().toString(), request.body() !=
                     null ? request.body().toString() : null, e);
+            throw e;
         }
-        return "";
+//        return "";
     }
 
     private void execute(Callback callback) {

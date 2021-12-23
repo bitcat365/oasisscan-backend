@@ -9,6 +9,8 @@ import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.service.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.io.IOException;
+
 @Slf4j
 @RestController
 @RequestMapping("/chain")
@@ -140,7 +142,7 @@ public class ChainController {
 
     @ApiIgnore
     @GetMapping("/sync/block")
-    public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) {
+    public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) throws IOException {
         scanChainService.syncBlock(start, end, true);
         return ApiResult.ok();
     }

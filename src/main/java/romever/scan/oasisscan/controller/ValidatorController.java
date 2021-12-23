@@ -8,6 +8,8 @@ import romever.scan.oasisscan.service.ScanValidatorService;
 import romever.scan.oasisscan.service.ValidatorService;
 import romever.scan.oasisscan.vo.SortEnum;
 
+import java.io.IOException;
+
 @Slf4j
 @RestController
 @RequestMapping("/validator")
@@ -20,7 +22,7 @@ public class ValidatorController {
     private ScanValidatorService scanValidatorService;
 
     @GetMapping("/network")
-    public ApiResult network() {
+    public ApiResult network() throws IOException {
         return ApiResult.ok(validatorService.networkInfo());
     }
 
@@ -29,7 +31,7 @@ public class ValidatorController {
             @RequestParam(value = "orderBy", required = false, defaultValue = "escrow") String orderBy,
             @RequestParam(value = "sort", required = false, defaultValue = "desc") String sort,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "pageSize", required = false, defaultValue = "300") int pageSize) {
+            @RequestParam(value = "pageSize", required = false, defaultValue = "300") int pageSize) throws IOException {
         SortEnum sortEnum = SortEnum.getEnumByCode(orderBy);
         return ApiResult.ok(validatorService.validators(sortEnum, sort, page, pageSize));
     }
@@ -44,7 +46,7 @@ public class ValidatorController {
     @GetMapping("/info")
     public ApiResult validatorInfo(
             @RequestParam(value = "entityId", required = false) String entityId,
-            @RequestParam(value = "address", required = false) String address) {
+            @RequestParam(value = "address", required = false) String address) throws IOException {
         return ApiResult.ok(validatorService.validatorInfo(entityId, address));
     }
 

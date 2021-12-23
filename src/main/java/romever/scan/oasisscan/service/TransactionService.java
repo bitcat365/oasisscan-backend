@@ -331,10 +331,14 @@ public class TransactionService {
 
     public AccountSimple accountInfo(String address, Long height) {
         AccountSimple response = null;
-        AccountInfo accountInfo = apiClient.accountInfo(address, height);
-        if (accountInfo != null) {
-            response = AccountSimple.of(accountInfo);
-            response.setAddress(address);
+        try {
+            AccountInfo accountInfo = apiClient.accountInfo(address, height);
+            if (accountInfo != null) {
+                response = AccountSimple.of(accountInfo);
+                response.setAddress(address);
+            }
+        } catch (Exception e) {
+            log.error("", e);
         }
         return response;
     }

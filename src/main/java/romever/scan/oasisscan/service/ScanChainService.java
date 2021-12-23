@@ -72,7 +72,7 @@ public class ScanChainService {
 
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 5 * 1000)
-    public void scanBlock() {
+    public void scanBlock() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -89,7 +89,7 @@ public class ScanChainService {
         }
     }
 
-    public long syncBlock(long start, long end, boolean fix) {
+    public long syncBlock(long start, long end, boolean fix) throws IOException {
         if (start > end) {
             return start;
         }
@@ -227,7 +227,7 @@ public class ScanChainService {
         return start;
     }
 
-    private void updateAccountInfo(Transaction tx) {
+    private void updateAccountInfo(Transaction tx) throws IOException {
         String method = tx.getMethod();
         MethodEnum methodEnum = MethodEnum.getEnumByName(method);
         Transaction.Body body = tx.getBody();
@@ -261,7 +261,7 @@ public class ScanChainService {
         }
     }
 
-    private void updateAccountInfo(String address) {
+    private void updateAccountInfo(String address) throws IOException {
         AccountInfo accountInfo = apiClient.accountInfo(address, null);
         Account account = scanValidatorService.getAccount(address, accountInfo);
         accountRepository.save(account);

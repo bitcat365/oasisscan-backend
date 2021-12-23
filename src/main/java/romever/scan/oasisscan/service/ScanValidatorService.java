@@ -219,7 +219,7 @@ public class ScanValidatorService {
      * Sync entity and node relation from oasis api
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    public void syncEntityNode() {
+    public void syncEntityNode() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -251,7 +251,7 @@ public class ScanValidatorService {
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 60 * 1000)
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
-    public void syncValidatorInfo() {
+    public void syncValidatorInfo() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -327,7 +327,7 @@ public class ScanValidatorService {
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
-    public void saveValidator(long dbHeight, List<Node> nodes, RegistryGenesis registryGenesis) {
+    public void saveValidator(long dbHeight, List<Node> nodes, RegistryGenesis registryGenesis) throws IOException {
         List<ValidatorConsensus> consensusList = Lists.newArrayList();
         List<ValidatorInfo> validatorInfoList = Lists.newArrayList();
         Map<String, NodeStatus> nodeStatus = registryGenesis.getNode_statuses();
@@ -390,7 +390,7 @@ public class ScanValidatorService {
     }
 
     @Scheduled(fixedDelay = 60 * 1000, initialDelay = 15 * 1000)
-    public void syncGenesis() {
+    public void syncGenesis() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -406,7 +406,7 @@ public class ScanValidatorService {
     }
 
     @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 5 * 1000)
-    public void syncEscrowStats() {
+    public void syncEscrowStats() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -617,7 +617,7 @@ public class ScanValidatorService {
         return height;
     }
 
-    public String getEscrowByHeight(String address, Long height) {
+    public String getEscrowByHeight(String address, Long height) throws IOException {
         String ret = null;
         AccountInfo accountInfo = apiClient.accountInfo(address, height);
         if (accountInfo != null) {

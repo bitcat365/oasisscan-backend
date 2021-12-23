@@ -199,79 +199,83 @@ public class RuntimeService {
         ListRuntimeStatsResponse listResponse = new ListRuntimeStatsResponse();
         List<RuntimeStatsResponse> responses = Lists.newArrayList();
         listResponse.setList(responses);
-        List<String> entities = runtimeNodeRepository.entities(runtimeId);
-        if (CollectionUtils.isEmpty(entities)) {
-            return listResponse;
-        }
-
-        List<Node> nodes = apiClient.registryNodes(null);
-        if (CollectionUtils.isEmpty(nodes)) {
-            return listResponse;
-        }
-        Set<String> onlineNodeSet = Sets.newHashSet();
-        for (Node node : nodes) {
-            onlineNodeSet.add(node.getEntity_id());
-        }
-
-        RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
-        int online = 0;
-        for (String entity : entities) {
-            RuntimeStatsResponse response = new RuntimeStatsResponse();
-            response.setEntityId(entity);
-            //info
-            Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(entity);
-            String address = null;
-            boolean validator = false;
-            if (optionalValidatorInfo.isPresent()) {
-                ValidatorInfo info = optionalValidatorInfo.get();
-                response.setName(info.getName());
-                response.setIcon(info.getIcon());
-                address = info.getEntityAddress();
-                validator = true;
+        try {
+            List<String> entities = runtimeNodeRepository.entities(runtimeId);
+            if (CollectionUtils.isEmpty(entities)) {
+                return listResponse;
             }
 
-            if (Texts.isBlank(address)) {
-                address = apiClient.pubkeyToBech32Address(entity);
+            List<Node> nodes = apiClient.registryNodes(null);
+            if (CollectionUtils.isEmpty(nodes)) {
+                return listResponse;
             }
-            response.setAddress(address);
-            response.setValidator(validator);
-            if (onlineNodeSet.contains(entity)) {
-                online++;
-                response.setStatus(onlineNodeSet.contains(entity));
+            Set<String> onlineNodeSet = Sets.newHashSet();
+            for (Node node : nodes) {
+                onlineNodeSet.add(node.getEntity_id());
             }
 
-            //stats
-            List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
-            Map<String, Long> statsMap = Maps.newLinkedHashMap();
-            for (RuntimeStatsType type : types) {
-                statsMap.put(type.name().toLowerCase(), 0L);
-            }
-            if (!CollectionUtils.isEmpty(statsInfoList)) {
-                for (RuntimeStatsInfo info : statsInfoList) {
-                    for (RuntimeStatsType type : types) {
-                        if (type == info.getStatsType()) {
-                            statsMap.put(type.name().toLowerCase(), info.getCount());
-                            break;
+            RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();
+            int online = 0;
+            for (String entity : entities) {
+                RuntimeStatsResponse response = new RuntimeStatsResponse();
+                response.setEntityId(entity);
+                //info
+                Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(entity);
+                String address = null;
+                boolean validator = false;
+                if (optionalValidatorInfo.isPresent()) {
+                    ValidatorInfo info = optionalValidatorInfo.get();
+                    response.setName(info.getName());
+                    response.setIcon(info.getIcon());
+                    address = info.getEntityAddress();
+                    validator = true;
+                }
+
+                if (Texts.isBlank(address)) {
+                    address = apiClient.pubkeyToBech32Address(entity);
+                }
+                response.setAddress(address);
+                response.setValidator(validator);
+                if (onlineNodeSet.contains(entity)) {
+                    online++;
+                    response.setStatus(onlineNodeSet.contains(entity));
+                }
+
+                //stats
+                List<RuntimeStatsInfo> statsInfoList = runtimeStatsInfoRepository.findByRuntimeIdAndEntityId(runtimeId, entity);
+                Map<String, Long> statsMap = Maps.newLinkedHashMap();
+                for (RuntimeStatsType type : types) {
+                    statsMap.put(type.name().toLowerCase(), 0L);
+                }
+                if (!CollectionUtils.isEmpty(statsInfoList)) {
+                    for (RuntimeStatsInfo info : statsInfoList) {
+                        for (RuntimeStatsType type : types) {
+                            if (type == info.getStatsType()) {
+                                statsMap.put(type.name().toLowerCase(), info.getCount());
+                                break;
+                            }
                         }
                     }
                 }
+                response.setStats(statsMap);
+                responses.add(response);
             }
-            response.setStats(statsMap);
-            responses.add(response);
+            responses.sort((r1, r2) -> {
+                Map<String, Long> map1 = r1.getStats();
+                Map<String, Long> map2 = r2.getStats();
+                long count1 = map1.get(types[sort].name().toLowerCase());
+                long count2 = map2.get(types[sort].name().toLowerCase());
+                if (count1 == count2) {
+                    return r1.getEntityId().compareTo(r2.getEntityId());
+                }
+                return (int) (map2.get(types[sort].name().toLowerCase()) - map1.get(types[sort].name().toLowerCase()));
+            });
+            listResponse.setList(responses);
+            listResponse.setOnline(online);
+            listResponse.setOffline(responses.size() - online);
+        } catch (Exception e) {
+            log.error("", e);
         }
-        responses.sort((r1, r2) -> {
-            Map<String, Long> map1 = r1.getStats();
-            Map<String, Long> map2 = r2.getStats();
-            long count1 = map1.get(types[sort].name().toLowerCase());
-            long count2 = map2.get(types[sort].name().toLowerCase());
-            if (count1 == count2) {
-                return r1.getEntityId().compareTo(r2.getEntityId());
-            }
-            return (int) (map2.get(types[sort].name().toLowerCase()) - map1.get(types[sort].name().toLowerCase()));
-        });
-        listResponse.setList(responses);
-        listResponse.setOnline(online);
-        listResponse.setOffline(responses.size() - online);
         return listResponse;
     }
 

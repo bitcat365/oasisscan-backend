@@ -77,7 +77,7 @@ public class ScanRuntimeService {
      * Get all runtimes info and save in elasticsearch
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
-    public void scanRuntime() {
+    public void scanRuntime() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -160,7 +160,7 @@ public class ScanRuntimeService {
      * See https://github.com/oasisprotocol/tools/tree/main/runtime-stats
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
-    public void scanRuntimeStats() {
+    public void scanRuntimeStats() throws IOException {
         if (applicationConfig.isLocal()) {
             return;
         }

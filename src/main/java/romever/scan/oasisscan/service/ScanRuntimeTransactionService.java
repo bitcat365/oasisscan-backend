@@ -249,22 +249,13 @@ public class ScanRuntimeTransactionService {
 
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
 
-            if (scanRound % 100 == 0) {
-                //save scan height
-                Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (optionalRuntime.isPresent()) {
-                    Runtime runtime = optionalRuntime.get();
-                    runtime.setScanTxHeight(scanRound);
-                    runtimeRepository.saveAndFlush(runtime);
-                }
+            //save scan height
+            Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+            if (optionalRuntime.isPresent()) {
+                Runtime runtime = optionalRuntime.get();
+                runtime.setScanTxHeight(scanRound);
+                runtimeRepository.saveAndFlush(runtime);
             }
-        }
-        //save scan height
-        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-        if (optionalRuntime.isPresent()) {
-            Runtime runtime = optionalRuntime.get();
-            runtime.setScanTxHeight(scanRound);
-            runtimeRepository.saveAndFlush(runtime);
         }
     }
 

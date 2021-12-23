@@ -247,14 +247,14 @@ public class ScanRuntimeTransactionService {
                 }
             }
 
-            //save scan height
-            Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-            if (optionalRuntime.isPresent()) {
-                Runtime runtime = optionalRuntime.get();
-                runtime.setScanTxHeight(scanRound);
-                runtimeRepository.save(runtime);
-            }
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
+        }
+        //save scan height
+        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+        if (optionalRuntime.isPresent()) {
+            Runtime runtime = optionalRuntime.get();
+            runtime.setScanTxHeight(scanRound);
+            runtimeRepository.saveAndFlush(runtime);
         }
     }
 

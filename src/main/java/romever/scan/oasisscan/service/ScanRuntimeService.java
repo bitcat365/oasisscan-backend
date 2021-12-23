@@ -144,15 +144,28 @@ public class ScanRuntimeService {
                 String id = header.getNamespace() + "_" + header.getRound();
                 JestDao.index(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), Mappers.map(header), id);
                 log.info("Runtime round sync done. {} [{}]", scanHeight, id);
-                Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (!optionalRuntime.isPresent()) {
-                    throw new RuntimeException("Runtime db read error.");
+
+                if(scanHeight % 100 == 0){
+                    //save scan height
+                    Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                    if (!optionalRuntime.isPresent()) {
+                        throw new RuntimeException("Runtime db read error.");
+                    }
+                    romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
+                    _runtime.setScanRoundHeight(scanHeight);
+                    runtimeRepository.saveAndFlush(_runtime);
                 }
-                romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
-                _runtime.setScanRoundHeight(scanHeight);
-                runtimeRepository.saveAndFlush(_runtime);
                 scanHeight++;
             }
+
+            //save scan height
+            Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+            if (!optionalRuntime.isPresent()) {
+                throw new RuntimeException("Runtime db read error.");
+            }
+            romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
+            _runtime.setScanRoundHeight(scanHeight);
+            runtimeRepository.saveAndFlush(_runtime);
         }
     }
 

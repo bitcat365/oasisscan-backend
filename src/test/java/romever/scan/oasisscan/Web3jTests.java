@@ -21,7 +21,7 @@ public class Web3jTests {
     @Test
     public void test1() throws IOException {
 //        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
-        String s = "YWNjb3VudHMAAAAB";
+        String s = "YWNjb3VudHMAAAAD";
         System.out.println(Texts.base64ToHex(s));
         System.out.println(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64("FNESDXsWAAA=")), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
 //        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
@@ -35,7 +35,7 @@ public class Web3jTests {
     }
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "o2J0b1UA9e8Nj24nfxIVJ2fyTJBk5LsVE4FkZnJvbVUAJwu0GyGMNH+O/5E6oMwRBLI+bxVmYW1vdW50gkBA";
+        String code = "gaRidG9VAMvEOZyMfMLfDuYKdWMBu15CkA2pZGZyb21VAO1D91JQJv1Tegv1JEiLfFSfA5glZW5vbmNlF2ZhbW91bnSCSBTREg17FgAAQA==";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);

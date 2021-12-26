@@ -64,7 +64,7 @@ public class ScanRuntimeTransactionService {
      * Currently only scan emerald transactions
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanTransaction() throws IOException {
         if (applicationConfig.isLocal()) {
             return;

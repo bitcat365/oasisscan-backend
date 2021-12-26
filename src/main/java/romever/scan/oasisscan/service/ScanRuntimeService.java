@@ -103,7 +103,7 @@ public class ScanRuntimeService {
      * Scan runtimes round and save in elasticsearch
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanRuntimeRound() throws IOException {
         if (applicationConfig.isLocal()) {
             return;

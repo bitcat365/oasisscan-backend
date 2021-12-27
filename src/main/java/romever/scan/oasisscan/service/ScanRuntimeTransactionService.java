@@ -395,7 +395,7 @@ public class ScanRuntimeTransactionService {
     }
 
     private Long getScanEventRound(String runtimeId) {
-        Long storeHeight = null;
+        Long storeHeight = 0L;
         String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
         Optional<SystemProperty> optionalSystemProperty = systemPropertyRepository.findByProperty(property);
         if (optionalSystemProperty.isPresent()) {

@@ -459,7 +459,15 @@ public class RuntimeService {
                     if (eventES != null) {
                         List<EventLog> logs = eventES.getLogs();
                         if (CollectionUtils.isEmpty(logs)) {
-                            continue;
+                            return null;
+                        }
+                        String typeHex = eventES.getType();
+                        if (typeHex.contains(Constants.RUNTIME_TX_DEPOSIT_HEX)) {
+                            eventES.setType("deposit");
+                        } else if (typeHex.contains(Constants.RUNTIME_TX_WITHDRAW_HEX)) {
+                            eventES.setType("withdraw");
+                        } else {
+                            return null;
                         }
                         for (EventLog eventLog : logs) {
                             List<String> hexAmounts = eventLog.getAmount();

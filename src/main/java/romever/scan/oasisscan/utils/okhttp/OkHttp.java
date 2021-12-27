@@ -45,13 +45,17 @@ public class OkHttp {
     private Headers responseHeaders;
     private Response response;
 
-    private static final int CONN_TIMEOUT = 30;
-    private static final int WRITE_TIMEOUT = 30;
-    private static final int READ_TIMEOUT = 30;
+    private static final int CONN_TIMEOUT = 10;
+    private static final int WRITE_TIMEOUT = 10;
+    private static final int READ_TIMEOUT = 10;
+    public static final int MAX_IDLE_CONNECTIONS = 50;
 
     //    private static OkHttpClient client = getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);
     private boolean del = false;
     private OkHttpClient client;
+
+    private static OkHttpClient httpsClient = getOkHttpsClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, MAX_IDLE_CONNECTIONS);
+    private static OkHttpClient httpClient = getUnsafeOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, MAX_IDLE_CONNECTIONS, 60 * 30);
 
     public static OkHttp of(String url) {
         return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, false);
@@ -96,9 +100,9 @@ public class OkHttp {
         }
 
         if (unsafe) {
-            okHttp.setClient(getUnsafeOkHttpClient());
+            okHttp.setClient(httpClient);
         } else {
-            okHttp.setClient(getOkHttpClient(connTimeout, writeTimeout, readTimeout));
+            okHttp.setClient(httpsClient);
         }
 
         // OkHttpClient client = getOkHttpClient(connTimeout, writeTimeout, readTimeout);
@@ -116,10 +120,10 @@ public class OkHttp {
         return null;
     }
 
-    public static OkHttpClient getOkHttpClient(int connTimeout, int writeTimeout, int readTimeout) {
+    public static OkHttpClient getOkHttpsClient(int connTimeout, int writeTimeout, int readTimeout, int maxIdleConnections) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder().retryOnConnectionFailure(true)
                 .connectTimeout(connTimeout, TimeUnit.SECONDS).writeTimeout(writeTimeout, TimeUnit.SECONDS)
-                .readTimeout(readTimeout, TimeUnit.SECONDS).connectionPool(new ConnectionPool(50, 5, TimeUnit.SECONDS))
+                .readTimeout(readTimeout, TimeUnit.SECONDS).connectionPool(new ConnectionPool(maxIdleConnections, 60 * 30, TimeUnit.SECONDS))
                 .addInterceptor(new LoggingInterceptor.Builder().loggable(true).log(Platform.INFO).request("OkHttp")
                         .response("OkHttp")
                         // .addQueryParam("query", "0")
@@ -128,10 +132,6 @@ public class OkHttp {
         OkHttpClient okHttpClient = builder.build();
         // new RetryAndFollowUpInterceptor(okHttpClient,false);
         return okHttpClient;
-    }
-
-    public static OkHttpClient getOkHttpClient() {
-        return getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);
     }
 
     /**
@@ -460,7 +460,7 @@ public class OkHttp {
 
     }
 
-    private static OkHttpClient getUnsafeOkHttpClient() {
+    private static OkHttpClient getUnsafeOkHttpClient(int connTimeout, int writeTimeout, int readTimeout, int maxIdleConnections, int keepAliveDuration) {
         try {
             // Create a trust manager that does not validate certificate chains
             final TrustManager[] trustAllCerts = new TrustManager[]{
@@ -486,7 +486,15 @@ public class OkHttp {
             // Create an ssl socket factory with our all-trusting manager
             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+//            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            OkHttpClient.Builder builder = new OkHttpClient.Builder().retryOnConnectionFailure(true)
+                    .connectTimeout(connTimeout, TimeUnit.SECONDS).writeTimeout(writeTimeout, TimeUnit.SECONDS)
+                    .readTimeout(readTimeout, TimeUnit.SECONDS).connectionPool(new ConnectionPool(maxIdleConnections, keepAliveDuration, TimeUnit.SECONDS))
+                    .addInterceptor(new LoggingInterceptor.Builder().loggable(true).log(Platform.INFO).request("OkHttp")
+                            .response("OkHttp")
+                            // .addQueryParam("query", "0")
+                            // .executor(Executors.newSingleThreadExecutor())
+                            .build());
             builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
             builder.hostnameVerifier(new HostnameVerifier() {
                 @Override

@@ -397,7 +397,9 @@ public class RuntimeService {
 
                             //find events
                             RuntimeEventES eventES = findEvents(ctx.getFrom(), ctx.getNonce());
-                            response.setEvents(Lists.newArrayList(eventES));
+                            if (eventES != null) {
+                                response.setEvents(Lists.newArrayList(eventES));
+                            }
 
 //                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
 //                            if (!CollectionUtils.isEmpty(events)) {

@@ -407,7 +407,7 @@ public class ScanRuntimeTransactionService {
     private void saveScanEventRound(String runtimeId, long round) {
         String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
         SystemProperty systemProperty = systemPropertyRepository.findByProperty(property).orElse(new SystemProperty());
-        systemProperty.setProperty(Constants.SCAN_HEIGHT_PROPERTY);
+        systemProperty.setProperty(property);
         systemProperty.setValue(String.valueOf(round));
         systemPropertyRepository.saveAndFlush(systemProperty);
     }

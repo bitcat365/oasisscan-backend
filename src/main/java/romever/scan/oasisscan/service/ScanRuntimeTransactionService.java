@@ -265,7 +265,7 @@ public class ScanRuntimeTransactionService {
     }
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
-//    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanEvents() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
@@ -376,7 +376,7 @@ public class ScanRuntimeTransactionService {
             if (optionalRuntime.isPresent()) {
                 Runtime runtime = optionalRuntime.get();
                 runtime.setScanRoundHeight(scanRound);
-                runtimeRepository.saveAndFlush(runtime);
+                runtimeRepository.save(runtime);
             }
 
             log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, eventMap.size()));

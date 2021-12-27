@@ -265,7 +265,7 @@ public class ScanRuntimeTransactionService {
     }
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
+//    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanEvents() throws Exception {
         if (applicationConfig.isLocal()) {
             return;

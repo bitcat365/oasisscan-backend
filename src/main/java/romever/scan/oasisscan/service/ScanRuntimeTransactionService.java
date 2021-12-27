@@ -98,7 +98,7 @@ public class ScanRuntimeTransactionService {
                 if (optionalRuntime.isPresent()) {
                     Runtime runtime = optionalRuntime.get();
                     runtime.setScanTxHeight(scanRound);
-                    runtimeRepository.saveAndFlush(runtime);
+                    runtimeRepository.save(runtime);
                 }
                 log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, 0));
                 continue;
@@ -255,7 +255,7 @@ public class ScanRuntimeTransactionService {
             if (optionalRuntime.isPresent()) {
                 Runtime runtime = optionalRuntime.get();
                 runtime.setScanTxHeight(scanRound);
-                runtimeRepository.saveAndFlush(runtime);
+                runtimeRepository.save(runtime);
             }
 
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));

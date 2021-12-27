@@ -454,6 +454,23 @@ public class RuntimeService {
                 for (SearchHit hit : searchHits) {
                     eventES = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeEventES>() {
                     });
+                    if (eventES != null) {
+                        List<EventLog> logs = eventES.getLogs();
+                        if (CollectionUtils.isEmpty(logs)) {
+                            continue;
+                        }
+                        for (EventLog eventLog : logs) {
+                            List<String> hexAmounts = eventLog.getAmount();
+                            List<String> numberAmounts = Lists.newArrayList();
+                            if (!CollectionUtils.isEmpty(hexAmounts)) {
+                                String amount = hexAmounts.get(0);
+                                if (Texts.isNotBlank(amount)) {
+                                    numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+                                }
+                            }
+                            eventLog.setAmount(numberAmounts);
+                        }
+                    }
                 }
             }
         } catch (Exception e) {

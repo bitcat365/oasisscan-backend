@@ -446,7 +446,7 @@ public class RuntimeService {
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
             searchSourceBuilder.size(1);
-            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), searchSourceBuilder);
             if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
                 SearchHits hits = searchResponse.getHits();
                 SearchHit[] searchHits = hits.getHits();

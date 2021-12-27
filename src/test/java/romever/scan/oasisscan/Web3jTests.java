@@ -4,24 +4,32 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Test;
 import org.web3j.crypto.*;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import romever.scan.oasisscan.common.Constants;
+import romever.scan.oasisscan.common.client.ApiClient;
+import romever.scan.oasisscan.common.exception.AddressFormatException;
+import romever.scan.oasisscan.utils.Numeric;
+import romever.scan.oasisscan.utils.crypto.Bech32;
+import romever.scan.oasisscan.utils.crypto.ConvertBits;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.EventLog;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.List;
+
+import static org.bitcoinj.core.ECKey.CURVE;
 
 public class Web3jTests {
 
     @Test
     public void test1() throws IOException {
 //        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
-        String s = "YWNjb3VudHMAAAAD";
+        String s = "ZXZtAAAAAQ==";
         System.out.println(Texts.base64ToHex(s));
         System.out.println(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64("FNESDXsWAAA=")), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
 //        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
@@ -34,12 +42,82 @@ public class Web3jTests {
         System.out.println(address);
     }
 
+    @Test
+    public void test2() throws IOException {
+        ApiClient apiClient = new ApiClient("http://135.181.112.38:9180", "oasisscan_testnet");
+        String address = apiClient.base64ToBech32Address("ANJ3lLMjzUOc99mE5+BiZPLvCMYs");
+        System.out.println(address);
+    }
+
+    @Test
+    public void bech32() throws IOException {
+        String hexCompressed = Texts.base64ToHex("AhMWP64MyA5vN7TUeGXNuPTSepI5C8L7s2S3F6bfrk/e");
+        System.out.println(hexCompressed);
+        byte[] c = Texts.hexStringToByteArray(hexCompressed);
+        Bech32.Bech32Data data = Bech32.decode("oasis1qpl202ahu2r7fk76vzwsn644dv25n84c8yxttegj");
+        System.out.println(Texts.toHex(data.getData()));
+
+        String a = "93f198121A048f8f917bCEf9ee492d1aBbA0D020";
+
+
+        String V0_SECP256K1ETH_CONTEXT_IDENTIFIER = "oasis-runtime-sdk/address: secp256k1eth";
+
+        byte[] aa = Texts.concat(V0_SECP256K1ETH_CONTEXT_IDENTIFIER.getBytes(StandardCharsets.UTF_8), new byte[]{0});
+        byte[] aaa = Texts.concat(aa, a.getBytes(StandardCharsets.UTF_8));
+
+        byte[] r = Texts.slice(Texts.hexStringToByteArray(Texts.sha512_256(aaa)), 0, 20);
+        byte[] address = Texts.concat(new byte[]{0}, r);
+
+        String bech32Address = Bech32.encode("oasis", encode(address));
+        System.out.println(bech32Address);
+
+    }
+
+    public static String createNewAddressSecp256k1(String mainPrefix, byte[] publickKey) {
+        // convert 33 bytes public key to 65 bytes public key
+
+        String addressResult = null;
+        try {
+            byte[] uncompressedPubKey = CURVE.getCurve().decodePoint(publickKey).getEncoded(false);
+            byte[] pub = new byte[64];
+            // truncate last 64 bytes to generate address
+            System.arraycopy(uncompressedPubKey, 1, pub, 0, 64);
+
+            //get address
+            byte[] address = Keys.getAddress(pub);
+            byte[] bytes = encode(address);
+            addressResult = Bech32.encode(mainPrefix, bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return addressResult;
+    }
+
+    public static String convertAddressFromHexToBech32(String hexAddress) {
+        byte[] address = Texts.hexStringToByteArray(hexAddress);
+
+        String bech32Address = null;
+        try {
+            byte[] bytes = encode(address);
+            bech32Address = Bech32.encode("oasis", bytes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return bech32Address;
+    }
+
+    public static byte[] encode(byte[] witnessProgram) throws AddressFormatException {
+        byte[] convertedProgram = ConvertBits.convertBits(witnessProgram, 0, witnessProgram.length, 8, 5, true);
+        return convertedProgram;
+    }
+
+
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gaRidG9VAMvEOZyMfMLfDuYKdWMBu15CkA2pZGZyb21VAO1D91JQJv1Tegv1JEiLfFSfA5glZW5vbmNlF2ZhbW91bnSCSBTREg17FgAAQA==";
+        String code = "gaNkZGF0YVgg//////////////////////////////////////////9mdG9waWNzg1ggjFvh5evsfVvRT3FCfR6E890DFMD3sikeWyAKyMfDuSVYIAAAAAAAAAAAAAAAAJEi5WGirclpK4PPuJe1s4Fbssg8WCAAAAAAAAAAAAAAAABlsPUmDLSXzjRPOShsQmApBgU05WdhZGRyZXNzVL5HV9RiPlMvRN3cMlNOFmNeH55b";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);
-        List<AbstractRuntimeTransaction.EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
+        List<EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<EventLog>>() {
         });
         System.out.println(eventLogs);
 

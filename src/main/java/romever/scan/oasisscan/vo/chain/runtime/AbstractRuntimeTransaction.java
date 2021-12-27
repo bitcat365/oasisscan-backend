@@ -20,11 +20,4 @@ public abstract class AbstractRuntimeTransaction {
         private String type;
         private List<EventLog> logs;
     }
-
-    @Data
-    public static class EventLog {
-        private String from;
-        private String to;
-        private List<String> amount;
-    }
 }

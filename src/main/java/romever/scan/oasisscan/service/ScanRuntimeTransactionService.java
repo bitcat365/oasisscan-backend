@@ -81,12 +81,8 @@ public class ScanRuntimeTransactionService {
         }
 
         String runtimeId = emerald;
-        RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
-        if (runtimeState == null) {
-            return;
-        }
-
-        long currentRound = runtimeState.getLast_normal_round();
+        Long currentRound = getCurrentRound(runtimeId);
+        if (currentRound == null) return;
         Long scanRound = getScanRound(runtimeId);
         if (scanRound == null) {
             return;
@@ -181,10 +177,10 @@ public class ScanRuntimeTransactionService {
                     transaction.setMessage(resultJson.path(result).toString());
 
                     //events
-                    List<RuntimeTransactionWithResult.PlainEvent> events = r.getEvents();
+                    List<RuntimeEvent> events = r.getEvents();
                     if (!CollectionUtils.isEmpty(events) && !type.contains("evm.ethereum")) {
                         List<AbstractRuntimeTransaction.Event> runtimeEvents = Lists.newArrayList();
-                        for (RuntimeTransactionWithResult.PlainEvent event : events) {
+                        for (RuntimeEvent event : events) {
                             AbstractRuntimeTransaction.Event runtimeEvent = new AbstractRuntimeTransaction.Event();
                             String key = event.getKey();
                             String keyHex = Texts.base64ToHex(key);
@@ -197,18 +193,18 @@ public class ScanRuntimeTransactionService {
                             runtimeEvent.setType(eventType);
 
                             String value = event.getValue();
-                            List<AbstractRuntimeTransaction.EventLog> eventLogs = Lists.newArrayList();
+                            List<EventLog> eventLogs = Lists.newArrayList();
                             JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
                             });
                             if (eventJson.isArray()) {
-                                eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<AbstractRuntimeTransaction.EventLog>>() {
+                                eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<EventLog>>() {
                                 });
                             } else {
-                                eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<AbstractRuntimeTransaction.EventLog>() {
+                                eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<EventLog>() {
                                 }));
                             }
                             if (!CollectionUtils.isEmpty(eventLogs)) {
-                                for (AbstractRuntimeTransaction.EventLog log : eventLogs) {
+                                for (EventLog log : eventLogs) {
                                     String from = apiClient.base64ToBech32Address(log.getFrom());
                                     if (Texts.isBlank(from)) {
                                         throw new RuntimeException(String.format("address parse failed, %s", scanRound));
@@ -256,6 +252,131 @@ public class ScanRuntimeTransactionService {
             }
 
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
+        }
+    }
+
+    private Long getCurrentRound(String runtimeId) throws IOException {
+        RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
+        if (runtimeState == null) {
+            return null;
+        }
+
+        return runtimeState.getLast_normal_round();
+    }
+
+    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
+    public void scanEvents() throws Exception {
+        if (applicationConfig.isLocal()) {
+            return;
+        }
+
+        String emerald = null;
+        if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
+            emerald = "000000000000000000000000000000000000000000000000e2eaa99fc008f87f";
+        } else if ("test".equalsIgnoreCase(applicationConfig.getEnv())) {
+            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
+        } else if ("local".equalsIgnoreCase(applicationConfig.getEnv())) {
+            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
+        }
+        if (Texts.isBlank(emerald)) {
+            return;
+        }
+
+        String runtimeId = emerald;
+        Long currentRound = getCurrentRound(runtimeId);
+        if (currentRound == null) return;
+
+        Long scanRound = null;
+        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+        if (optionalRuntime.isPresent()) {
+            scanRound = optionalRuntime.get().getScanEventHeight();
+        } else {
+            return;
+        }
+
+        if (scanRound != 0) {
+            scanRound++;
+        }
+        for (; scanRound <= currentRound; scanRound++) {
+            List<RuntimeEvent> events = apiClient.runtimeEvent(runtimeId, scanRound);
+            if (CollectionUtils.isEmpty(events)) {
+                log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, 0));
+                continue;
+            }
+
+            Map<String, Map<String, Object>> eventMap = Maps.newHashMap();
+            for (int i = 0; i < events.size(); i++) {
+                RuntimeEvent event = events.get(i);
+                String key = event.getKey();
+                String keyHex = Texts.base64ToHex(key);
+                if (keyHex.equalsIgnoreCase(Constants.RUNTIME_EVENT_EVM_HEX)) {
+                    continue;
+                }
+                event.setKey(keyHex);
+
+                String value = event.getValue();
+                List<EventLog> eventLogs = Lists.newArrayList();
+                JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
+                });
+                if (eventJson.isArray()) {
+                    eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<EventLog>>() {
+                    });
+                } else {
+                    eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<EventLog>() {
+                    }));
+                }
+                if (!CollectionUtils.isEmpty(eventLogs)) {
+                    for (EventLog log : eventLogs) {
+                        if (Texts.isNotBlank(log.getFrom())) {
+                            String from = apiClient.base64ToBech32Address(log.getFrom());
+                            if (Texts.isBlank(from)) {
+                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            }
+                            log.setFrom(from);
+                        }
+                        if (Texts.isNotBlank(log.getTo())) {
+                            String to = apiClient.base64ToBech32Address(log.getTo());
+                            if (Texts.isBlank(to)) {
+                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            }
+                            log.setTo(to);
+                        }
+                        if (Texts.isNotBlank(log.getOwner())) {
+                            String owner = apiClient.base64ToBech32Address(log.getOwner());
+                            if (Texts.isBlank(owner)) {
+                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            }
+                            log.setOwner(owner);
+                        }
+                    }
+                }
+
+                RuntimeEventES eventES = new RuntimeEventES();
+                eventES.setType(event.getKey());
+                eventES.setTx_hash(event.getTx_hash());
+                eventES.setLogs(eventLogs);
+                String esId = runtimeId + "_" + scanRound + "_" + i;
+                eventMap.put(esId, Mappers.map(eventES));
+            }
+
+            if (!CollectionUtils.isEmpty(eventMap)) {
+                BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), eventMap);
+                for (BulkItemResponse bulkItemResponse : bulkResponse) {
+                    if (bulkItemResponse.isFailed()) {
+                        BulkItemResponse.Failure failure = bulkItemResponse.getFailure();
+                        log.error(failure.getMessage());
+                        throw failure.getCause();
+                    }
+                }
+            }
+
+            //save scan height
+            Runtime runtime = optionalRuntime.get();
+            runtime.setScanEventHeight(scanRound);
+            runtimeRepository.saveAndFlush(runtime);
+
+            log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, eventMap.size()));
         }
     }
 

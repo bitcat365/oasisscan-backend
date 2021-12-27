@@ -676,6 +676,7 @@ public abstract class Texts {
     }
 
     private static final ECParameterSpec SPEC = ECNamedCurveTable.getParameterSpec("secp256k1");
+
     public static byte[] compressedToUncompressed(byte[] compKey) throws IOException {
         ECPoint point = SPEC.getCurve().decodePoint(compKey);
         byte[] x = point.getXCoord().getEncoded();
@@ -688,5 +689,9 @@ public abstract class Texts {
         outputStream.write(a);
         outputStream.write(b);
         return outputStream.toByteArray();
+    }
+
+    public static byte[] slice(byte[] b, int from, int to) {
+        return Arrays.copyOfRange(b, 5, 10);
     }
 }

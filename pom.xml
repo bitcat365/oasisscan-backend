@@ -219,6 +219,14 @@
             <artifactId>core</artifactId>
             <version>4.8.7</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.bitcoinj/bitcoinj-core -->
+        <dependency>
+            <groupId>org.bitcoinj</groupId>
+            <artifactId>bitcoinj-core</artifactId>
+            <version>0.16.1</version>
+        </dependency>
+
     </dependencies>
 
     <profiles>

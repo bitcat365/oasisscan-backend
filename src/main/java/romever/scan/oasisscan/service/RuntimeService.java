@@ -39,6 +39,7 @@ import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.Node;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.EventLog;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
@@ -400,11 +401,11 @@ public class RuntimeService {
                             List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
                             if (!CollectionUtils.isEmpty(events)) {
                                 for (AbstractRuntimeTransaction.Event event : events) {
-                                    List<AbstractRuntimeTransaction.EventLog> logs = event.getLogs();
+                                    List<EventLog> logs = event.getLogs();
                                     if (CollectionUtils.isEmpty(logs)) {
                                         continue;
                                     }
-                                    for (AbstractRuntimeTransaction.EventLog eventLog : logs) {
+                                    for (EventLog eventLog : logs) {
                                         List<String> hexAmounts = eventLog.getAmount();
                                         List<String> numberAmounts = Lists.newArrayList();
                                         if (!CollectionUtils.isEmpty(hexAmounts)) {
@@ -470,11 +471,11 @@ public class RuntimeService {
                         List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
                         if (!CollectionUtils.isEmpty(events)) {
                             for (AbstractRuntimeTransaction.Event event : events) {
-                                List<AbstractRuntimeTransaction.EventLog> logs = event.getLogs();
+                                List<EventLog> logs = event.getLogs();
                                 if (CollectionUtils.isEmpty(logs)) {
                                     continue;
                                 }
-                                for (AbstractRuntimeTransaction.EventLog eventLog : logs) {
+                                for (EventLog eventLog : logs) {
                                     List<String> amounts = eventLog.getAmount();
                                     List<String> numberAmounts = Lists.newArrayList();
                                     if (!CollectionUtils.isEmpty(amounts)) {

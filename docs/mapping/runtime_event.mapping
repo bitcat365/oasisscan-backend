@@ -1,0 +1,43 @@
+PUT /runtime_event_main/_alias/runtime_event
+PUT /runtime_event
+{
+    "settings": {
+        "index": {
+            "number_of_shards": 15,
+            "number_of_replicas": 0,
+            "refresh_interval": "5s",
+            "max_result_window": "100000000"
+        }
+    },
+    "mappings": {
+        "dynamic": "true",
+        "properties": {
+            "type": {
+                "type": "keyword"
+            },
+            "tx_hash": {
+                "type": "keyword"
+            },
+            "log": {
+                "properties": {
+                    "from": {
+                        "type": "keyword"
+                    },
+                    "to": {
+                        "type": "keyword"
+                    },
+                    "owner": {
+                        "type": "keyword"
+                    },
+                    "nonce": {
+                        "type": "long",
+                        "ignore_malformed": true
+                    },
+                    "amount": {
+                        "type": "keyword"
+                    }
+                }
+            }
+        }
+    }
+}

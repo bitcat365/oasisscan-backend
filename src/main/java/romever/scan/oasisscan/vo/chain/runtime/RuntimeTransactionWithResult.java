@@ -8,11 +8,5 @@ import java.util.List;
 public class RuntimeTransactionWithResult {
     private String tx;
     private String result;
-    private List<PlainEvent> events;
-
-    @Data
-    public static class PlainEvent {
-        private String key;
-        private String value;
-    }
+    private List<RuntimeEvent> events;
 }

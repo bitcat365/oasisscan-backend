@@ -15,10 +15,8 @@ import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.utils.okhttp.OkHttp;
 import romever.scan.oasisscan.vo.chain.*;
+import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.Runtime;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeState;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransactionWithResult;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -344,6 +342,20 @@ public class ApiClient {
         params.put("id", runtimeId);
         params.put("round", round);
         Result<RuntimeRound> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<RuntimeRound>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
+
+    public List<RuntimeEvent> runtimeEvent(String runtimeId, long round) throws IOException {
+        String url = String.format("%s/api/runtime/events/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("id", runtimeId);
+        params.put("round", round);
+        Result<List<RuntimeEvent>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<RuntimeEvent>>>() {
         });
         if (result != null) {
             return result.getResult();

@@ -93,6 +93,13 @@ public class ScanRuntimeTransactionService {
         for (; scanRound <= currentRound; scanRound++) {
             List<RuntimeTransactionWithResult> list = apiClient.runtimeTransactionsWithResults(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(list)) {
+                //save scan height
+                Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                if (optionalRuntime.isPresent()) {
+                    Runtime runtime = optionalRuntime.get();
+                    runtime.setScanTxHeight(scanRound);
+                    runtimeRepository.saveAndFlush(runtime);
+                }
                 log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, 0));
                 continue;
             }

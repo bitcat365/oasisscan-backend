@@ -162,6 +162,7 @@ public class ScanRuntimeService {
      * See https://github.com/oasisprotocol/tools/tree/main/runtime-stats
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanRuntimeStats() throws IOException {
         if (applicationConfig.isLocal()) {
             return;

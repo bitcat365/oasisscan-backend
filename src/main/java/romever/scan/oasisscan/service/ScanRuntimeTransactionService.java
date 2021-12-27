@@ -28,7 +28,9 @@ import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Runtime;
+import romever.scan.oasisscan.entity.SystemProperty;
 import romever.scan.oasisscan.repository.RuntimeRepository;
+import romever.scan.oasisscan.repository.SystemPropertyRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
@@ -59,6 +61,8 @@ public class ScanRuntimeTransactionService {
 
     @Autowired
     private RuntimeRepository runtimeRepository;
+    @Autowired
+    private SystemPropertyRepository systemPropertyRepository;
 
     /**
      * Currently only scan emerald transactions
@@ -272,7 +276,6 @@ public class ScanRuntimeTransactionService {
     }
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanEvents() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
@@ -294,11 +297,8 @@ public class ScanRuntimeTransactionService {
         Long currentRound = getCurrentRound(runtimeId);
         if (currentRound == null) return;
 
-        Long scanRound = null;
-        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-        if (optionalRuntime.isPresent()) {
-            scanRound = optionalRuntime.get().getScanEventHeight();
-        } else {
+        Long scanRound = getScanEventRound(runtimeId);
+        if (scanRound == null) {
             return;
         }
 
@@ -309,9 +309,7 @@ public class ScanRuntimeTransactionService {
             List<RuntimeEvent> events = apiClient.runtimeEvent(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(events)) {
                 //save scan height
-                Runtime runtime = optionalRuntime.get();
-                runtime.setScanEventHeight(scanRound);
-                runtimeRepository.save(runtime);
+                saveScanEventRound(runtimeId, scanRound);
                 log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, 0));
                 continue;
             }
@@ -382,10 +380,7 @@ public class ScanRuntimeTransactionService {
                 }
             }
             //save scan height
-            Runtime runtime = optionalRuntime.get();
-            runtime.setScanEventHeight(scanRound);
-            runtimeRepository.save(runtime);
-
+            saveScanEventRound(runtimeId, scanRound);
             log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, eventMap.size()));
         }
     }
@@ -397,6 +392,24 @@ public class ScanRuntimeTransactionService {
             storeHeight = optionalRuntime.get().getScanTxHeight();
         }
         return storeHeight;
+    }
+
+    private Long getScanEventRound(String runtimeId) {
+        Long storeHeight = null;
+        String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
+        Optional<SystemProperty> optionalSystemProperty = systemPropertyRepository.findByProperty(property);
+        if (optionalSystemProperty.isPresent()) {
+            storeHeight = Long.parseLong(optionalSystemProperty.get().getValue());
+        }
+        return storeHeight;
+    }
+
+    private void saveScanEventRound(String runtimeId, long round) {
+        String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
+        SystemProperty systemProperty = systemPropertyRepository.findByProperty(property).orElse(new SystemProperty());
+        systemProperty.setProperty(Constants.SCAN_HEIGHT_PROPERTY);
+        systemProperty.setValue(String.valueOf(round));
+        systemPropertyRepository.saveAndFlush(systemProperty);
     }
 
 

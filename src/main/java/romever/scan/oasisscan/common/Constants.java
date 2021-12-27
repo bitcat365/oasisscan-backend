@@ -9,6 +9,7 @@ public interface Constants {
 
     String SCAN_HEIGHT_PROPERTY = "scan_height";
     String DB_HEIGHT_PROPERTY = "db_height";
+    String SYSTEM_RUNTIME_EVENT_ROUND_PREFIX = "runtime_event_round_";
 
     int EMERALD_DECIMALS = 18;
 

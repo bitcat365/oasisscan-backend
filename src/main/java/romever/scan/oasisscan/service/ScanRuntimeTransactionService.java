@@ -370,16 +370,15 @@ public class ScanRuntimeTransactionService {
                     }
                 }
             }
-
-            //save scan height
-            optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-            if (optionalRuntime.isPresent()) {
-                Runtime runtime = optionalRuntime.get();
-                runtime.setScanRoundHeight(scanRound);
-                runtimeRepository.save(runtime);
-            }
-
             log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, eventMap.size()));
+        }
+
+        //save scan height
+        optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+        if (optionalRuntime.isPresent()) {
+            Runtime runtime = optionalRuntime.get();
+            runtime.setScanRoundHeight(scanRound);
+            runtimeRepository.save(runtime);
         }
     }
 

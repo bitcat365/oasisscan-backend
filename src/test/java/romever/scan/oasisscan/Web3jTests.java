@@ -113,7 +113,7 @@ public class Web3jTests {
 
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gaNkZGF0YVgg//////////////////////////////////////////9mdG9waWNzg1ggjFvh5evsfVvRT3FCfR6E890DFMD3sikeWyAKyMfDuSVYIAAAAAAAAAAAAAAAAJEi5WGirclpK4PPuJe1s4Fbssg8WCAAAAAAAAAAAAAAAABlsPUmDLSXzjRPOShsQmApBgU05WdhZGRyZXNzVL5HV9RiPlMvRN3cMlNOFmNeH55b";
+        String code = "pWJ0b1UAitdiRWTKCjq+xmbtNvAG51KlvQpkZnJvbVUAy8Q5nIx8wt8O5gp1YwG7XkKQDallZXJyb3KiZGNvZGUFZm1vZHVsZWdzdGFraW5nZW5vbmNlAGZhbW91bnSCSIrHIwSJ6AAAQA==";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);

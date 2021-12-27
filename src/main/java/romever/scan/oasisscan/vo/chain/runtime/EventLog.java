@@ -11,4 +11,11 @@ public class EventLog {
     private String owner;
     private Long nonce;
     private List<String> amount;
+    private Error error;
+
+    @Data
+    public static class Error {
+        private Long code;
+        private String module;
+    }
 }

@@ -38,10 +38,7 @@ import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.Node;
-import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
-import romever.scan.oasisscan.vo.chain.runtime.EventLog;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.*;
 import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
@@ -398,27 +395,31 @@ public class RuntimeService {
                             }
                             response.setCtx(ctx);
 
-                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
-                            if (!CollectionUtils.isEmpty(events)) {
-                                for (AbstractRuntimeTransaction.Event event : events) {
-                                    List<EventLog> logs = event.getLogs();
-                                    if (CollectionUtils.isEmpty(logs)) {
-                                        continue;
-                                    }
-                                    for (EventLog eventLog : logs) {
-                                        List<String> hexAmounts = eventLog.getAmount();
-                                        List<String> numberAmounts = Lists.newArrayList();
-                                        if (!CollectionUtils.isEmpty(hexAmounts)) {
-                                            String amount = hexAmounts.get(0);
-                                            if (Texts.isNotBlank(amount)) {
-                                                numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
-                                            }
-                                        }
-                                        eventLog.setAmount(numberAmounts);
-                                    }
-                                }
-                                response.setEvents(tx.getEvents());
-                            }
+                            //find events
+                            RuntimeEventES eventES = findEvents(ctx.getFrom(), ctx.getNonce());
+                            response.setEvents(Lists.newArrayList(eventES));
+
+//                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
+//                            if (!CollectionUtils.isEmpty(events)) {
+//                                for (AbstractRuntimeTransaction.Event event : events) {
+//                                    List<EventLog> logs = event.getLogs();
+//                                    if (CollectionUtils.isEmpty(logs)) {
+//                                        continue;
+//                                    }
+//                                    for (EventLog eventLog : logs) {
+//                                        List<String> hexAmounts = eventLog.getAmount();
+//                                        List<String> numberAmounts = Lists.newArrayList();
+//                                        if (!CollectionUtils.isEmpty(hexAmounts)) {
+//                                            String amount = hexAmounts.get(0);
+//                                            if (Texts.isNotBlank(amount)) {
+//                                                numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+//                                            }
+//                                        }
+//                                        eventLog.setAmount(numberAmounts);
+//                                    }
+//                                }
+//                                response.setEvents(tx.getEvents());
+//                            }
                         }
                     }
                 }
@@ -435,6 +436,29 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    public RuntimeEventES findEvents(String from, long nonce) {
+        RuntimeEventES eventES = null;
+        try {
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
+            searchSourceBuilder.size(1);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                SearchHit[] searchHits = hits.getHits();
+                for (SearchHit hit : searchHits) {
+                    eventES = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeEventES>() {
+                    });
+                }
+            }
+        } catch (Exception e) {
+            log.error("error", e);
+        }
+        return eventES;
     }
 
     @Cached(expire = 15, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)

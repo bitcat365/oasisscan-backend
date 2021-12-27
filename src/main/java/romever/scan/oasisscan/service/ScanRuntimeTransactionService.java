@@ -301,6 +301,10 @@ public class ScanRuntimeTransactionService {
         for (; scanRound <= currentRound; scanRound++) {
             List<RuntimeEvent> events = apiClient.runtimeEvent(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(events)) {
+                //save scan height
+                Runtime runtime = optionalRuntime.get();
+                runtime.setScanEventHeight(scanRound);
+                runtimeRepository.save(runtime);
                 log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, 0));
                 continue;
             }

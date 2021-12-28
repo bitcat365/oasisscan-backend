@@ -29,7 +29,7 @@ public class Web3jTests {
     @Test
     public void test1() throws IOException {
 //        System.out.println(Texts.numberFromBase64("Fx7SLFPNAAA="));
-        String s = "ZXZtAAAAAQ==";
+        String s = "Y29uc2Vuc3VzX2FjY291bnRzAAAAAg==";
         System.out.println(Texts.base64ToHex(s));
         System.out.println(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64("FNESDXsWAAA=")), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
 //        System.out.println(Mappers.parseCborFromBase64("AwF6GNjbybMzhi3XRj5R1oTiMMkO1nAwB7NZAlH1X4BE", new TypeReference<JsonNode>() {
@@ -57,8 +57,8 @@ public class Web3jTests {
         Bech32.Bech32Data data = Bech32.decode("oasis1qpl202ahu2r7fk76vzwsn644dv25n84c8yxttegj");
         System.out.println(Texts.toHex(data.getData()));
 
+        //oasis1qpl202ahu2r7fk76vzwsn644dv25n84c8yxttegj
         String a = "93f198121A048f8f917bCEf9ee492d1aBbA0D020";
-
 
         String V0_SECP256K1ETH_CONTEXT_IDENTIFIER = "oasis-runtime-sdk/address: secp256k1eth";
 
@@ -113,7 +113,7 @@ public class Web3jTests {
 
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "pWJ0b1UAitdiRWTKCjq+xmbtNvAG51KlvQpkZnJvbVUAy8Q5nIx8wt8O5gp1YwG7XkKQDallZXJyb3KiZGNvZGUFZm1vZHVsZWdzdGFraW5nZW5vbmNlAGZhbW91bnSCSIrHIwSJ6AAAQA==";
+        String code = "gaRidG9VAMvEOZyMfMLfDuYKdWMBu15CkA2pZGZyb21VAO1D91JQJv1Tegv1JEiLfFSfA5glZW5vbmNlF2ZhbW91bnSCSBTREg17FgAAQA==";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);

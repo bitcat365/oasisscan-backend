@@ -8,7 +8,9 @@ public enum MethodEnum {
     StakingReclaimEscrow("staking.ReclaimEscrow"),
     StakingAmendCommissionSchedule("staking.AmendCommissionSchedule"),
     RegistryRegisterNode("registry.RegisterNode"),
-    RoothashExecutorProposerTimeout("roothash.ExecutorProposerTimeout");
+    RoothashExecutorProposerTimeout("roothash.ExecutorProposerTimeout"),
+    ConsensusDeposit("consensus.Deposit"),
+    ConsensusWithdraw("consensus.Withdraw");
 
     private final String name;
 

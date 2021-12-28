@@ -36,6 +36,7 @@ import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.repository.*;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
+import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.Node;
 import romever.scan.oasisscan.vo.chain.runtime.*;
@@ -396,9 +397,26 @@ public class RuntimeService {
                             response.setCtx(ctx);
 
                             //find events
-                            RuntimeEventES eventES = findEvents(ctx.getFrom(), ctx.getNonce());
-                            if (eventES != null) {
-                                response.setEvents(Lists.newArrayList(eventES));
+                            String from = null;
+                            if (ctx.getMethod().equalsIgnoreCase(MethodEnum.ConsensusWithdraw.getName())) {
+                                List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
+                                if (!CollectionUtils.isEmpty(events)) {
+                                    AbstractRuntimeTransaction.Event event = events.get(0);
+                                    List<EventLog> logs = event.getLogs();
+                                    if (!CollectionUtils.isEmpty(logs)) {
+                                        EventLog eventLog = logs.get(0);
+                                        from = eventLog.getFrom();
+                                    }
+                                }
+                            } else {
+                                from = ctx.getFrom();
+                            }
+
+                            if (Texts.isNotBlank(from)) {
+                                RuntimeEventES eventES = findEvents(from, ctx.getNonce());
+                                if (eventES != null) {
+                                    response.setEvents(Lists.newArrayList(eventES));
+                                }
                             }
 
 //                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();

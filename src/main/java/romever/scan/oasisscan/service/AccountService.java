@@ -207,7 +207,6 @@ public class AccountService {
         return ApiResult.page(responses, page, size, delegatorPage.getTotalElements());
     }
 
-    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult runtimeTransactions(String address, String runtimeId, int page, int size) {
         long total = 0;
         List<ListRuntimeTransactionResponse> responses = Lists.newArrayList();

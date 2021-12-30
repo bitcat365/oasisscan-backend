@@ -26,6 +26,7 @@
 * [runtime-stats](#runtime-stats)
 * [runtime-transactions](#runtime-transactions)
 * [runtime-transaction-info](#runtime-transaction-info)
+* [account-runtime-transactions](#account-runtime-transactions)
 
 ### validator stats
 
@@ -1201,6 +1202,47 @@ evm transaction
             "data": "c9c65396000000000000000000000000e6c87c360c24efc6fef4dcefed5607b0adacf936000000000000000000000000ca8a7b55a04a9fde7ae7bf128384fa330f81a19c",
             "value": "0"
         }
+    }
+}
+```
+
+### account-runtime-transactions
+
+```
+// Request
+GET http://localhost:8181/chain/account/runtime/transactions
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| size  | option,default:10 |
+| page  | option,default:1 |
+| address  | address |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "runtimeId": "00000000000000000000000000000000000000000000000072c8215e60d5bca7",
+                "runtimeName": "Emerald",
+                "txHash": "708d2e3808c305bd2dc5c7498c00f782ba23683eb85e57e7254f88015a16512d",
+                "round": 136942,
+                "result": true,
+                "timestamp": 1640284810,
+                "type": "regular"
+            }
+        ],
+        "page": 1,
+        "size": 10,
+        "maxPage": 28,
+        "totalSize": 278
     }
 }
 ```

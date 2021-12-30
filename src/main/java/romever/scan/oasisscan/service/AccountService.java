@@ -28,6 +28,7 @@ import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Account;
 import romever.scan.oasisscan.entity.Debonding;
 import romever.scan.oasisscan.entity.Delegator;
+import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.AccountRepository;
 import romever.scan.oasisscan.repository.DebondingRepository;
@@ -73,6 +74,8 @@ public class AccountService {
     private ValidatorInfoRepository validatorInfoRepository;
     @Autowired
     private ScanValidatorService scanValidatorService;
+    @Autowired
+    private RuntimeService runtimeService;
     @Autowired
     private ElasticsearchConfig elasticsearchConfig;
 
@@ -256,6 +259,10 @@ public class AccountService {
                         response.setRuntimeId(tx.getRuntime_id());
                         response.setTxHash(tx.getTx_hash());
                         response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
+                        Runtime runtimeInfo = runtimeService.getRuntimeInfo(response.getRuntimeId());
+                        if (runtimeInfo != null) {
+                            response.setRuntimeName(runtimeInfo.getName());
+                        }
                         responses.add(response);
                     }
                 }

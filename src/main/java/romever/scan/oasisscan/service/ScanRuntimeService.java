@@ -20,18 +20,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApplicationConfig;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
-import romever.scan.oasisscan.entity.RuntimeNode;
-import romever.scan.oasisscan.entity.RuntimeStats;
-import romever.scan.oasisscan.entity.RuntimeStatsInfo;
-import romever.scan.oasisscan.entity.RuntimeStatsType;
-import romever.scan.oasisscan.repository.RuntimeNodeRepository;
-import romever.scan.oasisscan.repository.RuntimeRepository;
-import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
-import romever.scan.oasisscan.repository.RuntimeStatsRepository;
+import romever.scan.oasisscan.entity.*;
+import romever.scan.oasisscan.repository.*;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.CommitteeRoleEnum;
@@ -69,6 +64,8 @@ public class ScanRuntimeService {
     private RuntimeStatsInfoRepository runtimeStatsInfoRepository;
     @Autowired
     private RuntimeNodeRepository runtimeNodeRepository;
+    @Autowired
+    private SystemPropertyRepository systemPropertyRepository;
 
     @Autowired
     private TransactionService transactionService;
@@ -117,7 +114,7 @@ public class ScanRuntimeService {
         long currentChainHeight = apiClient.getCurHeight();
         for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
             String runtimeId = runtime.getRuntimeId();
-            long scanHeight = runtime.getScanRoundHeight();
+            long scanHeight = getScanRound(runtimeId);
             if (scanHeight == 0) {
                 RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
                 long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp().toEpochSecond();
@@ -146,16 +143,28 @@ public class ScanRuntimeService {
                 log.info("Runtime round sync done. {} [{}]", scanHeight, id);
 
                 //save scan height
-                Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (!optionalRuntime.isPresent()) {
-                    throw new RuntimeException("Runtime db read error.");
-                }
-                romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
-                _runtime.setScanRoundHeight(scanHeight);
-                runtimeRepository.saveAndFlush(_runtime);
+                saveScanRound(runtimeId, scanHeight);
                 scanHeight++;
             }
         }
+    }
+
+    private Long getScanRound(String runtimeId) {
+        Long storeHeight = 0L;
+        String property = Constants.SYSTEM_RUNTIME_ROUND_PREFIX + runtimeId;
+        Optional<SystemProperty> optionalSystemProperty = systemPropertyRepository.findByProperty(property);
+        if (optionalSystemProperty.isPresent()) {
+            storeHeight = Long.parseLong(optionalSystemProperty.get().getValue());
+        }
+        return storeHeight;
+    }
+
+    private void saveScanRound(String runtimeId, long round) {
+        String property = Constants.SYSTEM_RUNTIME_ROUND_PREFIX + runtimeId;
+        SystemProperty systemProperty = systemPropertyRepository.findByProperty(property).orElse(new SystemProperty());
+        systemProperty.setProperty(property);
+        systemProperty.setValue(String.valueOf(round));
+        systemPropertyRepository.saveAndFlush(systemProperty);
     }
 
     /**

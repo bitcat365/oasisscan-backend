@@ -135,6 +135,18 @@ public class ChainController {
         return accountService.delegations(address, all, page, size);
     }
 
+    @GetMapping("/account/runtime/transactions")
+    public ApiResult accountRuntimeTransactions(
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "address") String address,
+            @RequestParam(value = "runtimeId", required = false) String runtimeId) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
+        return accountService.runtimeTransactions(address, runtimeId, page, size);
+    }
+
     @GetMapping("/search")
     public ApiResult search(@RequestParam("key") String key) {
         return ApiResult.ok(searchService.search(key));

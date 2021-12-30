@@ -42,6 +42,12 @@ public class SearchService {
         String result = null;
         SearchType searchType = SearchType.None;
         try {
+            if (Texts.isBlank(key)) {
+                response.setResult(result);
+                response.setType(searchType.getName());
+                return response;
+            }
+
             if (key.startsWith("oasis")) {
                 AccountInfo accountInfo = apiClient.accountInfo(key, null);
                 if (accountInfo != null) {

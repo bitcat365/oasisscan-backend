@@ -28,6 +28,10 @@ public interface ESFields {
     String RUNTIME_TRANSACTION_ID = "runtime_id";
     String RUNTIME_TRANSACTION_ROUND = "round";
     String RUNTIME_TRANSACTION_TX_HASH = "tx_hash";
+    String RUNTIME_TRANSACTION_SIG_ADDRESS = "ai.si.address_spec.signature.address";
+    String RUNTIME_TRANSACTION_TO = "call.body.to";
+    String RUNTIME_TRANSACTION_EVENT_FROM = "events.logs.from";
+    String RUNTIME_TRANSACTION_EVENT_TO = "events.logs.to";
 
     //runtime transaction
     String RUNTIME_EVENT_FROM = "logs.from";

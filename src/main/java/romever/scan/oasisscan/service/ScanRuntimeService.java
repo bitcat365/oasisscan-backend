@@ -140,10 +140,10 @@ public class ScanRuntimeService {
                 RuntimeRound.Header header = runtimeRound.getHeader();
                 String id = header.getNamespace() + "_" + header.getRound();
                 JestDao.index(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), Mappers.map(header), id);
-                log.info("Runtime round sync done. {} [{}]", scanHeight, id);
 
                 //save scan height
                 saveScanRound(runtimeId, scanHeight);
+                log.info("Runtime round sync done. {} [{}]", scanHeight, id);
                 scanHeight++;
             }
         }

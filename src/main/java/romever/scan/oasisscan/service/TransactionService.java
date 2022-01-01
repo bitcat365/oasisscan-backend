@@ -3,10 +3,13 @@ package romever.scan.oasisscan.service;
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountResponse;
@@ -24,6 +27,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -32,15 +36,21 @@ import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.MethodEnum;
+import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.Transaction;
+import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.AccountSimple;
 import romever.scan.oasisscan.vo.response.HistogramResponse;
 import romever.scan.oasisscan.vo.response.ListTransactionResponse;
 import romever.scan.oasisscan.vo.response.TransactionDetailResponse;
+import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -63,6 +73,9 @@ public class TransactionService {
     @Autowired
     private ApplicationConfig applicationConfig;
 
+    @Autowired
+    private RuntimeService runtimeService;
+
     private static final int HISTORY_DAY_SIZE = 30;
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
@@ -79,9 +92,9 @@ public class TransactionService {
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult transactions(
-            int size, int page, Long height, String address, String method) {
+            int size, int page, Long height, String address, String method, boolean runtime) {
         long total = 0;
-        List<ListTransactionResponse> responses = Lists.newArrayList();
+        List<Object> responses = Lists.newArrayList();
 
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
@@ -89,13 +102,25 @@ public class TransactionService {
             boolQueryBuilder.filter(QueryBuilders.termQuery(TRANSACTION_HEIGHT, height));
         }
         if (Texts.isNotBlank(address)) {
+            BoolQueryBuilder addressBoolQuery = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(
-                    QueryBuilders.boolQuery()
+                    addressBoolQuery
                             .should(QueryBuilders.termQuery(TRANSACTION_FROM, address))
                             .should(QueryBuilders.termQuery(TRANSACTION_ESCROW_ACCOUNT, address))
                             .should(QueryBuilders.termQuery(TRANSACTION_BODY_SIG_PUBLIC_KEY, address))
                             .should(QueryBuilders.termQuery(TRANSACTION_TRANSFER_TO, address))
             );
+
+            //runtime transactions
+            if (runtime) {
+                boolQueryBuilder.filter(
+                        addressBoolQuery
+                                .should(QueryBuilders.termQuery(RUNTIME_TRANSACTION_SIG_ADDRESS, address))
+                                .should(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TO, address))
+                                .should(QueryBuilders.termQuery(RUNTIME_TRANSACTION_EVENT_FROM, address))
+                                .should(QueryBuilders.termQuery(RUNTIME_TRANSACTION_EVENT_TO, address))
+                );
+            }
         }
         if (Texts.isNotBlank(method)) {
             boolQueryBuilder.filter(QueryBuilders.termQuery(TRANSACTION_METHOD, method));
@@ -113,33 +138,67 @@ public class TransactionService {
         searchSourceBuilder.trackTotalHits(true);
 
         try {
-            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getTransactionIndex(), searchSourceBuilder);
+            SearchResponse searchResponse;
+            if (runtime) {
+                String[] indices = new String[]{elasticsearchConfig.getTransactionIndex(), elasticsearchConfig.getRuntimeTransactionIndex()};
+                searchResponse = JestDao.searchFromIndices(elasticsearchClient, indices, searchSourceBuilder);
+            } else {
+                searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getTransactionIndex(), searchSourceBuilder);
+            }
             if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
                 SearchHits hits = searchResponse.getHits();
                 total = hits.getTotalHits().value;
                 SearchHit[] searchHits = hits.getHits();
                 for (SearchHit hit : searchHits) {
-                    Transaction tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<Transaction>() {
-                    });
-                    if (tx != null) {
-
-                        //calculate reclaim amount
-                        double escrowBalance = 0;
-                        double totalShares = 0;
-                        String txMethod = tx.getMethod();
-                        MethodEnum methodEnum = MethodEnum.getEnumByName(txMethod);
-                        if (methodEnum == MethodEnum.StakingReclaimEscrow) {
-                            Transaction.Body body = tx.getBody();
-                            String validator = body.getAccount();
-
-                            AccountSimple accountSimple = accountInfo(validator, tx.getHeight() - 1);
-                            if (accountSimple != null) {
-                                escrowBalance = Double.parseDouble(accountSimple.getEscrow());
-                                totalShares = Double.parseDouble(accountSimple.getTotalShares());
-                            }
+                    JsonNode txJson = Mappers.parseJson(hit.getSourceAsString());
+                    if (txJson.has(RUNTIME_TRANSACTION_ROUND)) {
+                        //runtime transactions
+                        String type = txJson.path("type").asText();
+                        AbstractRuntimeTransaction tx;
+                        if (type.equalsIgnoreCase("evm")) {
+                            tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
+                            });
+                        } else {
+                            tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
+                            });
                         }
 
-                        responses.add(ListTransactionResponse.of(tx, escrowBalance, totalShares));
+                        if (tx != null) {
+                            ListRuntimeTransactionResponse response = new ListRuntimeTransactionResponse();
+                            BeanUtils.copyProperties(tx, response);
+                            response.setRuntimeId(tx.getRuntime_id());
+                            response.setTxHash(tx.getTx_hash());
+                            response.setType(RuntimeTransactionType.getDisplayNameByType(response.getType()));
+                            Runtime runtimeInfo = runtimeService.getRuntimeInfo(response.getRuntimeId());
+                            if (runtimeInfo != null) {
+                                response.setRuntimeName(runtimeInfo.getName());
+                            }
+                            responses.add(response);
+                        }
+
+                    } else {
+                        //consensus transactions
+                        Transaction tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<Transaction>() {
+                        });
+                        if (tx != null) {
+                            //calculate reclaim amount
+                            double escrowBalance = 0;
+                            double totalShares = 0;
+                            String txMethod = tx.getMethod();
+                            MethodEnum methodEnum = MethodEnum.getEnumByName(txMethod);
+                            if (methodEnum == MethodEnum.StakingReclaimEscrow) {
+                                Transaction.Body body = tx.getBody();
+                                String validator = body.getAccount();
+
+                                AccountSimple accountSimple = accountInfo(validator, tx.getHeight() - 1);
+                                if (accountSimple != null) {
+                                    escrowBalance = Double.parseDouble(accountSimple.getEscrow());
+                                    totalShares = Double.parseDouble(accountSimple.getTotalShares());
+                                }
+                            }
+
+                            responses.add(ListTransactionResponse.of(tx, escrowBalance, totalShares));
+                        }
                     }
                 }
             }

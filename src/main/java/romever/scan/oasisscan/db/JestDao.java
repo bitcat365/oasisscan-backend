@@ -52,6 +52,13 @@ public class JestDao {
         return client.search(searchRequest, RequestOptions.DEFAULT);
     }
 
+    public static SearchResponse searchFromIndices(
+            RestHighLevelClient client, String[] indices, SearchSourceBuilder searchSourceBuilder) throws IOException {
+        SearchRequest searchRequest = new SearchRequest(indices);
+        searchRequest.source(searchSourceBuilder);
+        return client.search(searchRequest, RequestOptions.DEFAULT);
+    }
+
     public static CountResponse count(
             RestHighLevelClient client, String index, QueryBuilder queryBuilder) throws IOException {
         CountRequest countRequest = new CountRequest(index);

@@ -34,11 +34,12 @@ public class ChainController {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "height", required = false) Long height,
             @RequestParam(value = "address", required = false) String address,
-            @RequestParam(value = "method", required = false) String method) {
+            @RequestParam(value = "method", required = false) String method,
+            @RequestParam(value = "runtime", required = false) boolean runtime) {
         if (size > 5000) {
             return ApiResult.err("size must be less than 5000");
         }
-        return transactionService.transactions(size, page, height, address, method);
+        return transactionService.transactions(size, page, height, address, method, runtime);
     }
 
     @ApiOperation("Block list")

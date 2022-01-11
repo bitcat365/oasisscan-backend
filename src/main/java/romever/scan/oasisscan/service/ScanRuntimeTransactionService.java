@@ -87,7 +87,7 @@ public class ScanRuntimeTransactionService {
         String runtimeId = emerald;
         Long currentRound = getCurrentRound(runtimeId);
         if (currentRound == null) return;
-        Long scanRound = getScanRound(runtimeId);
+        Long scanRound = getScanTxRound(runtimeId);
         if (scanRound == null) {
             return;
         }
@@ -98,12 +98,13 @@ public class ScanRuntimeTransactionService {
             List<RuntimeTransactionWithResult> list = apiClient.runtimeTransactionsWithResults(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(list)) {
                 //save scan height
-                Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (optionalRuntime.isPresent()) {
-                    Runtime runtime = optionalRuntime.get();
-                    runtime.setScanTxHeight(scanRound);
-                    runtimeRepository.save(runtime);
-                }
+//                Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+//                if (optionalRuntime.isPresent()) {
+//                    Runtime runtime = optionalRuntime.get();
+//                    runtime.setScanTxHeight(scanRound);
+//                    runtimeRepository.save(runtime);
+//                }
+                saveScanTxRound(runtimeId, scanRound);
                 log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, 0));
                 continue;
             }
@@ -255,12 +256,13 @@ public class ScanRuntimeTransactionService {
             }
 
             //save scan height
-            Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-            if (optionalRuntime.isPresent()) {
-                Runtime runtime = optionalRuntime.get();
-                runtime.setScanTxHeight(scanRound);
-                runtimeRepository.save(runtime);
-            }
+//            Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+//            if (optionalRuntime.isPresent()) {
+//                Runtime runtime = optionalRuntime.get();
+//                runtime.setScanTxHeight(scanRound);
+//                runtimeRepository.save(runtime);
+//            }
+            saveScanTxRound(runtimeId, scanRound);
 
             log.info(String.format("runtime transaction %s, round: %s, count: %s", emerald, scanRound, list.size()));
         }
@@ -385,15 +387,6 @@ public class ScanRuntimeTransactionService {
         }
     }
 
-    private Long getScanRound(String runtimeId) {
-        Long storeHeight = null;
-        Optional<Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-        if (optionalRuntime.isPresent()) {
-            storeHeight = optionalRuntime.get().getScanTxHeight();
-        }
-        return storeHeight;
-    }
-
     private Long getScanEventRound(String runtimeId) {
         Long storeHeight = 0L;
         String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
@@ -406,6 +399,24 @@ public class ScanRuntimeTransactionService {
 
     private void saveScanEventRound(String runtimeId, long round) {
         String property = Constants.SYSTEM_RUNTIME_EVENT_ROUND_PREFIX + runtimeId;
+        SystemProperty systemProperty = systemPropertyRepository.findByProperty(property).orElse(new SystemProperty());
+        systemProperty.setProperty(property);
+        systemProperty.setValue(String.valueOf(round));
+        systemPropertyRepository.saveAndFlush(systemProperty);
+    }
+
+    private Long getScanTxRound(String runtimeId) {
+        Long storeHeight = 0L;
+        String property = Constants.SYSTEM_RUNTIME_TX_HEIGHT_PREFIX + runtimeId;
+        Optional<SystemProperty> optionalSystemProperty = systemPropertyRepository.findByProperty(property);
+        if (optionalSystemProperty.isPresent()) {
+            storeHeight = Long.parseLong(optionalSystemProperty.get().getValue());
+        }
+        return storeHeight;
+    }
+
+    private void saveScanTxRound(String runtimeId, long round) {
+        String property = Constants.SYSTEM_RUNTIME_TX_HEIGHT_PREFIX + runtimeId;
         SystemProperty systemProperty = systemPropertyRepository.findByProperty(property).orElse(new SystemProperty());
         systemProperty.setProperty(property);
         systemProperty.setValue(String.valueOf(round));

@@ -11,6 +11,7 @@ public interface Constants {
     String DB_HEIGHT_PROPERTY = "db_height";
     String SYSTEM_RUNTIME_EVENT_ROUND_PREFIX = "runtime_event_round_";
     String SYSTEM_RUNTIME_ROUND_PREFIX = "runtime_round_";
+    String SYSTEM_RUNTIME_TX_HEIGHT_PREFIX = "runtime_tx_round_";
 
     int EMERALD_DECIMALS = 18;
 

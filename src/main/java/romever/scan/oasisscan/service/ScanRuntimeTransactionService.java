@@ -60,15 +60,12 @@ public class ScanRuntimeTransactionService {
     private ElasticsearchConfig elasticsearchConfig;
 
     @Autowired
-    private RuntimeRepository runtimeRepository;
-    @Autowired
     private SystemPropertyRepository systemPropertyRepository;
 
     /**
      * Currently only scan emerald transactions
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanTransaction() throws IOException {
         if (applicationConfig.isLocal()) {
             return;

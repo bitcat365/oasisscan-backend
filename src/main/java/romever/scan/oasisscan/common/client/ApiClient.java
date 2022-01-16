@@ -186,7 +186,7 @@ public class ApiClient {
         if (height != null) {
             params.put("height", height);
         }
-        Result<StakingGenesis> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<StakingGenesis>>() {
+        Result<StakingGenesis> result = OkHttp.of(url, 60, 60, 60).queries(params).exec(new TypeReference<Result<StakingGenesis>>() {
         });
         if (result != null) {
             stakingGenesis = result.getResult();

@@ -35,5 +35,6 @@ public interface ESFields {
 
     //runtime transaction
     String RUNTIME_EVENT_FROM = "logs.from";
+    String RUNTIME_EVENT_TO = "logs.to";
     String RUNTIME_EVENT_NONCE = "logs.nonce";
 }

@@ -467,7 +467,7 @@ public class RuntimeService {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
-            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, to));
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_TO, to));
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
             searchSourceBuilder.query(boolQueryBuilder);
             searchSourceBuilder.size(1);

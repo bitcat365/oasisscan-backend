@@ -388,8 +388,9 @@ public class RuntimeService {
                             ctx.setTo(tx.getCall().getBody().getTo());
                             ctx.setMethod(tx.getCall().getMethod());
                             List<String> amounts = tx.getCall().getBody().getAmount();
+                            String amount = null;
                             if (!CollectionUtils.isEmpty(amounts)) {
-                                String amount = amounts.get(0);
+                                amount = amounts.get(0);
                                 if (Texts.isNotBlank(amount)) {
                                     ctx.setAmount(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
                                 }
@@ -416,7 +417,7 @@ public class RuntimeService {
                             }
 
                             if (Texts.isNotBlank(from)) {
-                                RuntimeEventES eventES = findEvents(from, to, ctx.getNonce());
+                                RuntimeEventES eventES = findEvents(from, to, ctx.getNonce(), amount);
                                 if (eventES != null) {
                                     response.setEvents(Lists.newArrayList(eventES));
                                 }
@@ -461,7 +462,7 @@ public class RuntimeService {
         return response;
     }
 
-    public RuntimeEventES findEvents(String from, String to, long nonce) {
+    public RuntimeEventES findEvents(String from, String to, long nonce, String amount) {
         RuntimeEventES eventES = null;
         try {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -469,6 +470,9 @@ public class RuntimeService {
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_TO, to));
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
+            if (Texts.isNotBlank(amount)) {
+                boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_AMOUNT, amount));
+            }
             searchSourceBuilder.query(boolQueryBuilder);
             searchSourceBuilder.size(1);
             SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), searchSourceBuilder);
@@ -499,9 +503,9 @@ public class RuntimeService {
                             List<String> hexAmounts = eventLog.getAmount();
                             List<String> numberAmounts = Lists.newArrayList();
                             if (!CollectionUtils.isEmpty(hexAmounts)) {
-                                String amount = hexAmounts.get(0);
-                                if (Texts.isNotBlank(amount)) {
-                                    numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(amount)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+                                String a = hexAmounts.get(0);
+                                if (Texts.isNotBlank(a)) {
+                                    numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(a)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
                                 }
                             }
                             eventLog.setAmount(numberAmounts);

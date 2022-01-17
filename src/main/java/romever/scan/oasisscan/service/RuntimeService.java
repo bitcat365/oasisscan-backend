@@ -398,6 +398,7 @@ public class RuntimeService {
 
                             //find events
                             String from = null;
+                            String to = null;
                             if (ctx.getMethod().equalsIgnoreCase(MethodEnum.ConsensusWithdraw.getName())) {
                                 List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
                                 if (!CollectionUtils.isEmpty(events)) {
@@ -406,14 +407,16 @@ public class RuntimeService {
                                     if (!CollectionUtils.isEmpty(logs)) {
                                         EventLog eventLog = logs.get(0);
                                         from = eventLog.getFrom();
+                                        to = eventLog.getTo();
                                     }
                                 }
                             } else {
                                 from = ctx.getFrom();
+                                to = ctx.getTo();
                             }
 
                             if (Texts.isNotBlank(from)) {
-                                RuntimeEventES eventES = findEvents(from, ctx.getNonce());
+                                RuntimeEventES eventES = findEvents(from, to, ctx.getNonce());
                                 if (eventES != null) {
                                     response.setEvents(Lists.newArrayList(eventES));
                                 }
@@ -458,12 +461,13 @@ public class RuntimeService {
         return response;
     }
 
-    public RuntimeEventES findEvents(String from, long nonce) {
+    public RuntimeEventES findEvents(String from, String to, long nonce) {
         RuntimeEventES eventES = null;
         try {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, to));
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
             searchSourceBuilder.query(boolQueryBuilder);
             searchSourceBuilder.size(1);
@@ -487,7 +491,11 @@ public class RuntimeService {
                         } else {
                             return null;
                         }
+                        List<EventLog> el = Lists.newArrayList();
                         for (EventLog eventLog : logs) {
+                            if (!eventLog.getFrom().equals(from)) {
+                                continue;
+                            }
                             List<String> hexAmounts = eventLog.getAmount();
                             List<String> numberAmounts = Lists.newArrayList();
                             if (!CollectionUtils.isEmpty(hexAmounts)) {
@@ -497,7 +505,9 @@ public class RuntimeService {
                                 }
                             }
                             eventLog.setAmount(numberAmounts);
+                            el.add(eventLog);
                         }
+                        eventES.setLogs(el);
                     }
                 }
             }

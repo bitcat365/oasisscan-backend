@@ -127,8 +127,8 @@ public class ScanChainService {
                                         if (tx != null) {
                                             //status
                                             if (transactionResult != null) {
-                                                TransactionResult.Error error = transactionResult.getError();
-                                                tx.setError(error);
+                                                tx.setError(transactionResult.getError());
+                                                tx.setEvents(transactionResult.getEvents());
                                             }
 
                                             tx.setTx_hash(txHash);

@@ -24,6 +24,7 @@ public class Transaction {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
     private OffsetDateTime time;
     private TransactionResult.Error error;
+    private List<TransactionResult.Event> events;
 
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)

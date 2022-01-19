@@ -356,12 +356,24 @@ public class RuntimeService {
         RuntimeTransactionResponse response = null;
         String esId = runtimeId + "_" + txHash;
         try {
-            GetResponse getResponse = JestDao.get(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), esId);
-            if (getResponse.isExists()) {
-                JsonNode jsonHit = Mappers.parseJson(getResponse.getSourceAsString());
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
+            searchSourceBuilder.query(boolQueryBuilder);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.ASC);
+            searchSourceBuilder.size(1);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                SearchHit[] searchHits = hits.getHits();
+                if (searchHits.length != 1) {
+                    return response;
+                }
+                SearchHit hit = searchHits[0];
+                JsonNode jsonHit = Mappers.parseJson(hit.getSourceAsString());
                 String type = jsonHit.path("type").asText();
                 if (type.equalsIgnoreCase("evm")) {
-                    EmeraldTransaction tx = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
+                    EmeraldTransaction tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<EmeraldTransaction>() {
                     });
                     if (tx != null) {
                         response = new RuntimeTransactionResponse();
@@ -373,7 +385,7 @@ public class RuntimeService {
                         response.setEtx(etx);
                     }
                 } else {
-                    RuntimeTransaction tx = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
+                    RuntimeTransaction tx = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeTransaction>() {
                     });
                     if (tx != null) {
                         response = new RuntimeTransactionResponse();
@@ -529,6 +541,8 @@ public class RuntimeService {
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
             searchSourceBuilder.query(boolQueryBuilder);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.ASC);
+            searchSourceBuilder.size(1);
             SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
             if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
                 SearchHits hits = searchResponse.getHits();

@@ -33,7 +33,7 @@ public interface ESFields {
     String RUNTIME_TRANSACTION_EVENT_FROM = "events.logs.from";
     String RUNTIME_TRANSACTION_EVENT_TO = "events.logs.to";
 
-    //runtime transaction
+    //runtime event
     String RUNTIME_EVENT_FROM = "logs.from";
     String RUNTIME_EVENT_TO = "logs.to";
     String RUNTIME_EVENT_NONCE = "logs.nonce";

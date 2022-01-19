@@ -18,7 +18,7 @@ PUT /runtime_event
             "tx_hash": {
                 "type": "keyword"
             },
-            "log": {
+            "logs": {
                 "properties": {
                     "from": {
                         "type": "keyword"

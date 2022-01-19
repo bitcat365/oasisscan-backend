@@ -18,8 +18,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.web3j.crypto.*;
 import romever.scan.oasisscan.common.ApplicationConfig;
@@ -27,9 +25,7 @@ import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
-import romever.scan.oasisscan.entity.Runtime;
 import romever.scan.oasisscan.entity.SystemProperty;
-import romever.scan.oasisscan.repository.RuntimeRepository;
 import romever.scan.oasisscan.repository.SystemPropertyRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
@@ -108,7 +104,8 @@ public class ScanRuntimeTransactionService {
 
             RuntimeRound runtimeRound = apiClient.runtimeRound(runtimeId, scanRound);
             Map<String, Map<String, Object>> txMap = Maps.newHashMap();
-            for (RuntimeTransactionWithResult r : list) {
+            for (int i = 0; i < list.size(); i++) {
+                RuntimeTransactionWithResult r = list.get(i);
                 try {
                     JsonNode rawJson = Mappers.parseCborFromBase64(r.getTx(), new TypeReference<JsonNode>() {
                     });
@@ -140,7 +137,7 @@ public class ScanRuntimeTransactionService {
                     } else {
                         transaction = Mappers.parseCborFromBase64(raw, new TypeReference<RuntimeTransaction>() {
                         });
-                        txHash = Texts.sha512_256(Texts.base64Decode(raw));
+                        txHash = Texts.sha512_256(Texts.base64Decode(r.getTx()));
 
                         RuntimeTransaction runtimeTransaction = (RuntimeTransaction) transaction;
                         RuntimeTransaction.Body body = runtimeTransaction.getCall().getBody();
@@ -178,6 +175,7 @@ public class ScanRuntimeTransactionService {
                     transaction.setTx_hash(txHash);
                     transaction.setRound(scanRound);
                     transaction.setTimestamp(runtimeRound.getHeader().getTimestamp().toEpochSecond());
+                    transaction.setPosition((long) i);
 
                     JsonNode resultJson = Mappers.parseCborFromBase64(r.getResult(), new TypeReference<JsonNode>() {
                     });
@@ -233,7 +231,8 @@ public class ScanRuntimeTransactionService {
                         transaction.setEvents(runtimeEvents);
                     }
 
-                    String esId = runtimeId + "_" + txHash;
+//                    String esId = runtimeId + "_" + txHash;
+                    String esId = runtimeId + "_" + scanRound + "_" + i;
                     txMap.put(esId, Mappers.map(transaction));
                     if (!CollectionUtils.isEmpty(txMap)) {
                         BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), txMap);

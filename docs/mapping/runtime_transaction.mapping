@@ -38,6 +38,10 @@ PUT /runtime_transaction_main
                 "type": "long",
                 "ignore_malformed": true
             },
+            "position": {
+                "type": "long",
+                "ignore_malformed": true
+            },
             "ai": {
                 "properties": {
                     "si": {

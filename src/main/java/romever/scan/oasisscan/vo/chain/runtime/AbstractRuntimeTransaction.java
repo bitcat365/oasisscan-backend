@@ -14,6 +14,7 @@ public abstract class AbstractRuntimeTransaction {
     private long timestamp;
     private String type;
     private List<Event> events;
+    private Long position;
 
     @Data
     public static class Event {

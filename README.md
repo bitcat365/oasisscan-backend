@@ -1140,6 +1140,7 @@ Params
 |  ----  | ----  |
 | id  | runtime id |
 | hash  | tx hash |
+| round  | runtime round height |
 
 ```
 

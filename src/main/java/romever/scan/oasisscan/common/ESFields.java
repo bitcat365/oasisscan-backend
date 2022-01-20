@@ -32,6 +32,7 @@ public interface ESFields {
     String RUNTIME_TRANSACTION_TO = "call.body.to";
     String RUNTIME_TRANSACTION_EVENT_FROM = "events.logs.from";
     String RUNTIME_TRANSACTION_EVENT_TO = "events.logs.to";
+    String RUNTIME_TRANSACTION_RESULT = "result";
 
     //runtime event
     String RUNTIME_EVENT_FROM = "logs.from";

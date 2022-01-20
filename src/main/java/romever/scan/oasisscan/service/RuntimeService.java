@@ -20,6 +20,8 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -360,7 +362,8 @@ public class RuntimeService {
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
             searchSourceBuilder.query(boolQueryBuilder);
-            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.ASC);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_RESULT, SortOrder.DESC);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.DESC);
             searchSourceBuilder.size(1);
             SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
             if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
@@ -541,7 +544,8 @@ public class RuntimeService {
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
             searchSourceBuilder.query(boolQueryBuilder);
-            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.ASC);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_RESULT, SortOrder.DESC);
+            searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.DESC);
             searchSourceBuilder.size(1);
             SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), searchSourceBuilder);
             if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {

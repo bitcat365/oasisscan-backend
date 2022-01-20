@@ -348,7 +348,7 @@ public class RuntimeService {
      * @param txHash
      * @return
      */
-    public RuntimeTransactionResponse transactionInfo(String runtimeId, String txHash) {
+    public RuntimeTransactionResponse transactionInfo(String runtimeId, String txHash, Long round) {
         String runtimeName = "unknown";
         Runtime runtimeInfo = runtimeService.getRuntimeInfo(runtimeId);
         if (runtimeInfo != null) {
@@ -361,6 +361,9 @@ public class RuntimeService {
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_TX_HASH, txHash));
+            if (round != null) {
+                boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_TRANSACTION_ROUND, round));
+            }
             searchSourceBuilder.query(boolQueryBuilder);
             searchSourceBuilder.sort(RUNTIME_TRANSACTION_RESULT, SortOrder.DESC);
             searchSourceBuilder.sort(RUNTIME_TRANSACTION_ROUND, SortOrder.DESC);

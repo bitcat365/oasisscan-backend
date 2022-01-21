@@ -184,7 +184,9 @@ public class ScanChainService {
                                             txMap.put(tx.getTx_hash(), Mappers.map(tx));
 
                                             //update account info
-                                            updateAccountInfo(tx);
+                                            if (!fix) {
+                                                updateAccountInfo(tx);
+                                            }
                                         }
                                     }
                                 }

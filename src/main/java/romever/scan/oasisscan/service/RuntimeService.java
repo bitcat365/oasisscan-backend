@@ -43,10 +43,7 @@ import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.Node;
-import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
-import romever.scan.oasisscan.vo.chain.runtime.EventLog;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.ListRuntimeStatsResponse;
 import romever.scan.oasisscan.vo.response.RuntimeResponse;
@@ -442,12 +439,12 @@ public class RuntimeService {
                                 to = ctx.getTo();
                             }
 
-//                            if (Texts.isNotBlank(from)) {
-//                                RuntimeEventES eventES = findEvents(from, to, ctx.getNonce(), amount);
-//                                if (eventES != null) {
-//                                    response.setEvents(Lists.newArrayList(eventES));
-//                                }
-//                            }
+                            if (Texts.isNotBlank(from)) {
+                                RuntimeEventES eventES = findEvents(from, ctx.getNonce());
+                                if (eventES != null) {
+                                    response.setEvents(eventES);
+                                }
+                            }
 
 //                            List<AbstractRuntimeTransaction.Event> events = tx.getEvents();
 //                            if (!CollectionUtils.isEmpty(events)) {
@@ -486,6 +483,50 @@ public class RuntimeService {
             log.error("error", e);
         }
         return response;
+    }
+
+    public RuntimeEventES findEvents(String from, long nonce) {
+        RuntimeEventES eventES = null;
+        try {
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
+            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
+            searchSourceBuilder.query(boolQueryBuilder);
+            searchSourceBuilder.size(1);
+            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), searchSourceBuilder);
+            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+                SearchHits hits = searchResponse.getHits();
+                SearchHit[] searchHits = hits.getHits();
+                for (SearchHit hit : searchHits) {
+                    eventES = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeEventES>() {
+                    });
+                    if (eventES != null) {
+                        String typeHex = eventES.getType();
+                        if (typeHex.contains(Constants.RUNTIME_TX_DEPOSIT_HEX)) {
+                            eventES.setType("deposit");
+                        } else if (typeHex.contains(Constants.RUNTIME_TX_WITHDRAW_HEX)) {
+                            eventES.setType("withdraw");
+                        } else {
+                            return null;
+                        }
+
+                        List<String> hexAmounts = eventES.getAmount();
+                        List<String> numberAmounts = Lists.newArrayList();
+                        if (!CollectionUtils.isEmpty(hexAmounts)) {
+                            String a = hexAmounts.get(0);
+                            if (Texts.isNotBlank(a)) {
+                                numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(a)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+                            }
+                        }
+                        eventES.setAmount(numberAmounts);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("error", e);
+        }
+        return eventES;
     }
 
 //    public RuntimeEventES findEvents(String from, String to, long nonce, String amount) {

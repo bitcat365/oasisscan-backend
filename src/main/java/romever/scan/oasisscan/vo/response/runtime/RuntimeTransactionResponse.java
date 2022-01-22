@@ -19,7 +19,7 @@ public class RuntimeTransactionResponse {
     private Consensus ctx;
     private Ethereum etx;
 
-    private List<RuntimeEventES> events;
+    private RuntimeEventES events;
 
     @Data
     public static class Consensus {

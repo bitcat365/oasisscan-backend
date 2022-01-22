@@ -35,8 +35,6 @@ public interface ESFields {
     String RUNTIME_TRANSACTION_RESULT = "result";
 
     //runtime event
-    String RUNTIME_EVENT_FROM = "logs.from";
-    String RUNTIME_EVENT_TO = "logs.to";
-    String RUNTIME_EVENT_NONCE = "logs.nonce";
-    String RUNTIME_EVENT_AMOUNT = "logs.amount";
+    String RUNTIME_EVENT_FROM = "from";
+    String RUNTIME_EVENT_NONCE = "nonce";
 }

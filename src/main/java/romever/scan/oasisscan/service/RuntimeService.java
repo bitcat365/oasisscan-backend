@@ -431,12 +431,10 @@ public class RuntimeService {
                                     if (!CollectionUtils.isEmpty(logs)) {
                                         EventLog eventLog = logs.get(0);
                                         from = eventLog.getFrom();
-                                        to = eventLog.getTo();
                                     }
                                 }
                             } else {
                                 from = ctx.getFrom();
-                                to = ctx.getTo();
                             }
 
                             if (Texts.isNotBlank(from)) {

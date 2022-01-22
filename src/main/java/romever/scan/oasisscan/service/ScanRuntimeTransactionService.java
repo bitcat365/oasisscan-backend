@@ -276,9 +276,9 @@ public class ScanRuntimeTransactionService {
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
     public void scanEvents() throws Exception {
-//        if (applicationConfig.isLocal()) {
-//            return;
-//        }
+        if (applicationConfig.isLocal()) {
+            return;
+        }
 
         String emerald = null;
         if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {

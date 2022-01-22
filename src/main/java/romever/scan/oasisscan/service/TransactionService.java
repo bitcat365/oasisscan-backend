@@ -109,6 +109,8 @@ public class TransactionService {
                             .should(QueryBuilders.termQuery(TRANSACTION_ESCROW_ACCOUNT, address))
                             .should(QueryBuilders.termQuery(TRANSACTION_BODY_SIG_PUBLIC_KEY, address))
                             .should(QueryBuilders.termQuery(TRANSACTION_TRANSFER_TO, address))
+                            .should(QueryBuilders.termQuery(TRANSACTION_EVENT_STAKING_FROM, address))
+                            .should(QueryBuilders.termQuery(TRANSACTION_EVENT_STAKING_TO, address))
             );
 
             //runtime transactions

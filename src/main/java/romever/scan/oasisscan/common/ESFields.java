@@ -19,6 +19,8 @@ public interface ESFields {
     String TRANSACTION_METHOD = "method";
     String TRANSACTION_RATE_EPOCH_START = "body.amendment.rates.start";
     String TRANSACTION_ERROR_MESSAGE = "error.message";
+    String TRANSACTION_EVENT_STAKING_FROM = "events.staking.transfer.from";
+    String TRANSACTION_EVENT_STAKING_TO = "events.staking.transfer.to";
 
     //runtime
     String RUNTIME_ROUND_NAMESPACE = "namespace";

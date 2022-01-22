@@ -15,6 +15,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -275,9 +276,9 @@ public class ScanRuntimeTransactionService {
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
     public void scanEvents() throws Exception {
-        if (applicationConfig.isLocal()) {
-            return;
-        }
+//        if (applicationConfig.isLocal()) {
+//            return;
+//        }
 
         String emerald = null;
         if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
@@ -334,37 +335,43 @@ public class ScanRuntimeTransactionService {
                     }));
                 }
                 if (!CollectionUtils.isEmpty(eventLogs)) {
-                    for (EventLog log : eventLogs) {
+                    for (int logIndex = 0; logIndex < eventLogs.size(); logIndex++) {
+                        EventLog log = eventLogs.get(logIndex);
+
+                        RuntimeEventES eventES = new RuntimeEventES();
+                        BeanUtils.copyProperties(log, eventES);
+                        eventES.setType(event.getKey());
+                        eventES.setTx_hash(event.getTx_hash());
+                        eventES.setRound(scanRound);
+                        eventES.setPosition((long) logIndex);
+                        eventES.setI((long) logIndex);
+
                         if (Texts.isNotBlank(log.getFrom())) {
                             String from = apiClient.base64ToBech32Address(log.getFrom());
                             if (Texts.isBlank(from)) {
                                 throw new RuntimeException(String.format("address parse failed, %s", scanRound));
                             }
-                            log.setFrom(from);
+                            eventES.setFrom(from);
                         }
                         if (Texts.isNotBlank(log.getTo())) {
                             String to = apiClient.base64ToBech32Address(log.getTo());
                             if (Texts.isBlank(to)) {
                                 throw new RuntimeException(String.format("address parse failed, %s", scanRound));
                             }
-                            log.setTo(to);
+                            eventES.setTo(to);
                         }
                         if (Texts.isNotBlank(log.getOwner())) {
                             String owner = apiClient.base64ToBech32Address(log.getOwner());
                             if (Texts.isBlank(owner)) {
                                 throw new RuntimeException(String.format("address parse failed, %s", scanRound));
                             }
-                            log.setOwner(owner);
+                            eventES.setOwner(owner);
                         }
+
+                        String esId = runtimeId + "_" + scanRound + "_" + i + "_" + logIndex;
+                        eventMap.put(esId, Mappers.map(eventES));
                     }
                 }
-
-                RuntimeEventES eventES = new RuntimeEventES();
-                eventES.setType(event.getKey());
-                eventES.setTx_hash(event.getTx_hash());
-                eventES.setLogs(eventLogs);
-                String esId = runtimeId + "_" + scanRound + "_" + i;
-                eventMap.put(esId, Mappers.map(eventES));
             }
 
             if (!CollectionUtils.isEmpty(eventMap)) {

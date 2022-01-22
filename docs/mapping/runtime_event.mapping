@@ -18,25 +18,30 @@ PUT /runtime_event
             "tx_hash": {
                 "type": "keyword"
             },
-            "logs": {
-                "properties": {
-                    "from": {
-                        "type": "keyword"
-                    },
-                    "to": {
-                        "type": "keyword"
-                    },
-                    "owner": {
-                        "type": "keyword"
-                    },
-                    "nonce": {
-                        "type": "long",
-                        "ignore_malformed": true
-                    },
-                    "amount": {
-                        "type": "keyword"
-                    }
-                }
+            "round": {
+                "type": "long"
+            },
+            "position": {
+                "type": "long"
+            },
+            "i": {
+                "type": "long"
+            },
+            "from": {
+                "type": "keyword"
+            },
+            "to": {
+                "type": "keyword"
+            },
+            "owner": {
+                "type": "keyword"
+            },
+            "nonce": {
+                "type": "long",
+                "ignore_malformed": true
+            },
+            "amount": {
+                "type": "keyword"
             }
         }
     }

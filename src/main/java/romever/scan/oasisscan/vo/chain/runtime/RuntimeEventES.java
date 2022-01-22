@@ -8,6 +8,14 @@ import java.util.List;
 public class RuntimeEventES {
     private String type;
     private String tx_hash;
+    private Long round;
+    private Long position;
+    private Long i;
 
-    private List<EventLog> logs;
+    private String from;
+    private String to;
+    private String owner;
+    private Long nonce;
+    private List<String> amount;
+    private EventLog.Error error;
 }

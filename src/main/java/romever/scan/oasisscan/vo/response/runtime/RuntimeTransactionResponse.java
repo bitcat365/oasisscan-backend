@@ -1,7 +1,6 @@
 package romever.scan.oasisscan.vo.response.runtime;
 
 import lombok.Data;
-import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeEventES;
 
 import java.util.List;

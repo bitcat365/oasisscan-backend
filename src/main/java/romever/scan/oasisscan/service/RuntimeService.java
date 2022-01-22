@@ -13,15 +13,12 @@ import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortBuilder;
-import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +30,28 @@ import romever.scan.oasisscan.common.ESFields;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
-import romever.scan.oasisscan.entity.*;
 import romever.scan.oasisscan.entity.Runtime;
-import romever.scan.oasisscan.repository.*;
+import romever.scan.oasisscan.entity.RuntimeStatsInfo;
+import romever.scan.oasisscan.entity.RuntimeStatsType;
+import romever.scan.oasisscan.entity.ValidatorInfo;
+import romever.scan.oasisscan.repository.RuntimeNodeRepository;
+import romever.scan.oasisscan.repository.RuntimeRepository;
+import romever.scan.oasisscan.repository.RuntimeStatsInfoRepository;
+import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.Node;
-import romever.scan.oasisscan.vo.chain.runtime.*;
+import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
+import romever.scan.oasisscan.vo.chain.runtime.EventLog;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
+import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
-import romever.scan.oasisscan.vo.response.*;
+import romever.scan.oasisscan.vo.response.ListRuntimeStatsResponse;
+import romever.scan.oasisscan.vo.response.RuntimeResponse;
+import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
+import romever.scan.oasisscan.vo.response.RuntimeStatsResponse;
 import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
 import romever.scan.oasisscan.vo.response.runtime.RuntimeTransactionResponse;
 
@@ -480,64 +488,64 @@ public class RuntimeService {
         return response;
     }
 
-    public RuntimeEventES findEvents(String from, String to, long nonce, String amount) {
-        RuntimeEventES eventES = null;
-        try {
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
-            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_TO, to));
-            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
-            if (Texts.isNotBlank(amount)) {
-                boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_AMOUNT, amount));
-            }
-            searchSourceBuilder.query(boolQueryBuilder);
-            searchSourceBuilder.size(1);
-            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), searchSourceBuilder);
-            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
-                SearchHits hits = searchResponse.getHits();
-                SearchHit[] searchHits = hits.getHits();
-                for (SearchHit hit : searchHits) {
-                    eventES = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeEventES>() {
-                    });
-                    if (eventES != null) {
-                        List<EventLog> logs = eventES.getLogs();
-                        if (CollectionUtils.isEmpty(logs)) {
-                            return null;
-                        }
-                        String typeHex = eventES.getType();
-                        if (typeHex.contains(Constants.RUNTIME_TX_DEPOSIT_HEX)) {
-                            eventES.setType("deposit");
-                        } else if (typeHex.contains(Constants.RUNTIME_TX_WITHDRAW_HEX)) {
-                            eventES.setType("withdraw");
-                        } else {
-                            return null;
-                        }
-                        List<EventLog> el = Lists.newArrayList();
-                        for (EventLog eventLog : logs) {
-                            if (!eventLog.getFrom().equals(from)) {
-                                continue;
-                            }
-                            List<String> hexAmounts = eventLog.getAmount();
-                            List<String> numberAmounts = Lists.newArrayList();
-                            if (!CollectionUtils.isEmpty(hexAmounts)) {
-                                String a = hexAmounts.get(0);
-                                if (Texts.isNotBlank(a)) {
-                                    numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(a)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
-                                }
-                            }
-                            eventLog.setAmount(numberAmounts);
-                            el.add(eventLog);
-                        }
-                        eventES.setLogs(el);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("error", e);
-        }
-        return eventES;
-    }
+//    public RuntimeEventES findEvents(String from, String to, long nonce, String amount) {
+//        RuntimeEventES eventES = null;
+//        try {
+//            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+//            BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+//            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_FROM, from));
+//            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_TO, to));
+//            boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_NONCE, nonce));
+//            if (Texts.isNotBlank(amount)) {
+//                boolQueryBuilder.filter(QueryBuilders.termQuery(RUNTIME_EVENT_AMOUNT, amount));
+//            }
+//            searchSourceBuilder.query(boolQueryBuilder);
+//            searchSourceBuilder.size(1);
+//            SearchResponse searchResponse = JestDao.search(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), searchSourceBuilder);
+//            if (searchResponse.getTotalShards() == searchResponse.getSuccessfulShards()) {
+//                SearchHits hits = searchResponse.getHits();
+//                SearchHit[] searchHits = hits.getHits();
+//                for (SearchHit hit : searchHits) {
+//                    eventES = Mappers.parseJson(hit.getSourceAsString(), new TypeReference<RuntimeEventES>() {
+//                    });
+//                    if (eventES != null) {
+//                        List<EventLog> logs = eventES.getLogs();
+//                        if (CollectionUtils.isEmpty(logs)) {
+//                            return null;
+//                        }
+//                        String typeHex = eventES.getType();
+//                        if (typeHex.contains(Constants.RUNTIME_TX_DEPOSIT_HEX)) {
+//                            eventES.setType("deposit");
+//                        } else if (typeHex.contains(Constants.RUNTIME_TX_WITHDRAW_HEX)) {
+//                            eventES.setType("withdraw");
+//                        } else {
+//                            return null;
+//                        }
+//                        List<EventLog> el = Lists.newArrayList();
+//                        for (EventLog eventLog : logs) {
+//                            if (!eventLog.getFrom().equals(from)) {
+//                                continue;
+//                            }
+//                            List<String> hexAmounts = eventLog.getAmount();
+//                            List<String> numberAmounts = Lists.newArrayList();
+//                            if (!CollectionUtils.isEmpty(hexAmounts)) {
+//                                String a = hexAmounts.get(0);
+//                                if (Texts.isNotBlank(a)) {
+//                                    numberAmounts.add(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64(a)), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
+//                                }
+//                            }
+//                            eventLog.setAmount(numberAmounts);
+//                            el.add(eventLog);
+//                        }
+//                        eventES.setLogs(el);
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("error", e);
+//        }
+//        return eventES;
+//    }
 
     @Cached(expire = 15, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public RuntimeTransactionResponse transactionInfo(String txHash) {

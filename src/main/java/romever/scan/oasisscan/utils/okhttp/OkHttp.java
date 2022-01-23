@@ -45,9 +45,9 @@ public class OkHttp {
     private Headers responseHeaders;
     private Response response;
 
-    private static final int CONN_TIMEOUT = 600;
-    private static final int WRITE_TIMEOUT = 600;
-    private static final int READ_TIMEOUT = 600;
+    private static final int CONN_TIMEOUT = 1200;
+    private static final int WRITE_TIMEOUT = 1200;
+    private static final int READ_TIMEOUT = 1200;
     public static final int MAX_IDLE_CONNECTIONS = 50;
 
     //    private static OkHttpClient client = getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);

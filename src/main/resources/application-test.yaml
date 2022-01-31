@@ -51,7 +51,7 @@ application:
   validator:
     git-info: https://api.github.com/repos/oasisprotocol/metadata-registry/contents/registry/entity
     keybase-json: https://keybase.io/_/api/1.0/user/lookup.json
-  upgrade-start-height: 3027601
+  upgrade-start-height: 3398334
 
 elasticsearch:
   hosts:
@@ -64,3 +64,4 @@ elasticsearch:
   runtime-round-index: runtime_round_test
   runtime-transaction-index: runtime_transaction_test
   runtime-event-index: runtime_event_test
+  staking-event-index: staking_event_test

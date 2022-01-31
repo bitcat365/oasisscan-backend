@@ -63,7 +63,7 @@ public class ScanRuntimeTransactionService {
      * Currently only scan emerald transactions
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    public void scanTransaction() throws IOException {
+    public void scanTransaction() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -235,20 +235,20 @@ public class ScanRuntimeTransactionService {
 //                    String esId = runtimeId + "_" + txHash;
                     String esId = runtimeId + "_" + scanRound + "_" + i;
                     txMap.put(esId, Mappers.map(transaction));
-                    if (!CollectionUtils.isEmpty(txMap)) {
-                        BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), txMap);
-                        for (BulkItemResponse bulkItemResponse : bulkResponse) {
-                            if (bulkItemResponse.isFailed()) {
-                                BulkItemResponse.Failure failure = bulkItemResponse.getFailure();
-                                log.error(failure.getMessage());
-                                throw failure.getCause();
-                            }
-                        }
-                    }
-
                 } catch (Exception e) {
                     log.error(String.format("error, %s, %s, %s", runtimeId, scanRound, r.getTx()), e);
                     return;
+                }
+            }
+
+            if (!CollectionUtils.isEmpty(txMap)) {
+                BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeTransactionIndex(), txMap);
+                for (BulkItemResponse bulkItemResponse : bulkResponse) {
+                    if (bulkItemResponse.isFailed()) {
+                        BulkItemResponse.Failure failure = bulkItemResponse.getFailure();
+                        log.error(failure.getMessage());
+                        throw failure.getCause();
+                    }
                 }
             }
 

@@ -34,6 +34,7 @@ public class ElasticsearchConfig {
     private String runtimeRoundIndex;
     private String runtimeTransactionIndex;
     private String runtimeEventIndex;
+    private String stakingEventIndex;
 
     @Bean
     public RestClientBuilder restClientBuilder() {

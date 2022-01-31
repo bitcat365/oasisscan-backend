@@ -12,6 +12,8 @@ public interface Constants {
     String SYSTEM_RUNTIME_EVENT_ROUND_PREFIX = "runtime_event_round_";
     String SYSTEM_RUNTIME_ROUND_PREFIX = "runtime_round_";
     String SYSTEM_RUNTIME_TX_HEIGHT_PREFIX = "runtime_tx_round_";
+    String SCAN_START_HEIGHT_PROPERTY = "scan_start_height";
+    String SCAN_STAKING_EVENT_HEIGHT_PROPERTY = "scan_staking_event_height";
 
     int EMERALD_DECIMALS = 18;
 

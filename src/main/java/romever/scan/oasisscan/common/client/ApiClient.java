@@ -242,6 +242,22 @@ public class ApiClient {
         return accounts;
     }
 
+    public List<StakingEvent> stakingEvents(Long height) throws IOException {
+        List<StakingEvent> events = null;
+        String url = String.format("%s/api/staking/events/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<List<StakingEvent>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<StakingEvent>>>() {
+        });
+        if (result != null) {
+            events = result.getResult();
+        }
+        return events;
+    }
+
     public List<SchedulerValidator> schedulerValidators(Long height) throws IOException {
         List<SchedulerValidator> validators = Lists.newArrayList();
         String url = String.format("%s/api/scheduler/validators/", api);

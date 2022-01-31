@@ -64,3 +64,4 @@ elasticsearch:
   runtime-round-index: runtime_round
   runtime-transaction-index: runtime_transaction
   runtime-event-index: runtime_event
+  staking-event-index: staking_event

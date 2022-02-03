@@ -39,4 +39,18 @@ public interface ESFields {
     //runtime event
     String RUNTIME_EVENT_FROM = "from";
     String RUNTIME_EVENT_NONCE = "nonce";
+
+    //staking event
+    String STAKING_EVENT_TRANSFER_FROM = "transfer.from";
+    String STAKING_EVENT_TRANSFER_TO = "transfer.to";
+    String STAKING_EVENT_BURN_OWNER = "burn_owner";
+    String STAKING_EVENT_ESCROW_ADD_OWNER = "escrow.add.owner";
+    String STAKING_EVENT_ESCROW_ADD_ESCROW = "escrow.add.escrow";
+    String STAKING_EVENT_ESCROW_TAKE_OWNER = "escrow.take.owner";
+    String STAKING_EVENT_ESCROW_DEBONDING_START_OWNER = "escrow.debonding_start.owner";
+    String STAKING_EVENT_ESCROW_DEBONDING_START_ESCROW = "escrow.debonding_start.escrow";
+    String STAKING_EVENT_ESCROW_RECLAIM_OWNER = "escrow.reclaim.owner";
+    String STAKING_EVENT_ESCROW_RECLAIM_ESCROW = "escrow.reclaim.escrow";
+    String STAKING_EVENT_ALLOWANCE_CHANGE_OWNER = "allowance_change.owner";
+    String STAKING_EVENT_ALLOWANCE_CHANGE_BENEFICIARY = "allowance_change.beneficiary";
 }

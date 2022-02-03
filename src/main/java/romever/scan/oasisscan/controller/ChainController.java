@@ -26,6 +26,8 @@ public class ChainController {
     private SearchService searchService;
     @Autowired
     private ScanChainService scanChainService;
+    @Autowired
+    private StakingEventService stakingEventService;
 
     @ApiOperation("Transaction list")
     @GetMapping("/transactions")
@@ -158,5 +160,22 @@ public class ChainController {
     public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) throws IOException {
         scanChainService.syncBlock(start, end, true);
         return ApiResult.ok();
+    }
+
+    @GetMapping("/staking/events")
+    public ApiResult stakingEvents(
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "address") String address) {
+        if (size > 5000) {
+            return ApiResult.err("size must be less than 5000");
+        }
+        return stakingEventService.stakingEvents(size, page, address);
+    }
+
+    @GetMapping("/staking/events/info")
+    public ApiResult stakingEvents(
+            @RequestParam(value = "id") String id) {
+        return ApiResult.ok(stakingEventService.stakingEventInfo(id));
     }
 }

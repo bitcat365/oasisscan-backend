@@ -27,6 +27,8 @@
 * [runtime-transactions](#runtime-transactions)
 * [runtime-transaction-info](#runtime-transaction-info)
 * [account-runtime-transactions](#account-runtime-transactions)
+* [staking-events](#staking-events)
+* [staking-events-info](#staking-events-info)
 
 ### validator stats
 
@@ -1245,6 +1247,74 @@ Params
         "size": 10,
         "maxPage": 28,
         "totalSize": 278
+    }
+}
+```
+
+### staking-events
+
+```
+// Request
+GET http://localhost:8181/chain/staking/events
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| address  | account address |
+| size  | option,default:10 |
+| page  | option,default:1 |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "id": "8038022_0",
+                "height": 8038022,
+                "tx_hash": "5a21eb3aefbefc55dbd22ef67bf205c283ec23c997e4f794669fb4db9fdd0c58"
+            }
+        ],
+        "page": 1,
+        "size": 10,
+        "maxPage": 1,
+        "totalSize": 1
+    }
+}
+```
+
+### staking-events-info
+
+```
+// Request
+GET http://localhost:8181/chain/staking/events/info
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | id |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "height": 8038022,
+        "tx_hash": "5a21eb3aefbefc55dbd22ef67bf205c283ec23c997e4f794669fb4db9fdd0c58",
+        "transfer": {
+            "from": "oasis1qzjm0zwfg4egs9kk4d9rkujudzk8pjp5rvxyr3ag",
+            "to": "oasis1qqw5qhuqkg88grepr2crvwrupwzyvwn07yt728ht",
+            "amount": "405000000000"
+        }
     }
 }
 ```

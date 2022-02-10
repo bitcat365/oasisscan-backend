@@ -394,11 +394,12 @@ public class ScanValidatorService {
         if (applicationConfig.isLocal()) {
             return;
         }
+        syncDelegator();
+
         log.info("genesis sync start...");
         StakingGenesis stakingGenesis = apiClient.stakingGenesis(null);
         if (stakingGenesis != null) {
             log.info("staking genesis sync start...");
-            syncDelegator(stakingGenesis);
             syncDebonding(stakingGenesis);
             syncAccounts(stakingGenesis);
         }
@@ -452,20 +453,49 @@ public class ScanValidatorService {
         }
     }
 
+//    @Transactional(rollbackFor = Exception.class)
+//    public void syncDelegator(StakingGenesis stakingGenesis) {
+//        Map<String, Map<String, Delegations>> delegations = stakingGenesis.getDelegations();
+//        if (!CollectionUtils.isEmpty(delegations)) {
+//            List<Delegator> saveList = Lists.newArrayList();
+//            for (Map.Entry<String, Map<String, Delegations>> entry : delegations.entrySet()) {
+//                String validator = entry.getKey();
+//                Map<String, Delegations> delegationsMap = entry.getValue();
+//                if (!CollectionUtils.isEmpty(delegationsMap)) {
+//                    for (Map.Entry<String, Delegations> delegationsEntry : delegationsMap.entrySet()) {
+//                        String delegatorId = delegationsEntry.getKey();
+//                        Delegator delegator = delegatorRepository.findByValidatorAndDelegator(validator, delegatorId).orElse(new Delegator());
+//                        String shares = delegationsEntry.getValue().getShares();
+//                        delegator.setValidator(validator);
+//                        delegator.setDelegator(delegatorId);
+//                        delegator.setShares(shares);
+//                        saveList.add(delegator);
+//                    }
+//                }
+//            }
+//            if (!CollectionUtils.isEmpty(saveList)) {
+//                delegatorRepository.deleteAll();
+//                delegatorRepository.saveAll(saveList);
+//                log.info("delegators sync done, size: {}", saveList.size());
+//            }
+//        }
+//    }
+
     @Transactional(rollbackFor = Exception.class)
-    public void syncDelegator(StakingGenesis stakingGenesis) {
-        Map<String, Map<String, Delegations>> delegations = stakingGenesis.getDelegations();
-        if (!CollectionUtils.isEmpty(delegations)) {
+    public void syncDelegator() throws IOException {
+        List<ValidatorInfo> validatorInfos = validatorInfoRepository.findAll();
+        if (!CollectionUtils.isEmpty(validatorInfos)) {
+            log.info("delegators sync start, size: {}", validatorInfos.size());
             List<Delegator> saveList = Lists.newArrayList();
-            for (Map.Entry<String, Map<String, Delegations>> entry : delegations.entrySet()) {
-                String validator = entry.getKey();
-                Map<String, Delegations> delegationsMap = entry.getValue();
+            for (ValidatorInfo validatorInfo : validatorInfos) {
+                String v = validatorInfo.getEntityAddress();
+                Map<String, Delegations> delegationsMap = apiClient.delegationsTo(v, null);
                 if (!CollectionUtils.isEmpty(delegationsMap)) {
                     for (Map.Entry<String, Delegations> delegationsEntry : delegationsMap.entrySet()) {
                         String delegatorId = delegationsEntry.getKey();
-                        Delegator delegator = delegatorRepository.findByValidatorAndDelegator(validator, delegatorId).orElse(new Delegator());
+                        Delegator delegator = delegatorRepository.findByValidatorAndDelegator(v, delegatorId).orElse(new Delegator());
                         String shares = delegationsEntry.getValue().getShares();
-                        delegator.setValidator(validator);
+                        delegator.setValidator(v);
                         delegator.setDelegator(delegatorId);
                         delegator.setShares(shares);
                         saveList.add(delegator);

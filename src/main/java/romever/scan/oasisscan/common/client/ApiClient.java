@@ -178,6 +178,23 @@ public class ApiClient {
         return delegations;
     }
 
+    public Map<String, Delegations> delegationsTo(String address, Long height) throws IOException {
+        Map<String, Delegations> delegations = null;
+        String url = String.format("%s/api/staking/delegationsto/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("ownerKey", Texts.urlEncode(address));
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<Map<String, Delegations>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<Map<String, Delegations>>>() {
+        });
+        if (result != null) {
+            delegations = result.getResult();
+        }
+        return delegations;
+    }
+
     public StakingGenesis stakingGenesis(Long height) throws IOException {
         StakingGenesis stakingGenesis = null;
         String url = String.format("%s/api/staking/genesis/", api);

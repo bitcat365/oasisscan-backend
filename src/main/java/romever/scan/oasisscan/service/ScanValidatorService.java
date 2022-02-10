@@ -397,10 +397,9 @@ public class ScanValidatorService {
         log.info("genesis sync start...");
         StakingGenesis stakingGenesis = apiClient.stakingGenesis(null);
         if (stakingGenesis != null) {
-
+            log.info("staking genesis sync start...");
             syncDelegator(stakingGenesis);
             syncDebonding(stakingGenesis);
-
             syncAccounts(stakingGenesis);
         }
     }

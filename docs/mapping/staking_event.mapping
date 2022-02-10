@@ -1,4 +1,5 @@
-PUT /staking_event
+PUT /staking_event_main/_alias/staking_event
+PUT /staking_event_main
 {
     "settings": {
         "index": {

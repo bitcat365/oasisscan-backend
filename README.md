@@ -1277,7 +1277,8 @@ Params
             {
                 "id": "8038022_0",
                 "height": 8038022,
-                "tx_hash": "5a21eb3aefbefc55dbd22ef67bf205c283ec23c997e4f794669fb4db9fdd0c58"
+                "tx_hash": "5a21eb3aefbefc55dbd22ef67bf205c283ec23c997e4f794669fb4db9fdd0c58",
+                "type": "transfer"
             }
         ],
         "page": 1,
@@ -1314,7 +1315,8 @@ Params
             "from": "oasis1qzjm0zwfg4egs9kk4d9rkujudzk8pjp5rvxyr3ag",
             "to": "oasis1qqw5qhuqkg88grepr2crvwrupwzyvwn07yt728ht",
             "amount": "405000000000"
-        }
+        },
+        "type": "transfer"
     }
 }
 ```

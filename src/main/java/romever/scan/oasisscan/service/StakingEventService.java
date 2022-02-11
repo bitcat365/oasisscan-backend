@@ -3,13 +3,11 @@ package romever.scan.oasisscan.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -18,19 +16,11 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import romever.scan.oasisscan.common.ApiResult;
-import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
-import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.utils.Mappers;
-import romever.scan.oasisscan.vo.MethodEnum;
 import romever.scan.oasisscan.vo.chain.StakingEvent;
-import romever.scan.oasisscan.vo.chain.Transaction;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeRound;
-import romever.scan.oasisscan.vo.response.AccountSimple;
 import romever.scan.oasisscan.vo.response.ListStakingEventResponse;
-import romever.scan.oasisscan.vo.response.ListTransactionResponse;
-import romever.scan.oasisscan.vo.response.RuntimeRoundResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,6 +76,7 @@ public class StakingEventService {
                     }
                     BeanUtils.copyProperties(se, response);
                     response.setId(hit.getId());
+                    response.setType(getType(se));
                     responses.add(response);
                 }
             }
@@ -103,11 +94,27 @@ public class StakingEventService {
             if (getResponse.isExists()) {
                 stakingEvent = Mappers.parseJson(getResponse.getSourceAsString(), new TypeReference<StakingEvent>() {
                 });
+                if (stakingEvent != null) {
+                    stakingEvent.setType(getType(stakingEvent));
+                }
             }
         } catch (IOException e) {
             log.error("error", e);
         }
         return stakingEvent;
+    }
+
+    private String getType(StakingEvent stakingEvent) {
+        if (stakingEvent.getTransfer() != null) {
+            return "transfer";
+        } else if (stakingEvent.getEscrow() != null) {
+            return "escrow";
+        } else if (stakingEvent.getBurn() != null) {
+            return "burn";
+        } else if (stakingEvent.getAllowance_change() != null) {
+            return "allowance change";
+        }
+        return "unknown";
     }
 
 }

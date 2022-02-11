@@ -12,6 +12,7 @@ public class StakingEvent {
     private BurnEvent burn;
     private EscrowEvent escrow;
     private AllowanceChangeEvent allowance_change;
+    private String type;
 
     @Data
     public static class TransferEvent {

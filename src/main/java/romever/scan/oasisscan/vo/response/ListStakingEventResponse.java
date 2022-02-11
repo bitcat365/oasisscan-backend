@@ -7,4 +7,5 @@ public class ListStakingEventResponse {
     private String id;
     private Long height;
     private String tx_hash;
+    private String type;
 }

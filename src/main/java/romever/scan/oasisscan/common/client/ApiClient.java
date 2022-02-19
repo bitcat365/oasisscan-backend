@@ -195,8 +195,8 @@ public class ApiClient {
         return delegations;
     }
 
-    public Map<String, Debonding> debondingdelegations(String address, Long height) throws IOException {
-        Map<String, Debonding> debondingMap = null;
+    public Map<String, List<Debonding>> debondingdelegations(String address, Long height) throws IOException {
+        Map<String, List<Debonding>> debondingMap = null;
         String url = String.format("%s/api/staking/debondingdelegations/", api);
         Map<String, Object> params = Maps.newHashMap();
         params.put("name", this.name);
@@ -204,7 +204,7 @@ public class ApiClient {
         if (height != null) {
             params.put("height", height);
         }
-        Result<Map<String, Debonding>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<Map<String, Debonding>>>() {
+        Result<Map<String, List<Debonding>>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<Map<String, List<Debonding>>>>() {
         });
         if (result != null) {
             debondingMap = result.getResult();

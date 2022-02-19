@@ -38,4 +38,16 @@ public class AccountResponse {
         response.setTotal(Texts.formatDecimals(String.valueOf(total), Constants.DECIMALS, scale));
         return response;
     }
+
+    public static AccountResponse of(String address, long available, long escrow, long debonding, int scale) {
+        AccountResponse response = new AccountResponse();
+        response.setAddress(address);
+        response.setAvailable(Texts.formatDecimals(String.valueOf(available), Constants.DECIMALS, scale));
+        response.setEscrow(Texts.formatDecimals(String.valueOf(escrow), Constants.DECIMALS, scale));
+        response.setDebonding(Texts.formatDecimals(String.valueOf(debonding), Constants.DECIMALS, scale));
+        double total = available + escrow + debonding;
+        total = Numeric.add(total, Double.parseDouble(response.getDebonding()));
+        response.setTotal(Texts.formatDecimals(String.valueOf(total), Constants.DECIMALS, scale));
+        return response;
+    }
 }

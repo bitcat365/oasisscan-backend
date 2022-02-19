@@ -35,10 +35,12 @@ import romever.scan.oasisscan.repository.DebondingRepository;
 import romever.scan.oasisscan.repository.DelegatorRepository;
 import romever.scan.oasisscan.repository.ValidatorInfoRepository;
 import romever.scan.oasisscan.utils.Mappers;
+import romever.scan.oasisscan.utils.MemoryPageUtil;
 import romever.scan.oasisscan.utils.Numeric;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.vo.RuntimeTransactionType;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
+import romever.scan.oasisscan.vo.chain.Delegations;
 import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
@@ -107,10 +109,43 @@ public class AccountService {
 //            if (optional.isPresent()) {
 //                response = AccountResponse.of(optional.get(), Constants.DECIMALS);
 //            }
-                Account accountDb = scanValidatorService.getAccount(address, accountInfo);
-                if (accountDb != null) {
-                    response = AccountResponse.of(accountDb, Constants.DECIMALS);
+
+                //escrow
+                double totalEscrow = 0;
+                Map<String, Delegations> delegationsMap = apiClient.delegations(address, null);
+                if (!CollectionUtils.isEmpty(delegationsMap)) {
+                    for (Map.Entry<String, Delegations> entry : delegationsMap.entrySet()) {
+                        double shares = Double.parseDouble(Texts.formatDecimals(entry.getValue().getShares(), Constants.DECIMALS, 9));
+
+                        String validator = entry.getKey();
+                        AccountInfo validatorInfo = apiClient.accountInfo(validator, null);
+                        //tokens = shares * balance / total_shares
+                        double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow().getActive().getTotal_shares(), Constants.DECIMALS, 9));
+                        double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow().getActive().getBalance(), Constants.DECIMALS, 9));
+                        double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, 9);
+                        totalEscrow = Numeric.add(amount, totalEscrow);
+                    }
                 }
+                long totalEscrowLong = (long) (totalEscrow * Math.pow(10, 9));
+
+                //debonding
+                long totalDebonding = 0;
+                Map<String, romever.scan.oasisscan.vo.chain.Debonding> debondingMap = apiClient.debondingdelegations(address, null);
+                if (!CollectionUtils.isEmpty(debondingMap)) {
+                    for (Map.Entry<String, romever.scan.oasisscan.vo.chain.Debonding> entry : debondingMap.entrySet()) {
+                        totalDebonding += Long.parseLong(entry.getValue().getShares());
+                    }
+                }
+
+                long available = Long.parseLong(accountInfo.getGeneral().getBalance());
+                response = AccountResponse.of(address, available, totalEscrowLong, totalDebonding, Constants.DECIMALS);
+
+
+//                Account accountDb = scanValidatorService.getAccount(address, accountInfo);
+//                if (accountDb != null) {
+//                    response = AccountResponse.of(accountDb, Constants.DECIMALS);
+//                }
+
                 AccountInfo.General general = accountInfo.getGeneral();
                 if (general != null) {
                     response.setNonce(general.getNonce());
@@ -138,25 +173,37 @@ public class AccountService {
         List<AccountDebondingResponse> responses = Lists.newArrayList();
         long total = 0;
         try {
-            total = debondingRepository.countByDelegator(delegator);
-            long currentEpoch = apiClient.epoch(null);
-            if (total > 0) {
-                PageRequest pageRequest = PageRequest.of(page - 1, size);
-                List<Debonding> list = debondingRepository.findByDelegatorOrderByDebondEndAsc(delegator, pageRequest);
-                if (!CollectionUtils.isEmpty(list)) {
-                    for (Debonding debonding : list) {
-                        String validatorAddress = debonding.getValidator();
-                        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
-                        if (optional.isPresent()) {
-                            ValidatorInfo validatorInfo = optional.get();
-                            AccountDebondingResponse response = new AccountDebondingResponse();
-                            response.setValidatorAddress(validatorAddress);
-                            response.setValidatorName(validatorInfo.getName());
-                            response.setIcon(validatorInfo.getIcon());
-                            response.setDebondEnd(debonding.getDebondEnd());
-                            response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
-                            response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
-                            responses.add(response);
+            Map<String, romever.scan.oasisscan.vo.chain.Debonding> debondingMap = apiClient.debondingdelegations(delegator, null);
+            if (!CollectionUtils.isEmpty(debondingMap)) {
+                total = debondingMap.size();
+                long currentEpoch = apiClient.epoch(null);
+                if (total > 0) {
+                    List<Debonding> list = Lists.newArrayList();
+                    for (Map.Entry<String, romever.scan.oasisscan.vo.chain.Debonding> entry : debondingMap.entrySet()) {
+                        Debonding debonding = new Debonding();
+                        debonding.setDelegator(delegator);
+                        debonding.setValidator(entry.getKey());
+                        debonding.setShares(entry.getValue().getShares());
+                        debonding.setDebondEnd(entry.getValue().getDebond_end());
+                        list.add(debonding);
+                    }
+                    list = MemoryPageUtil.pageLimit(list, page, size);
+
+                    if (!CollectionUtils.isEmpty(list)) {
+                        for (Debonding debonding : list) {
+                            String validatorAddress = debonding.getValidator();
+                            Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
+                            if (optional.isPresent()) {
+                                ValidatorInfo validatorInfo = optional.get();
+                                AccountDebondingResponse response = new AccountDebondingResponse();
+                                response.setValidatorAddress(validatorAddress);
+                                response.setValidatorName(validatorInfo.getName());
+                                response.setIcon(validatorInfo.getIcon());
+                                response.setDebondEnd(debonding.getDebondEnd());
+                                response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
+                                response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
+                                responses.add(response);
+                            }
                         }
                     }
                 }

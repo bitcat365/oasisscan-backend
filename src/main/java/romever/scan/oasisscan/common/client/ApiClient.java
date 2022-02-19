@@ -195,6 +195,23 @@ public class ApiClient {
         return delegations;
     }
 
+    public Map<String, Debonding> debondingdelegations(String address, Long height) throws IOException {
+        Map<String, Debonding> debondingMap = null;
+        String url = String.format("%s/api/staking/debondingdelegations/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("ownerKey", Texts.urlEncode(address));
+        if (height != null) {
+            params.put("height", height);
+        }
+        Result<Map<String, Debonding>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<Map<String, Debonding>>>() {
+        });
+        if (result != null) {
+            debondingMap = result.getResult();
+        }
+        return debondingMap;
+    }
+
     public StakingGenesis stakingGenesis(Long height) throws IOException {
         StakingGenesis stakingGenesis = null;
         String url = String.format("%s/api/staking/genesis/", api);

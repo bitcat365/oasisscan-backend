@@ -2,6 +2,7 @@ package romever.scan.oasisscan.service;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -50,6 +51,12 @@ public class ScanEventService {
     @Autowired
     private ScanValidatorService scanValidatorService;
 
+    @Data
+    public static class DirtyList {
+        /** Addresses of accounts that have changed */
+        private Set<String> accounts = Sets.newHashSet();
+    }
+
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
     public void scanEvent() throws Exception {
         if (applicationConfig.isLocal()) {
@@ -74,14 +81,14 @@ public class ScanEventService {
             }
 
             Map<String, Map<String, Object>> txMap = Maps.newHashMap();
-            Set<String> dirtyAccounts = Sets.newHashSet();
+            DirtyList dl = new DirtyList();
             for (int i = 0; i < stakingEvents.size(); i++) {
                 StakingEvent event = stakingEvents.get(i);
                 String esId = scanHeight + "_" + i;
                 txMap.put(esId, Mappers.map(event));
 
                 //update account info
-                dirty(dirtyAccounts, event);
+                dirty(dl, event);
             }
 
             if (!CollectionUtils.isEmpty(txMap)) {
@@ -95,7 +102,7 @@ public class ScanEventService {
                 }
             }
 
-            for (String address : dirtyAccounts) {
+            for (String address : dl.getAccounts()) {
                 updateAccountInfo(address);
             }
 
@@ -104,33 +111,33 @@ public class ScanEventService {
         }
     }
 
-    private void dirty(Set<String> dirtyAccounts, StakingEvent ev) {
+    private void dirty(DirtyList dl, StakingEvent ev) {
         if (ev.getTransfer() != null) {
-            dirtyAccounts.add(ev.getTransfer().getFrom());
-            dirtyAccounts.add(ev.getTransfer().getTo());
+            dl.getAccounts().add(ev.getTransfer().getFrom());
+            dl.getAccounts().add(ev.getTransfer().getTo());
         }
         if (ev.getBurn() != null) {
-            dirtyAccounts.add(ev.getBurn().getOwner());
+            dl.getAccounts().add(ev.getBurn().getOwner());
         }
         if (ev.getEscrow() != null) {
             if (ev.getEscrow().getAdd() != null) {
-                dirtyAccounts.add(ev.getEscrow().getAdd().getOwner());
-                dirtyAccounts.add(ev.getEscrow().getAdd().getEscrow());
+                dl.getAccounts().add(ev.getEscrow().getAdd().getOwner());
+                dl.getAccounts().add(ev.getEscrow().getAdd().getEscrow());
             }
             if (ev.getEscrow().getTake() != null) {
-                dirtyAccounts.add(ev.getEscrow().getTake().getOwner());
+                dl.getAccounts().add(ev.getEscrow().getTake().getOwner());
             }
             if (ev.getEscrow().getDebonding_start() != null) {
-                dirtyAccounts.add(ev.getEscrow().getDebonding_start().getOwner());
-                dirtyAccounts.add(ev.getEscrow().getDebonding_start().getEscrow());
+                dl.getAccounts().add(ev.getEscrow().getDebonding_start().getOwner());
+                dl.getAccounts().add(ev.getEscrow().getDebonding_start().getEscrow());
             }
             if (ev.getEscrow().getReclaim() != null) {
-                dirtyAccounts.add(ev.getEscrow().getReclaim().getOwner());
-                dirtyAccounts.add(ev.getEscrow().getReclaim().getEscrow());
+                dl.getAccounts().add(ev.getEscrow().getReclaim().getOwner());
+                dl.getAccounts().add(ev.getEscrow().getReclaim().getEscrow());
             }
         }
         if (ev.getAllowance_change() != null) {
-            dirtyAccounts.add(ev.getAllowance_change().getOwner());
+            dl.getAccounts().add(ev.getAllowance_change().getOwner());
         }
     }
 

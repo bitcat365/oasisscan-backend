@@ -512,16 +512,7 @@ public class ScanValidatorService {
                     for (Map.Entry<String, List<Debonding>> debondingEntry : debondingMap.entrySet()) {
                         String delegator = debondingEntry.getKey();
                         List<Debonding> debondingList = debondingEntry.getValue();
-                        if (!CollectionUtils.isEmpty(debondingMap)) {
-                            for (Debonding debonding : debondingList) {
-                                romever.scan.oasisscan.entity.Debonding s = new romever.scan.oasisscan.entity.Debonding();
-                                s.setValidator(validator);
-                                s.setDelegator(delegator);
-                                s.setShares(debonding.getShares());
-                                s.setDebondEnd(debonding.getDebond_end());
-                                saveList.add(s);
-                            }
-                        }
+                        saveList.addAll(getDebondings(validator, delegator, debondingList));
                     }
                 }
             }
@@ -562,6 +553,19 @@ public class ScanValidatorService {
             delegators.add(delegator);
         }
         return delegators;
+    }
+
+    public List<romever.scan.oasisscan.entity.Debonding> getDebondings(String validatorAddress, String delegatorAddress, List<Debonding> debondingList) {
+        List<romever.scan.oasisscan.entity.Debonding> debondings = Lists.newArrayList();
+        for (Debonding debonding : debondingList) {
+            romever.scan.oasisscan.entity.Debonding s = new romever.scan.oasisscan.entity.Debonding();
+            s.setValidator(validatorAddress);
+            s.setDelegator(delegatorAddress);
+            s.setShares(debonding.getShares());
+            s.setDebondEnd(debonding.getDebond_end());
+            debondings.add(s);
+        }
+        return debondings;
     }
 
     public Account getAccount(String address, AccountInfo accountInfo) {

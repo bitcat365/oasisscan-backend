@@ -568,6 +568,16 @@ public class ScanValidatorService {
         return debondings;
     }
 
+    public List<romever.scan.oasisscan.entity.Debonding> getDebondingsForDelegator(String delegatorAddress, Map<String, List<Debonding>> debondingDelegationInfoByValidator) {
+        List<romever.scan.oasisscan.entity.Debonding> debondings = Lists.newArrayList();
+        for (Map.Entry<String, List<Debonding>> debondingDelegationsEntry : debondingDelegationInfoByValidator.entrySet()) {
+            String validatorAddress = debondingDelegationsEntry.getKey();
+            List<Debonding> debondingList = debondingDelegationsEntry.getValue();
+            debondings.addAll(getDebondings(validatorAddress, delegatorAddress, debondingList));
+        }
+        return debondings;
+    }
+
     public Account getAccount(String address, AccountInfo accountInfo) {
         Account account = accountRepository.findByAddress(address).orElse(new Account());
         account.setAddress(address);

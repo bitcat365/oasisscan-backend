@@ -18,11 +18,16 @@ import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.entity.Account;
+import romever.scan.oasisscan.entity.Debonding;
+import romever.scan.oasisscan.entity.Delegator;
 import romever.scan.oasisscan.entity.SystemProperty;
 import romever.scan.oasisscan.repository.AccountRepository;
+import romever.scan.oasisscan.repository.DebondingRepository;
+import romever.scan.oasisscan.repository.DelegatorRepository;
 import romever.scan.oasisscan.repository.SystemPropertyRepository;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
+import romever.scan.oasisscan.vo.chain.Delegations;
 import romever.scan.oasisscan.vo.chain.StakingEvent;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeState;
 
@@ -48,12 +53,20 @@ public class ScanEventService {
     @Autowired
     private SystemPropertyRepository systemPropertyRepository;
     @Autowired
+    private DelegatorRepository delegatorRepository;
+    @Autowired
+    private DebondingRepository debondingRepository;
+    @Autowired
     private AccountRepository accountRepository;
     @Autowired
     private ScanValidatorService scanValidatorService;
 
     @Data
     public static class DirtyList {
+        /** Escrow addresses where delegations to that account have changed */
+        private Set<String> delegations = Sets.newHashSet();
+        /** Delegator addresses where debonding delegations made by that account have changed */
+        private Set<String> debondingDelegations = Sets.newHashSet();
         /** Addresses of accounts that have changed */
         private Set<String> accounts = Sets.newHashSet();
     }
@@ -120,17 +133,22 @@ public class ScanEventService {
         }
         if (ev.getEscrow() != null) {
             if (ev.getEscrow().getAdd() != null) {
+                dl.getDelegations().add(ev.getEscrow().getAdd().getEscrow());
                 dl.getAccounts().add(ev.getEscrow().getAdd().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getAdd().getEscrow());
             }
             if (ev.getEscrow().getTake() != null) {
+                // Note: Shares don't change in take escrow events.
                 dl.getAccounts().add(ev.getEscrow().getTake().getOwner());
             }
             if (ev.getEscrow().getDebonding_start() != null) {
+                dl.getDelegations().add(ev.getEscrow().getDebonding_start().getEscrow());
+                dl.getDebondingDelegations().add(ev.getEscrow().getDebonding_start().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getDebonding_start().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getDebonding_start().getEscrow());
             }
             if (ev.getEscrow().getReclaim() != null) {
+                dl.getDelegations().add(ev.getEscrow().getDebonding_start().getEscrow());
                 dl.getAccounts().add(ev.getEscrow().getReclaim().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getReclaim().getEscrow());
             }
@@ -142,9 +160,29 @@ public class ScanEventService {
 
     @Transactional(rollbackFor = Exception.class)
     private void updateDirty(DirtyList dl) throws IOException {
+        for (String address : dl.getDelegations()) {
+            updateDelegatorInfo(address);
+        }
+        for (String address : dl.getDebondingDelegations()) {
+            updateDebondingInfo(address);
+        }
         for (String address : dl.getAccounts()) {
             updateAccountInfo(address);
         }
+    }
+
+    private void updateDelegatorInfo(String validatorAccount) throws IOException {
+        Map<String, Delegations> delegationInfo = apiClient.delegationsTo(validatorAccount, null);
+        List<Delegator> saveList = scanValidatorService.getDelegatorsForValidator(validatorAccount, delegationInfo);
+        delegatorRepository.deleteByValidator(validatorAccount);
+        delegatorRepository.saveAll(saveList);
+    }
+
+    private void updateDebondingInfo(String delegatorAccount) throws IOException {
+        Map<String, List<romever.scan.oasisscan.vo.chain.Debonding>> debondingDelegationInfo = apiClient.debondingdelegations(delegatorAccount, null);
+        List<Debonding> saveList = scanValidatorService.getDebondingsForDelegator(delegatorAccount, debondingDelegationInfo);
+        debondingRepository.deleteByDelegator(delegatorAccount);
+        debondingRepository.saveAll(saveList);
     }
 
     private void updateAccountInfo(String address) throws IOException {

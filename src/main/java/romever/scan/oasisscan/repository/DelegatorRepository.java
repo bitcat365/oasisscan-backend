@@ -37,4 +37,6 @@ public interface DelegatorRepository extends JpaRepository<Delegator, Integer>,
     Page<Delegator> findByDelegatorAll(String delegator, Pageable pageable);
 
     Page<Delegator> findByDelegator(String delegator, Pageable pageable);
+
+    long deleteByValidator(String validator);
 }

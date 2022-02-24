@@ -19,4 +19,6 @@ public interface DebondingRepository extends JpaRepository<Debonding, Integer>,
     List<Debonding> findByDelegatorOrderByDebondEndAsc(String delegator, Pageable pageable);
 
     long countByDelegator(String delegator);
+
+    long deleteByDelegator(String delegator);
 }

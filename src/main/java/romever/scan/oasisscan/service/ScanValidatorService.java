@@ -490,17 +490,7 @@ public class ScanValidatorService {
             for (ValidatorInfo validatorInfo : validatorInfos) {
                 String v = validatorInfo.getEntityAddress();
                 Map<String, Delegations> delegationsMap = apiClient.delegationsTo(v, null);
-                if (!CollectionUtils.isEmpty(delegationsMap)) {
-                    for (Map.Entry<String, Delegations> delegationsEntry : delegationsMap.entrySet()) {
-                        String delegatorId = delegationsEntry.getKey();
-                        Delegator delegator = delegatorRepository.findByValidatorAndDelegator(v, delegatorId).orElse(new Delegator());
-                        String shares = delegationsEntry.getValue().getShares();
-                        delegator.setValidator(v);
-                        delegator.setDelegator(delegatorId);
-                        delegator.setShares(shares);
-                        saveList.add(delegator);
-                    }
-                }
+                saveList.addAll(getDelegatorsForValidator(v, delegationsMap));
             }
             if (!CollectionUtils.isEmpty(saveList)) {
                 delegatorRepository.deleteAll();
@@ -558,6 +548,20 @@ public class ScanValidatorService {
             accountRepository.saveAll(saveList);
             log.info("account sync done, size: {}", saveList.size());
         }
+    }
+
+    public List<Delegator> getDelegatorsForValidator(String validatorAddress, Map<String, Delegations> delegationInfoByDelegator) {
+        List<Delegator> delegators = Lists.newArrayList();
+        for (Map.Entry<String, Delegations> delegationsEntry : delegationInfoByDelegator.entrySet()) {
+            String delegatorId = delegationsEntry.getKey();
+            Delegator delegator = new Delegator();
+            String shares = delegationsEntry.getValue().getShares();
+            delegator.setValidator(validatorAddress);
+            delegator.setDelegator(delegatorId);
+            delegator.setShares(shares);
+            delegators.add(delegator);
+        }
+        return delegators;
     }
 
     public Account getAccount(String address, AccountInfo accountInfo) {

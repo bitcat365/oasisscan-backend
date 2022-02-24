@@ -1,6 +1,7 @@
 package romever.scan.oasisscan.service;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -14,9 +15,12 @@ import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
+import romever.scan.oasisscan.entity.Account;
 import romever.scan.oasisscan.entity.SystemProperty;
+import romever.scan.oasisscan.repository.AccountRepository;
 import romever.scan.oasisscan.repository.SystemPropertyRepository;
 import romever.scan.oasisscan.utils.Mappers;
+import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.StakingEvent;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeState;
 
@@ -24,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -40,6 +45,10 @@ public class ScanEventService {
 
     @Autowired
     private SystemPropertyRepository systemPropertyRepository;
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private ScanValidatorService scanValidatorService;
 
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
     public void scanEvent() throws Exception {
@@ -65,10 +74,14 @@ public class ScanEventService {
             }
 
             Map<String, Map<String, Object>> txMap = Maps.newHashMap();
+            Set<String> dirtyAccounts = Sets.newHashSet();
             for (int i = 0; i < stakingEvents.size(); i++) {
                 StakingEvent event = stakingEvents.get(i);
                 String esId = scanHeight + "_" + i;
                 txMap.put(esId, Mappers.map(event));
+
+                //update account info
+                dirty(dirtyAccounts, event);
             }
 
             if (!CollectionUtils.isEmpty(txMap)) {
@@ -82,9 +95,49 @@ public class ScanEventService {
                 }
             }
 
+            for (String address : dirtyAccounts) {
+                updateAccountInfo(address);
+            }
+
             saveScanHeight(scanHeight);
             log.info(String.format("staking events: height: %s, count: %s", scanHeight, 0));
         }
+    }
+
+    private void dirty(Set<String> dirtyAccounts, StakingEvent ev) {
+        if (ev.getTransfer() != null) {
+            dirtyAccounts.add(ev.getTransfer().getFrom());
+            dirtyAccounts.add(ev.getTransfer().getTo());
+        }
+        if (ev.getBurn() != null) {
+            dirtyAccounts.add(ev.getBurn().getOwner());
+        }
+        if (ev.getEscrow() != null) {
+            if (ev.getEscrow().getAdd() != null) {
+                dirtyAccounts.add(ev.getEscrow().getAdd().getOwner());
+                dirtyAccounts.add(ev.getEscrow().getAdd().getEscrow());
+            }
+            if (ev.getEscrow().getTake() != null) {
+                dirtyAccounts.add(ev.getEscrow().getTake().getOwner());
+            }
+            if (ev.getEscrow().getDebonding_start() != null) {
+                dirtyAccounts.add(ev.getEscrow().getDebonding_start().getOwner());
+                dirtyAccounts.add(ev.getEscrow().getDebonding_start().getEscrow());
+            }
+            if (ev.getEscrow().getReclaim() != null) {
+                dirtyAccounts.add(ev.getEscrow().getReclaim().getOwner());
+                dirtyAccounts.add(ev.getEscrow().getReclaim().getEscrow());
+            }
+        }
+        if (ev.getAllowance_change() != null) {
+            dirtyAccounts.add(ev.getAllowance_change().getOwner());
+        }
+    }
+
+    private void updateAccountInfo(String address) throws IOException {
+        AccountInfo accountInfo = apiClient.accountInfo(address, null);
+        Account account = scanValidatorService.getAccount(address, accountInfo);
+        accountRepository.save(account);
     }
 
     private Long getScanHeight() throws IOException {

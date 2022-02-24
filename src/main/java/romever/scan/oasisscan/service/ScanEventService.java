@@ -10,6 +10,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApplicationConfig;
 import romever.scan.oasisscan.common.Constants;
@@ -102,9 +103,7 @@ public class ScanEventService {
                 }
             }
 
-            for (String address : dl.getAccounts()) {
-                updateAccountInfo(address);
-            }
+            updateDirty(dl);
 
             saveScanHeight(scanHeight);
             log.info(String.format("staking events: height: %s, count: %s", scanHeight, 0));
@@ -138,6 +137,13 @@ public class ScanEventService {
         }
         if (ev.getAllowance_change() != null) {
             dl.getAccounts().add(ev.getAllowance_change().getOwner());
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    private void updateDirty(DirtyList dl) throws IOException {
+        for (String address : dl.getAccounts()) {
+            updateAccountInfo(address);
         }
     }
 

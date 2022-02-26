@@ -8,6 +8,7 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -105,6 +106,7 @@ public class ScanEventService {
                 //update account info
                 dirty(dl, event);
             }
+            dirtyDelegators(dl);
 
             if (!CollectionUtils.isEmpty(txMap)) {
                 BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getStakingEventIndex(), txMap);
@@ -162,6 +164,19 @@ public class ScanEventService {
         }
         if (ev.getAllowance_change() != null) {
             dl.getAccounts().add(ev.getAllowance_change().getOwner());
+        }
+    }
+
+    /**
+     * Look up the delegators for validators where the pool info changed and
+     * mark those for needing account update.
+     */
+    private void dirtyDelegators(DirtyList dl) {
+        for (String address : dl.getEscrowPools()) {
+            for (Delegator delegator : delegatorRepository.findByValidator(address, Pageable.unpaged())) {
+                dl.getAccounts().add(delegator.getValidator());
+            }
+            // Currently we don't model debonding share price.
         }
     }
 

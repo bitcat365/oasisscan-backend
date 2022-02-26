@@ -29,7 +29,6 @@ import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.Delegations;
 import romever.scan.oasisscan.vo.chain.StakingEvent;
-import romever.scan.oasisscan.vo.chain.runtime.RuntimeState;
 
 import java.io.IOException;
 import java.util.List;
@@ -67,6 +66,8 @@ public class ScanEventService {
         private Set<String> delegations = Sets.newHashSet();
         /** Delegator addresses where debonding delegations made by that account have changed */
         private Set<String> debondingDelegations = Sets.newHashSet();
+        /** Escrow addresses where the active and/or debonding pool token prices have changed */
+        private Set<String> escrowPools = Sets.newHashSet();
         /** Addresses of accounts that have changed */
         private Set<String> accounts = Sets.newHashSet();
     }
@@ -136,9 +137,15 @@ public class ScanEventService {
                 dl.getDelegations().add(ev.getEscrow().getAdd().getEscrow());
                 dl.getAccounts().add(ev.getEscrow().getAdd().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getAdd().getEscrow());
+                if ("0".equals(ev.getEscrow().getAdd().getNew_shares())) {
+                    // https://github.com/oasisprotocol/oasis-core/blob/v21.3.10/go/consensus/tendermint/apps/staking/state/state.go#L850
+                    // Rewards are entered as add escrow events where no new shares are created.
+                    dl.getEscrowPools().add(ev.getEscrow().getAdd().getEscrow());
+                }
             }
             if (ev.getEscrow().getTake() != null) {
                 // Note: Shares don't change in take escrow events.
+                dl.getEscrowPools().add(ev.getEscrow().getTake().getOwner());
                 dl.getAccounts().add(ev.getEscrow().getTake().getOwner());
             }
             if (ev.getEscrow().getDebonding_start() != null) {
@@ -166,6 +173,9 @@ public class ScanEventService {
         for (String address : dl.getDebondingDelegations()) {
             updateDebondingInfo(address);
         }
+        for (String address : dl.getEscrowPools()) {
+            updatePoolInfo(address);
+        }
         for (String address : dl.getAccounts()) {
             updateAccountInfo(address);
         }
@@ -183,6 +193,11 @@ public class ScanEventService {
         List<Debonding> saveList = scanValidatorService.getDebondingsForDelegator(delegatorAccount, debondingDelegationInfo);
         debondingRepository.deleteByDelegator(delegatorAccount);
         debondingRepository.saveAll(saveList);
+    }
+
+    private void updatePoolInfo(String address) throws IOException {
+        AccountInfo accountInfo = apiClient.accountInfo(address, null);
+        scanValidatorService.updateValidatorPools(address, accountInfo);
     }
 
     private void updateAccountInfo(String address) throws IOException {

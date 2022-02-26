@@ -216,6 +216,31 @@ public class ScanValidatorService {
     }
 
     /**
+     * Save new escrow pool balances and shares.
+     */
+    public void updateValidatorPools(String entityAddress, AccountInfo v) {
+        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(entityAddress);
+        if (optional.isPresent()) {
+            ValidatorInfo info = optional.get();
+            AccountInfo.Escrow vEscrow = v.getEscrow();
+            if (vEscrow != null) {
+                AccountInfo.Active vActive = vEscrow.getActive();
+                if (vActive != null) {
+                    info.setEscrow(vActive.getBalance());
+                    info.setTotalShares(vActive.getTotal_shares());
+                }
+                // Currently we don't store the debonding pool info.
+            }
+            validatorInfoRepository.save(info);
+        }
+        // If we don't have a record for this validator, hold off on updating.
+        // Oasis Scan only maintains this info for registered validators, and
+        // update may come from other accounts having escrow pools.
+        // We'll get create the record later when we go through the registry
+        // changes.
+    }
+
+    /**
      * Sync entity and node relation from oasis api
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)

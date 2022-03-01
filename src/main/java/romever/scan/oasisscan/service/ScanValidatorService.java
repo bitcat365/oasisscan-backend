@@ -396,13 +396,13 @@ public class ScanValidatorService {
         }
         syncDelegator();
 
-        log.info("genesis sync start...");
-        StakingGenesis stakingGenesis = apiClient.stakingGenesis(null);
-        if (stakingGenesis != null) {
-            log.info("staking genesis sync start...");
-            syncDebonding(stakingGenesis);
-            syncAccounts(stakingGenesis);
-        }
+//        log.info("genesis sync start...");
+//        StakingGenesis stakingGenesis = apiClient.stakingGenesis(null);
+//        if (stakingGenesis != null) {
+//            log.info("staking genesis sync start...");
+//            syncDebonding(stakingGenesis);
+//            syncAccounts(stakingGenesis);
+//        }
     }
 
     @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 5 * 1000)

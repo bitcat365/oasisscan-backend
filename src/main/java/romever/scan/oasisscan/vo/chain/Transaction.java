@@ -90,6 +90,7 @@ public class Transaction {
         private Object admission_policy;
         private Object staking;
         private Object governance_model;
+        private String pi;
 
         private Signature signature;
 

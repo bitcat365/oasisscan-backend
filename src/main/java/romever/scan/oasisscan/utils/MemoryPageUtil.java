@@ -1,10 +1,8 @@
 package romever.scan.oasisscan.utils;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class MemoryPageUtil {

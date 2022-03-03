@@ -18,8 +18,15 @@ public class Node {
     private Tls tls;
     private List<String> nodes;
     private Object beacon;
+    private Vrf vrf;
+    private String software_version;
     //    private boolean allow_entity_signed_nodes;
     //    private CommitteeInfo committee;
+
+    @Data
+    public static class Vrf {
+        private String id;
+    }
 
     @Data
     public static class Tls {

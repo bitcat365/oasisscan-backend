@@ -91,6 +91,7 @@ public class Transaction {
         private Object staking;
         private Object governance_model;
         private String pi;
+        private Object deployments;
 
         private Signature signature;
 

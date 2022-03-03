@@ -180,36 +180,34 @@ public class AccountService {
             if (!CollectionUtils.isEmpty(debondingMap)) {
                 total = debondingMap.size();
                 long currentEpoch = apiClient.epoch(null);
-                if (total > 0) {
-                    List<Debonding> list = Lists.newArrayList();
-                    for (Map.Entry<String, List<romever.scan.oasisscan.vo.chain.Debonding>> entry : debondingMap.entrySet()) {
-                        List<romever.scan.oasisscan.vo.chain.Debonding> debondings = entry.getValue();
-                        for (romever.scan.oasisscan.vo.chain.Debonding d : debondings) {
-                            Debonding debonding = new Debonding();
-                            debonding.setDelegator(delegator);
-                            debonding.setValidator(entry.getKey());
-                            debonding.setShares(d.getShares());
-                            debonding.setDebondEnd(d.getDebond_end());
-                            list.add(debonding);
-                        }
+                List<Debonding> list = Lists.newArrayList();
+                for (Map.Entry<String, List<romever.scan.oasisscan.vo.chain.Debonding>> entry : debondingMap.entrySet()) {
+                    List<romever.scan.oasisscan.vo.chain.Debonding> debondings = entry.getValue();
+                    for (romever.scan.oasisscan.vo.chain.Debonding d : debondings) {
+                        Debonding debonding = new Debonding();
+                        debonding.setDelegator(delegator);
+                        debonding.setValidator(entry.getKey());
+                        debonding.setShares(d.getShares());
+                        debonding.setDebondEnd(d.getDebond_end());
+                        list.add(debonding);
                     }
-                    list = MemoryPageUtil.pageLimit(list, page, size);
+                }
+                list = MemoryPageUtil.pageLimit(list, page, size);
 
-                    if (!CollectionUtils.isEmpty(list)) {
-                        for (Debonding debonding : list) {
-                            String validatorAddress = debonding.getValidator();
-                            Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
-                            if (optional.isPresent()) {
-                                ValidatorInfo validatorInfo = optional.get();
-                                AccountDebondingResponse response = new AccountDebondingResponse();
-                                response.setValidatorAddress(validatorAddress);
-                                response.setValidatorName(validatorInfo.getName());
-                                response.setIcon(validatorInfo.getIcon());
-                                response.setDebondEnd(debonding.getDebondEnd());
-                                response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
-                                response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
-                                responses.add(response);
-                            }
+                if (!CollectionUtils.isEmpty(list)) {
+                    for (Debonding debonding : list) {
+                        String validatorAddress = debonding.getValidator();
+                        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
+                        if (optional.isPresent()) {
+                            ValidatorInfo validatorInfo = optional.get();
+                            AccountDebondingResponse response = new AccountDebondingResponse();
+                            response.setValidatorAddress(validatorAddress);
+                            response.setValidatorName(validatorInfo.getName());
+                            response.setIcon(validatorInfo.getIcon());
+                            response.setDebondEnd(debonding.getDebondEnd());
+                            response.setEpochLeft(debonding.getDebondEnd() - currentEpoch);
+                            response.setShares(Texts.formatDecimals(String.valueOf(debonding.getShares()), Constants.DECIMALS, 2));
+                            responses.add(response);
                         }
                     }
                 }
@@ -223,41 +221,42 @@ public class AccountService {
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public ApiResult delegations(String delegator, boolean all, int page, int size) {
         List<AccountValidatorResponse> responses = Lists.newArrayList();
-        PageRequest pageRequest = PageRequest.of(page - 1, size);
-        Page<Delegator> delegatorPage;
-        if (all) {
-            delegatorPage = delegatorRepository.findByDelegator(delegator, pageRequest);
-        } else {
-            delegatorPage = delegatorRepository.findByDelegatorAll(delegator, pageRequest);
-        }
-        List<Delegator> list = delegatorPage.toList();
-        if (!CollectionUtils.isEmpty(list)) {
-            for (Delegator d : list) {
-                String validatorAddress = d.getValidator();
-                Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validatorAddress);
-                AccountValidatorResponse response = new AccountValidatorResponse();
-                double shares = Double.parseDouble(Texts.formatDecimals(d.getShares(), Constants.DECIMALS, Constants.DECIMALS));
-                if (optional.isPresent()) {
-                    ValidatorInfo validatorInfo = optional.get();
-                    response.setValidatorAddress(validatorAddress);
-                    response.setValidatorName(validatorInfo.getName());
-                    response.setIcon(validatorInfo.getIcon());
-                    response.setActive(validatorInfo.getNodes() == 1);
-                    //tokens = shares * balance / total_shares
-                    double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, Constants.DECIMALS));
-                    double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, Constants.DECIMALS));
-                    double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, Constants.DECIMALS);
-                    response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
-                    response.setAmount(Numeric.formatDouble(amount, Constants.DECIMALS));
-                } else {
-                    response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
-                    response.setAmount(Numeric.formatDouble(shares, Constants.DECIMALS));
-                    response.setEntityAddress(validatorAddress);
+        long total = 0;
+        try {
+            Map<String, Delegations> delegationsMap = apiClient.delegations(delegator, null);
+            if (!CollectionUtils.isEmpty(delegationsMap)) {
+                total = delegationsMap.size();
+                for (Map.Entry<String, Delegations> entry : delegationsMap.entrySet()) {
+                    String validator = entry.getKey();
+                    Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(validator);
+                    AccountValidatorResponse response = new AccountValidatorResponse();
+
+                    double shares = Double.parseDouble(Texts.formatDecimals(entry.getValue().getShares(), Constants.DECIMALS, 9));
+                    if (optional.isPresent()) {
+                        ValidatorInfo validatorInfo = optional.get();
+                        response.setValidatorAddress(validator);
+                        response.setValidatorName(validatorInfo.getName());
+                        response.setIcon(validatorInfo.getIcon());
+                        response.setActive(validatorInfo.getNodes() == 1);
+                        //tokens = shares * balance / total_shares
+                        double totalShares = Double.parseDouble(Texts.formatDecimals(validatorInfo.getTotalShares(), Constants.DECIMALS, Constants.DECIMALS));
+                        double escrow = Double.parseDouble(Texts.formatDecimals(validatorInfo.getEscrow(), Constants.DECIMALS, Constants.DECIMALS));
+                        double amount = Numeric.divide(Numeric.multiply(shares, escrow), totalShares, Constants.DECIMALS);
+                        response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
+                        response.setAmount(Numeric.formatDouble(amount, Constants.DECIMALS));
+                    } else {
+                        response.setShares(Numeric.formatDouble(shares, Constants.DECIMALS));
+                        response.setAmount(Numeric.formatDouble(shares, Constants.DECIMALS));
+                        response.setEntityAddress(validator);
+                    }
+                    responses.add(response);
                 }
-                responses.add(response);
+                responses = MemoryPageUtil.pageLimit(responses, page, size);
             }
+        } catch (Exception e) {
+            log.error("", e);
         }
-        return ApiResult.page(responses, page, size, delegatorPage.getTotalElements());
+        return ApiResult.page(responses, page, size, total);
     }
 
     public ApiResult runtimeTransactions(String address, String runtimeId, int page, int size) {

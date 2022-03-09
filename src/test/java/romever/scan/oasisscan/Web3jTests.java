@@ -33,6 +33,15 @@ public class Web3jTests {
     public void test1() throws IOException {
         System.out.println(Texts.numberFromBase64("Ah4Z4Mm6skAAAA=="));
         System.out.println(Texts.base64Encode(new BigInteger("10000000000000000000000").toByteArray()));
+
+        String value = "gaFmYW1vdW50GgABFWw=";
+        JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
+        });
+        System.out.println(eventJson);
+
+        List<EventLog> eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<EventLog>>() {
+        });
+        System.out.println(eventLogs);
 //        String s = "Y29uc2Vuc3VzX2FjY291bnRzAAAAAg==";
 //        System.out.println(Texts.base64ToHex(s));
 //        System.out.println(Texts.formatDecimals(String.valueOf(Texts.numberFromBase64("FNESDXsWAAA=")), Constants.EMERALD_DECIMALS, Constants.EMERALD_DECIMALS));
@@ -124,15 +133,14 @@ public class Web3jTests {
 
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gljSo2F2AWJhaaJic2mBomVub25jZQJsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIDes0bcbMm7s6WfkFb66AOttZXL3LMiL1TXjT2r3IN7XY2ZlZaNjZ2FzGcNQZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQA7sBQetrfMIEkd8IMkf+Xb8MYsmmZhbW91bnSCSQTFPs3BimAAAEBmbWV0aG9kcWNvbnNlbnN1cy5EZXBvc2l0gaFpc2lnbmF0dXJlWED8Z3F/Hxpqv3/7H7MYw/azMSzts9FwSUlOuC9xnyTKs1k+E70S0nSepapU8doutB1/125OivkHhuFbU0CFwjsD";
+        String code = "gljRo2F2AWJhaaJic2mBomVub25jZQxsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIC7G6fj+D5dhB3zzQW4nf/o4GB29dpGOdv438sXfh3dUY2ZlZaNjZ2FzGTqYZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQB5MdPDzVdOa2wLZxc33J1JZFsAK2ZhbW91bnSCSIrHIwSJ6AAAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQMP1stHIA1rJLtobnV8q9KuWmzeinOvgY6rK1Xa1OpcM+gnVqBFXNsYzPQH8l4CgbtCtjemBaVQDW1ioEUDhjwA=";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);
-        List<EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<EventLog>>() {
-        });
-        System.out.println(eventLogs);
+//        List<EventLog> eventLogs = Mappers.parseCborFromBase64(code, new TypeReference<List<EventLog>>() {
+//        });
+//        System.out.println(eventLogs);
 
-        System.out.println(rawJson);
         String raw = "";
         String type = "";
         if (rawJson.isArray()) {
@@ -166,15 +174,15 @@ public class Web3jTests {
             System.out.println(Mappers.json(runtimeTransaction));
         }
 
-        String test = "oWRmYWlso2Rjb2RlAmZtb2R1bGVjZXZtZ21lc3NhZ2V4HGV4ZWN1dGlvbiBmYWlsZWQ6IG91dCBvZiBnYXM=";
-        JsonNode j1 = Mappers.parseCborFromBase64(test, new TypeReference<JsonNode>() {
-        });
-        System.out.println(j1);
-        String result = j1.fieldNames().next();
-        System.out.println(result);
-//        System.out.println(Texts.base64ToHex(j1.path(result).asText()));
-
-        System.out.println(j1.path(result).toString());
+//        String test = "oWRmYWlso2Rjb2RlAmZtb2R1bGVjZXZtZ21lc3NhZ2V4HGV4ZWN1dGlvbiBmYWlsZWQ6IG91dCBvZiBnYXM=";
+//        JsonNode j1 = Mappers.parseCborFromBase64(test, new TypeReference<JsonNode>() {
+//        });
+//        System.out.println(j1);
+//        String result = j1.fieldNames().next();
+//        System.out.println(result);
+////        System.out.println(Texts.base64ToHex(j1.path(result).asText()));
+//
+//        System.out.println(j1.path(result).toString());
     }
 
     @Test
@@ -193,7 +201,7 @@ public class Web3jTests {
 //        byte[] c = Arrays.copyOf(b, 32);
 //        System.out.println(Texts.toHex(c));
 
-        String raw = "omlzaWduYXR1cmWiaXNpZ25hdHVyZVhA7/W9wN/Ar0HBUul3jo+qerOMCfXTiPDWPTGRTzDyYYxOswFrJNBOUgUUrcXDYfHe5eR+nq2mPZmLX97mXyNXCWpwdWJsaWNfa2V5WCDh4zZJ2Oe2QYYfQOqGWgbwcmw81KgR5gcUAK45X72pt3N1bnRydXN0ZWRfcmF3X3ZhbHVlWQK7pGNmZWWiY2dhcxkLuGZhbW91bnRAZGJvZHmtYXYDYmlkWCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAByyCFeYNW8p2RraW5kAWdnZW5lc2lzomVyb3VuZABqc3RhdGVfcm9vdFggxnK40e9W7Sirh8NiLFEUBpvdOte4+XN0mNDAHs7wlnpnc3RvcmFnZaNzY2hlY2twb2ludF9pbnRlcnZhbBkD6HNjaGVja3BvaW50X251bV9rZXB0AnVjaGVja3BvaW50X2NodW5rX3NpemUaAIAAAGhleGVjdXRvcqVqZ3JvdXBfc2l6ZQNsbWF4X21lc3NhZ2VzGQEAbXJvdW5kX3RpbWVvdXQCcWdyb3VwX2JhY2t1cF9zaXplA3JhbGxvd2VkX3N0cmFnZ2xlcnMBaWVudGl0eV9pZFgg4eM2SdjntkGGH0DqhloG8HJsPNSoEeYHFACuOV+9qbdrY29uc3RyYWludHOhAaIBomltYXhfbm9kZXOhZWxpbWl0AW1taW5fcG9vbF9zaXploWVsaW1pdAMComltYXhfbm9kZXOhZWxpbWl0AW1taW5fcG9vbF9zaXploWVsaW1pdANrZGVwbG95bWVudHOBomd2ZXJzaW9uoWVtYWpvcgdqdmFsaWRfZnJvbQBsdGVlX2hhcmR3YXJlAG10eG5fc2NoZWR1bGVypG5tYXhfYmF0Y2hfc2l6ZRkD6HNiYXRjaF9mbHVzaF90aW1lb3V0GjuaygB0bWF4X2JhdGNoX3NpemVfYnl0ZXMaAKAAAHVwcm9wb3NlX2JhdGNoX3RpbWVvdXQCcGFkbWlzc2lvbl9wb2xpY3mhaGFueV9ub2RloHBnb3Zlcm5hbmNlX21vZGVsAWVub25jZRguZm1ldGhvZHgYcmVnaXN0cnkuUmVnaXN0ZXJSdW50aW1l";
+        String raw = "gljRo2F2AWJhaaJic2mBomVub25jZQxsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIC7G6fj+D5dhB3zzQW4nf/o4GB29dpGOdv438sXfh3dUY2ZlZaNjZ2FzGTqYZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQB5MdPDzVdOa2wLZxc33J1JZFsAK2ZhbW91bnSCSIrHIwSJ6AAAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQMP1stHIA1rJLtobnV8q9KuWmzeinOvgY6rK1Xa1OpcM+gnVqBFXNsYzPQH8l4CgbtCtjemBaVQDW1ioEUDhjwA=";
 //        System.out.println(new String(bb));
         System.out.println(Mappers.parseCborFromBase64(raw, new TypeReference<JsonNode>() {
         }));

@@ -10,7 +10,7 @@ public class EventLog {
     private String to;
     private String owner;
     private Long nonce;
-    private List<String> amount;
+    private Object amount;
     private Error error;
 
     @Data

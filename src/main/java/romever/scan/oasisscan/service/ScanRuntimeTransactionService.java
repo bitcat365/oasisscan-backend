@@ -213,17 +213,21 @@ public class ScanRuntimeTransactionService {
                             }
                             if (!CollectionUtils.isEmpty(eventLogs)) {
                                 for (EventLog log : eventLogs) {
-                                    String from = apiClient.base64ToBech32Address(log.getFrom());
-                                    if (Texts.isBlank(from)) {
-                                        throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                    if (Texts.isNotBlank(log.getFrom())) {
+                                        String from = apiClient.base64ToBech32Address(log.getFrom());
+                                        if (Texts.isBlank(from)) {
+                                            throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                        }
+                                        log.setFrom(from);
                                     }
-                                    log.setFrom(from);
 
-                                    String to = apiClient.base64ToBech32Address(log.getTo());
-                                    if (Texts.isBlank(to)) {
-                                        throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                    if (Texts.isNotBlank(log.getTo())) {
+                                        String to = apiClient.base64ToBech32Address(log.getTo());
+                                        if (Texts.isBlank(to)) {
+                                            throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                        }
+                                        log.setTo(to);
                                     }
-                                    log.setTo(to);
                                 }
                                 runtimeEvent.setLogs(eventLogs);
                             }

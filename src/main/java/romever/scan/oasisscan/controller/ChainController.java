@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import romever.scan.oasisscan.common.ApiResult;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.service.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -38,8 +39,8 @@ public class ChainController {
             @RequestParam(value = "address", required = false) String address,
             @RequestParam(value = "method", required = false) String method,
             @RequestParam(value = "runtime", required = false) boolean runtime) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return transactionService.transactions(size, page, height, address, method, runtime);
     }
@@ -49,8 +50,8 @@ public class ChainController {
     public ApiResult latestBlocks(
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return blockService.latestBlocks(size, page);
     }
@@ -83,8 +84,8 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page
     ) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return blockService.proposerBlocks(proposer, address, size, page);
     }
@@ -94,8 +95,8 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "5") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address", required = false) String address) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return transactionService.powerEvent(size, page, address);
     }
@@ -109,8 +110,8 @@ public class ChainController {
     public ApiResult accountList(
             @RequestParam(value = "size", required = false, defaultValue = "100") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return accountService.accountList(page, size);
     }
@@ -120,8 +121,8 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "5") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address") String address) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return accountService.debondings(address, page, size);
     }
@@ -132,8 +133,8 @@ public class ChainController {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "all", required = false, defaultValue = "false") boolean all,
             @RequestParam(value = "address") String address) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return accountService.delegations(address, all, page, size);
     }
@@ -144,8 +145,8 @@ public class ChainController {
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address") String address,
             @RequestParam(value = "runtimeId", required = false) String runtimeId) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return accountService.runtimeTransactions(address, runtimeId, page, size);
     }
@@ -167,8 +168,8 @@ public class ChainController {
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "address") String address) {
-        if (size > 5000) {
-            return ApiResult.err("size must be less than 5000");
+        if (size > Constants.PAGE_SIZE_MAX_LIMIT) {
+            return ApiResult.err("size must be less than " + Constants.PAGE_SIZE_MAX_LIMIT);
         }
         return stakingEventService.stakingEvents(size, page, address);
     }

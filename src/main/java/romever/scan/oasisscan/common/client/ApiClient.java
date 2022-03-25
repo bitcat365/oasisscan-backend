@@ -1,28 +1,17 @@
 package romever.scan.oasisscan.common.client;
 
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.utils.Texts;
 import romever.scan.oasisscan.utils.okhttp.OkHttp;
 import romever.scan.oasisscan.vo.chain.*;
-import romever.scan.oasisscan.vo.chain.runtime.*;
 import romever.scan.oasisscan.vo.chain.runtime.Runtime;
+import romever.scan.oasisscan.vo.chain.runtime.*;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
-import java.security.MessageDigest;
-import java.security.Security;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -406,6 +395,34 @@ public class ApiClient {
         params.put("id", runtimeId);
         params.put("round", round);
         Result<List<RuntimeEvent>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<RuntimeEvent>>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
+
+
+    /*============================= governance api =============================*/
+
+    public List<Proposal> proposalList() throws IOException {
+        String url = String.format("%s/api/governance/proposals/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        Result<List<Proposal>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<Proposal>>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
+
+    public Proposal proposal(long id) throws IOException {
+        String url = String.format("%s/api/governance/proposal/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("id", id);
+        Result<Proposal> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<Proposal>>() {
         });
         if (result != null) {
             return result.getResult();

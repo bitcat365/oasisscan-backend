@@ -45,7 +45,7 @@ application:
     stats: /root/oasis-core/go/extra/stats/stats
     internal: /mnt/serverdir/node/internal.sock
     api:
-      url: http://localhost:8180
+      url: http://192.168.100.1:8180
       name: oasisscan
   leveldb:
     path: /mnt/data

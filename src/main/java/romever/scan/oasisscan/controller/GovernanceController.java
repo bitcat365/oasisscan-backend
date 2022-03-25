@@ -19,7 +19,7 @@ public class GovernanceController {
 
     @GetMapping("/proposals")
     public ApiResult proposalList() {
-        return ApiResult.ok(governanceService.proposalList());
+        return ApiResult.list(governanceService.proposalList());
     }
 
     @GetMapping("/proposal")

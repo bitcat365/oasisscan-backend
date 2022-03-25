@@ -29,6 +29,8 @@
 * [account-runtime-transactions](#account-runtime-transactions)
 * [staking-events](#staking-events)
 * [staking-events-info](#staking-events-info)
+* [governance-proposals](#governance-proposals)
+* [governance-proposal](#governance-proposal)
 
 ### validator stats
 
@@ -1317,6 +1319,116 @@ Params
             "amount": "405000000000"
         },
         "type": "transfer"
+    }
+}
+```
+
+### governance-proposals
+
+```
+// Request
+GET http://localhost:8181/governance/proposals
+
+```
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "id": 4,
+                "submitter": "oasis1qrs2dl6nz6fcxxr3tq37laxlz6hxk6kuscnr6rxj",
+                "state": "passed",
+                "deposit": "10000000000000",
+                "content": {
+                    "upgrade": {
+                        "v": 1,
+                        "handler": "03022022_testnet_upgrade",
+                        "target": {
+                            "consensus_protocol": {
+                                "Major": 0,
+                                "Minor": 0,
+                                "Patch": 0
+                            },
+                            "runtime_host_protocol": {
+                                "Major": 0,
+                                "Minor": 0,
+                                "Patch": 0
+                            },
+                            "runtime_committee_protocol": {
+                                "Major": 0,
+                                "Minor": 0,
+                                "Patch": 0
+                            }
+                        },
+                        "epoch": 14209
+                    }
+                },
+                "created_at": 14183,
+                "closes_at": 14195
+            }
+        ],
+        "page": 1,
+        "size": 10,
+        "maxPage": 1,
+        "totalSize": 1
+    }
+}
+```
+
+### governance-proposal
+
+```
+// Request
+GET http://localhost:8181/governance/proposal
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | id |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "id": 3,
+        "submitter": "oasis1qrs2dl6nz6fcxxr3tq37laxlz6hxk6kuscnr6rxj",
+        "state": "passed",
+        "deposit": "10000000000000",
+        "content": {
+            "upgrade": {
+                "v": 1,
+                "handler": "consensus-params-update-2021-08",
+                "target": {
+                    "consensus_protocol": {
+                        "Major": 0,
+                        "Minor": 0,
+                        "Patch": 0
+                    },
+                    "runtime_host_protocol": {
+                        "Major": 0,
+                        "Minor": 0,
+                        "Patch": 0
+                    },
+                    "runtime_committee_protocol": {
+                        "Major": 0,
+                        "Minor": 0,
+                        "Patch": 0
+                    }
+                },
+                "epoch": 8844
+            }
+        },
+        "created_at": 8817,
+        "closes_at": 8829
     }
 }
 ```

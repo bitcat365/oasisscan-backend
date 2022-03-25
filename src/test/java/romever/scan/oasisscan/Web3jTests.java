@@ -201,7 +201,7 @@ public class Web3jTests {
 //        byte[] c = Arrays.copyOf(b, 32);
 //        System.out.println(Texts.toHex(c));
 
-        String raw = "gljRo2F2AWJhaaJic2mBomVub25jZQxsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIC7G6fj+D5dhB3zzQW4nf/o4GB29dpGOdv438sXfh3dUY2ZlZaNjZ2FzGTqYZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQB5MdPDzVdOa2wLZxc33J1JZFsAK2ZhbW91bnSCSIrHIwSJ6AAAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQMP1stHIA1rJLtobnV8q9KuWmzeinOvgY6rK1Xa1OpcM+gnVqBFXNsYzPQH8l4CgbtCtjemBaVQDW1ioEUDhjwA=";
+        String raw = "omlzaWduYXR1cmWiaXNpZ25hdHVyZVhAUTyqVU72p9VV70lYcdVUOtt+8nbCAF7Ue2uvZGXCX1zrJRB4knxzAzACcXT/b8kzeiYajvmjEB/drDPhqlSXBmpwdWJsaWNfa2V5WCCnumpcuNEt7BGvPXV1lw9UmmlOpIw9ovQZrYeRanG95XN1bnRydXN0ZWRfcmF3X3ZhbHVlWOKkY2ZlZaJjZ2FzGQfQZmFtb3VudEBkYm9keaFndXBncmFkZaRhdgFlZXBvY2gZNFpmdGFyZ2V0o3Jjb25zZW5zdXNfcHJvdG9jb2yhZW1ham9yBXVydW50aW1lX2hvc3RfcHJvdG9jb2yhZW1ham9yBXgacnVudGltZV9jb21taXR0ZWVfcHJvdG9jb2yhZW1ham9yBGdoYW5kbGVyeBptYWlubmV0LXVwZ3JhZGUtMjAyMi0wNC0xMWVub25jZQFmbWV0aG9keBlnb3Zlcm5hbmNlLlN1Ym1pdFByb3Bvc2Fs";
 //        System.out.println(new String(bb));
         System.out.println(Mappers.parseCborFromBase64(raw, new TypeReference<JsonNode>() {
         }));

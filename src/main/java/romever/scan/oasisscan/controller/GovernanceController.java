@@ -28,4 +28,11 @@ public class GovernanceController {
     ) {
         return ApiResult.ok(governanceService.proposal(id));
     }
+
+    @GetMapping("/votes")
+    public ApiResult votes(
+            @RequestParam(value = "id") long id
+    ) {
+        return ApiResult.list(governanceService.votes(id));
+    }
 }

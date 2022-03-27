@@ -429,4 +429,17 @@ public class ApiClient {
         }
         return null;
     }
+
+    public List<Vote> votes(long id) throws IOException {
+        String url = String.format("%s/api/governance/votes/", api);
+        Map<String, Object> params = Maps.newHashMap();
+        params.put("name", this.name);
+        params.put("id", id);
+        Result<List<Vote>> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<List<Vote>>>() {
+        });
+        if (result != null) {
+            return result.getResult();
+        }
+        return null;
+    }
 }

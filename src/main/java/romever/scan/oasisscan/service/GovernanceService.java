@@ -61,7 +61,7 @@ public class GovernanceService {
                 response.setAddress(vote.getVoter());
                 response.setVote(vote.getVote());
                 //info
-                Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityId(vote.getVote());
+                Optional<ValidatorInfo> optionalValidatorInfo = validatorInfoRepository.findByEntityAddress(vote.getVote());
                 if (optionalValidatorInfo.isPresent()) {
                     ValidatorInfo info = optionalValidatorInfo.get();
                     response.setName(info.getName());

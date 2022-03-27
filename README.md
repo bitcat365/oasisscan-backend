@@ -31,6 +31,7 @@
 * [staking-events-info](#staking-events-info)
 * [governance-proposals](#governance-proposals)
 * [governance-proposal](#governance-proposal)
+* [governance-votes](#governance-votes)
 
 ### validator stats
 

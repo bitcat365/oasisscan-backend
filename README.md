@@ -1370,11 +1370,7 @@ GET http://localhost:8181/governance/proposals
                 "created_at": 14183,
                 "closes_at": 14195
             }
-        ],
-        "page": 1,
-        "size": 10,
-        "maxPage": 1,
-        "totalSize": 1
+        ]
     }
 }
 ```
@@ -1429,6 +1425,38 @@ Params
         },
         "created_at": 8817,
         "closes_at": 8829
+    }
+}
+```
+
+### governance-votes
+
+```
+// Request
+GET http://localhost:8181/governance/votes
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | id |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "list": [
+            {
+                "name": "ou812",
+                "icon": "https://s3.amazonaws.com/keybase_processed_uploads/5a956ac61193f183d8432e0778548905_360_360.jpg",
+                "address": "oasis1qqf6wmc0ax3mykd028ltgtqr49h3qffcm50gwag3",
+                "vote": "yes"
+            }
+        ]
     }
 }
 ```

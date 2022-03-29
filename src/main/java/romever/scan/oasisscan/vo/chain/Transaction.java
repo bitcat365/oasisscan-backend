@@ -67,6 +67,7 @@ public class Transaction {
         //governance
         private Long vote;
         private Object upgrade;
+        private Object cancel_upgrade;
 
         /**
          * registry

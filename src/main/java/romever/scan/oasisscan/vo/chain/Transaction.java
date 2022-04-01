@@ -44,6 +44,9 @@ public class Transaction {
         private Object commits;
         private Object commit;
         private Object reveal;
+        private String fee;
+        private String data;
+        private String tokens;
         /**
          * staking
          */

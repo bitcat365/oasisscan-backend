@@ -216,6 +216,31 @@ public class ScanValidatorService {
     }
 
     /**
+     * Save new escrow pool balances and shares.
+     */
+    public void updateValidatorPools(String entityAddress, AccountInfo v) {
+        Optional<ValidatorInfo> optional = validatorInfoRepository.findByEntityAddress(entityAddress);
+        if (optional.isPresent()) {
+            ValidatorInfo info = optional.get();
+            AccountInfo.Escrow vEscrow = v.getEscrow();
+            if (vEscrow != null) {
+                AccountInfo.Active vActive = vEscrow.getActive();
+                if (vActive != null) {
+                    info.setEscrow(vActive.getBalance());
+                    info.setTotalShares(vActive.getTotal_shares());
+                }
+                // Currently we don't store the debonding pool info.
+            }
+            validatorInfoRepository.save(info);
+        }
+        // If we don't have a record for this validator, hold off on updating.
+        // Oasis Scan only maintains this info for registered validators, and
+        // update may come from other accounts having escrow pools.
+        // We'll get create the record later when we go through the registry
+        // changes.
+    }
+
+    /**
      * Sync entity and node relation from oasis api
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
@@ -490,17 +515,7 @@ public class ScanValidatorService {
             for (ValidatorInfo validatorInfo : validatorInfos) {
                 String v = validatorInfo.getEntityAddress();
                 Map<String, Delegations> delegationsMap = apiClient.delegationsTo(v, null);
-                if (!CollectionUtils.isEmpty(delegationsMap)) {
-                    for (Map.Entry<String, Delegations> delegationsEntry : delegationsMap.entrySet()) {
-                        String delegatorId = delegationsEntry.getKey();
-                        Delegator delegator = delegatorRepository.findByValidatorAndDelegator(v, delegatorId).orElse(new Delegator());
-                        String shares = delegationsEntry.getValue().getShares();
-                        delegator.setValidator(v);
-                        delegator.setDelegator(delegatorId);
-                        delegator.setShares(shares);
-                        saveList.add(delegator);
-                    }
-                }
+                saveList.addAll(getDelegatorsForValidator(v, delegationsMap));
             }
             if (!CollectionUtils.isEmpty(saveList)) {
                 delegatorRepository.deleteAll();
@@ -522,16 +537,7 @@ public class ScanValidatorService {
                     for (Map.Entry<String, List<Debonding>> debondingEntry : debondingMap.entrySet()) {
                         String delegator = debondingEntry.getKey();
                         List<Debonding> debondingList = debondingEntry.getValue();
-                        if (!CollectionUtils.isEmpty(debondingMap)) {
-                            for (Debonding debonding : debondingList) {
-                                romever.scan.oasisscan.entity.Debonding s = new romever.scan.oasisscan.entity.Debonding();
-                                s.setValidator(validator);
-                                s.setDelegator(delegator);
-                                s.setShares(debonding.getShares());
-                                s.setDebondEnd(debonding.getDebond_end());
-                                saveList.add(s);
-                            }
-                        }
+                        saveList.addAll(getDebondings(validator, delegator, debondingList));
                     }
                 }
             }
@@ -558,6 +564,43 @@ public class ScanValidatorService {
             accountRepository.saveAll(saveList);
             log.info("account sync done, size: {}", saveList.size());
         }
+    }
+
+    public List<Delegator> getDelegatorsForValidator(String validatorAddress, Map<String, Delegations> delegationInfoByDelegator) {
+        List<Delegator> delegators = Lists.newArrayList();
+        for (Map.Entry<String, Delegations> delegationsEntry : delegationInfoByDelegator.entrySet()) {
+            String delegatorId = delegationsEntry.getKey();
+            Delegator delegator = new Delegator();
+            String shares = delegationsEntry.getValue().getShares();
+            delegator.setValidator(validatorAddress);
+            delegator.setDelegator(delegatorId);
+            delegator.setShares(shares);
+            delegators.add(delegator);
+        }
+        return delegators;
+    }
+
+    public List<romever.scan.oasisscan.entity.Debonding> getDebondings(String validatorAddress, String delegatorAddress, List<Debonding> debondingList) {
+        List<romever.scan.oasisscan.entity.Debonding> debondings = Lists.newArrayList();
+        for (Debonding debonding : debondingList) {
+            romever.scan.oasisscan.entity.Debonding s = new romever.scan.oasisscan.entity.Debonding();
+            s.setValidator(validatorAddress);
+            s.setDelegator(delegatorAddress);
+            s.setShares(debonding.getShares());
+            s.setDebondEnd(debonding.getDebond_end());
+            debondings.add(s);
+        }
+        return debondings;
+    }
+
+    public List<romever.scan.oasisscan.entity.Debonding> getDebondingsForDelegator(String delegatorAddress, Map<String, List<Debonding>> debondingDelegationInfoByValidator) {
+        List<romever.scan.oasisscan.entity.Debonding> debondings = Lists.newArrayList();
+        for (Map.Entry<String, List<Debonding>> debondingDelegationsEntry : debondingDelegationInfoByValidator.entrySet()) {
+            String validatorAddress = debondingDelegationsEntry.getKey();
+            List<Debonding> debondingList = debondingDelegationsEntry.getValue();
+            debondings.addAll(getDebondings(validatorAddress, delegatorAddress, debondingList));
+        }
+        return debondings;
     }
 
     public Account getAccount(String address, AccountInfo accountInfo) {

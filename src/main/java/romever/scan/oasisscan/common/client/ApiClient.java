@@ -27,7 +27,7 @@ public class ApiClient {
 
     private <T> void checkError(Result<T> result) throws Exception {
         if (Texts.isNotBlank(result.getError())) {
-            throw new Exception();
+            throw new Exception(result.getError());
         }
     }
 

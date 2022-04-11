@@ -84,7 +84,7 @@ public class ValidatorService {
             Long height = null;
             try {
                 height = apiClient.getCurHeight();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             if (height == null) {

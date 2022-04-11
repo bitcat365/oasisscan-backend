@@ -74,7 +74,7 @@ public class ScanRuntimeService {
      * Get all runtimes info and save in elasticsearch
      */
     @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
-    public void scanRuntime() throws IOException {
+    public void scanRuntime() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -100,7 +100,7 @@ public class ScanRuntimeService {
      * Scan runtimes round and save in elasticsearch
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    public void scanRuntimeRound() throws IOException {
+    public void scanRuntimeRound() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -171,7 +171,7 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
 //    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
-    public void scanRuntimeStats() throws IOException {
+    public void scanRuntimeStats() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }

@@ -37,7 +37,7 @@ public class DashboardController {
 
     @GetMapping("/network")
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public ApiResult network() throws IOException {
+    public ApiResult network() throws Exception {
         DashboardNetworkResponse response = new DashboardNetworkResponse();
 
         NetworkInfo networkInfo = validatorService.networkInfo();

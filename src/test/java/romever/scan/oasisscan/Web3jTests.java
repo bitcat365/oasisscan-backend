@@ -56,14 +56,14 @@ public class Web3jTests {
     }
 
     @Test
-    public void test2() throws IOException {
+    public void test2() throws Exception {
         ApiClient apiClient = new ApiClient("http://135.181.112.38:9180", "oasisscan_testnet");
         String address = apiClient.base64ToBech32Address("ANJ3lLMjzUOc99mE5+BiZPLvCMYs");
         System.out.println(address);
     }
 
     @Test
-    public void test3() throws IOException {
+    public void test3() throws Exception {
         ApiClient apiClient = new ApiClient("http://135.181.112.38:9180", "oasisscan_testnet");
         String address = apiClient.pubkeyToBech32Address("vlG7mUtP7s2PsnARfyrI3mW/q4pcqRi3SHk2GxmQ2NM=");
         System.out.println(address);

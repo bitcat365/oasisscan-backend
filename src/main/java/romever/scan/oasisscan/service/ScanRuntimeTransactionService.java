@@ -269,7 +269,7 @@ public class ScanRuntimeTransactionService {
         }
     }
 
-    private Long getCurrentRound(String runtimeId) throws IOException {
+    private Long getCurrentRound(String runtimeId) throws Exception {
         RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
         if (runtimeState == null) {
             return null;

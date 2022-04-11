@@ -9,8 +9,8 @@ public class Proposal {
     private String state;
     private String deposit;
     private Content content;
-    private int created_at;
-    private int closes_at;
+    private long created_at;
+    private long closes_at;
 
     @Data
     public static class Content {
@@ -22,7 +22,7 @@ public class Proposal {
         private long v;
         private String handler;
         private Target target;
-        private int epoch;
+        private long epoch;
     }
 
     @Data

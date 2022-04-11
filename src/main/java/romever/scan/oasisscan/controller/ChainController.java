@@ -158,7 +158,7 @@ public class ChainController {
 
     @ApiIgnore
     @GetMapping("/sync/block")
-    public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) throws IOException {
+    public ApiResult syncBlock(@RequestParam("start") long start, @RequestParam("end") long end) throws Exception {
         scanChainService.syncBlock(start, end, true);
         return ApiResult.ok();
     }

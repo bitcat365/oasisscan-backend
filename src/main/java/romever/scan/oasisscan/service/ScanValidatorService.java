@@ -86,7 +86,7 @@ public class ScanValidatorService {
      */
     @Scheduled(fixedDelay = 60 * 1000)
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
-    public void syncValidators() throws IOException {
+    public void syncValidators() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -219,7 +219,7 @@ public class ScanValidatorService {
      * Sync entity and node relation from oasis api
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
-    public void syncEntityNode() throws IOException {
+    public void syncEntityNode() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -327,7 +327,7 @@ public class ScanValidatorService {
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
-    public void saveValidator(long dbHeight, List<Node> nodes, RegistryGenesis registryGenesis) throws IOException {
+    public void saveValidator(long dbHeight, List<Node> nodes, RegistryGenesis registryGenesis) throws Exception {
         List<ValidatorConsensus> consensusList = Lists.newArrayList();
         List<ValidatorInfo> validatorInfoList = Lists.newArrayList();
         Map<String, NodeStatus> nodeStatus = registryGenesis.getNode_statuses();
@@ -390,7 +390,7 @@ public class ScanValidatorService {
     }
 
     @Scheduled(fixedDelay = 60 * 1000, initialDelay = 15 * 1000)
-    public void syncGenesis() throws IOException {
+    public void syncGenesis() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -406,7 +406,7 @@ public class ScanValidatorService {
     }
 
     @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 5 * 1000)
-    public void syncEscrowStats() throws IOException {
+    public void syncEscrowStats() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
         }
@@ -482,7 +482,7 @@ public class ScanValidatorService {
 //    }
 
     @Transactional(rollbackFor = Exception.class)
-    public void syncDelegator() throws IOException {
+    public void syncDelegator() throws Exception {
         List<ValidatorInfo> validatorInfos = validatorInfoRepository.findAll();
         if (!CollectionUtils.isEmpty(validatorInfos)) {
             log.info("delegators sync start, size: {}", validatorInfos.size());
@@ -646,7 +646,7 @@ public class ScanValidatorService {
         return height;
     }
 
-    public String getEscrowByHeight(String address, Long height) throws IOException {
+    public String getEscrowByHeight(String address, Long height) throws Exception {
         String ret = null;
         AccountInfo accountInfo = apiClient.accountInfo(address, height);
         if (accountInfo != null) {

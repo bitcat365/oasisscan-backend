@@ -8,4 +8,6 @@ public class VoteResponse {
     private String icon;
     private String address;
     private String vote;
+    private String amount;
+    private double percent;
 }

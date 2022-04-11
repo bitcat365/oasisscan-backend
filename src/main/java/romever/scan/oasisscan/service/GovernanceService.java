@@ -63,7 +63,7 @@ public class GovernanceService {
         List<VoteResponse> list = Lists.newArrayList();
         try {
             Map<String, BigDecimal> voteMap = Maps.newHashMap();
-            Map<String, BigDecimal> optionTotalMap = Maps.newHashMap();
+//            Map<String, BigDecimal> optionTotalMap = Maps.newHashMap();
             BigDecimal totalVotes = BigDecimal.ZERO;
 
             List<Vote> votes = apiClient.votes(id);
@@ -89,9 +89,9 @@ public class GovernanceService {
 
                     totalVotes = totalVotes.add(votePower);
 
-                    if (optionTotalMap.containsKey(option)) {
-                        optionTotalMap.put(option, optionTotalMap.get(option).add(votePower));
-                    }
+//                    if (optionTotalMap.containsKey(option)) {
+//                        optionTotalMap.put(option, optionTotalMap.get(option).add(votePower));
+//                    }
                 }
             }
 

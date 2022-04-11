@@ -1455,7 +1455,9 @@ Params
                 "name": "ou812",
                 "icon": "https://s3.amazonaws.com/keybase_processed_uploads/5a956ac61193f183d8432e0778548905_360_360.jpg",
                 "address": "oasis1qqf6wmc0ax3mykd028ltgtqr49h3qffcm50gwag3",
-                "vote": "yes"
+                "vote": "yes",
+                "amount": "10127577578443680",
+                "percent": 0.2001
             }
         ]
     }

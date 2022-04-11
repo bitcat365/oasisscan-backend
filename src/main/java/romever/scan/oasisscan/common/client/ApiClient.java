@@ -131,7 +131,7 @@ public class ApiClient {
         Result<AccountInfo> result = OkHttp.of(url).queries(params).exec(new TypeReference<Result<AccountInfo>>() {
         });
         if (result != null) {
-            checkError(result);
+//            checkError(result);
             accountInfo = result.getResult();
         }
         return accountInfo;

@@ -117,7 +117,7 @@ public class GovernanceService {
                 list.add(response);
             }
 
-            Comparator<VoteResponse> comparator = (c1, c2) -> new BigDecimal(c2.getVote()).compareTo(new BigDecimal(c1.getVote()));
+            Comparator<VoteResponse> comparator = (c1, c2) -> Double.compare(c2.getPercent(), c1.getPercent());
             list.sort(comparator);
         } catch (Exception e) {
             log.error("", e);

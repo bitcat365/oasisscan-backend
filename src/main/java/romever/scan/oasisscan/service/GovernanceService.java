@@ -49,13 +49,15 @@ public class GovernanceService {
             response = new ProposalResponse();
             BeanUtils.copyProperties(proposal, response);
 
+            String handler = "";
             Proposal.Content content = proposal.getContent();
             if (content != null) {
                 Proposal.Upgrade upgrade = content.getUpgrade();
                 if (upgrade != null) {
-                    response.setHandler(upgrade.getHandler());
+                    handler = upgrade.getHandler();
                 }
             }
+            response.setHandler(handler);
 
             List<ProposalResponse.Option> options = Lists.newArrayList();
             List<VoteResponse> voteResponses = governanceService.votes(id);
@@ -109,6 +111,8 @@ public class GovernanceService {
                 }
                 responses.add(response);
             }
+            Comparator<ProposalResponse> comparator = (c1, c2) -> Long.compare(c2.getId(), c1.getId());
+            responses.sort(comparator);
         } catch (Exception e) {
             log.error("", e);
         }

@@ -32,6 +32,7 @@
 * [governance-proposals](#governance-proposals)
 * [governance-proposal](#governance-proposal)
 * [governance-votes](#governance-votes)
+* [governance-proposalwithvotes](#governance-proposalwithvotes)
 
 ### validator stats
 
@@ -1326,6 +1327,8 @@ Params
 
 ### governance-proposals
 
+_Deprecated_
+
 ```
 // Request
 GET http://localhost:8181/governance/proposals
@@ -1460,6 +1463,81 @@ Params
                 "percent": 0.2001
             }
         ]
+    }
+}
+```
+
+### governance-proposalwithvotes
+
+```
+// Request
+GET http://localhost:8181/governance/proposalwithvotes
+
+```
+
+Params
+
+|  param   | description  |
+|  ----  | ----  |
+| id  | id |
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "id": 1,
+        "handler": "consensus-params-update-2021-08",
+        "submitter": "oasis1qpydpeyjrneq20kh2jz2809lew6d9p64yymutlee",
+        "state": "passed",
+        "deposit": "10000000000000",
+        "created_at": 7708,
+        "closes_at": 7876,
+        "options": [
+            {
+                "name": "yes",
+                "amount": "4855453528259128424",
+                "percent": 1.0
+            }
+        ],
+        "votes": [
+            {
+                "name": "stakefish",
+                "icon": "https://s3.amazonaws.com/keybase_processed_uploads/e1378cd4d5203ded716906687ad53905_360_360.jpg",
+                "address": "oasis1qq3xrq0urs8qcffhvmhfhz4p0mu7ewc8rscnlwxe",
+                "vote": "yes",
+                "amount": "391230693863903667",
+                "percent": 0.0806
+            }
+        ]
+    }
+}
+```
+
+### governance-proposallist
+
+_Deprecated_
+
+```
+// Request
+GET http://localhost:8181/governance/proposallist
+
+```
+
+```
+
+// Response
+{
+    "code": 0,
+    "data": {
+        "id": 1,
+        "handler": "consensus-params-update-2021-08",
+        "submitter": "oasis1qpydpeyjrneq20kh2jz2809lew6d9p64yymutlee",
+        "state": "passed",
+        "deposit": "10000000000000",
+        "created_at": 7708,
+        "closes_at": 7876,
     }
 }
 ```

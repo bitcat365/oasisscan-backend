@@ -52,7 +52,9 @@ public class GovernanceService {
             Proposal.Content content = proposal.getContent();
             if (content != null) {
                 Proposal.Upgrade upgrade = content.getUpgrade();
-                response.setHandler(upgrade.getHandler());
+                if (upgrade != null) {
+                    response.setHandler(upgrade.getHandler());
+                }
             }
 
             List<ProposalResponse.Option> options = Lists.newArrayList();
@@ -88,7 +90,34 @@ public class GovernanceService {
     }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public List<Proposal> proposalList() {
+    public List<ProposalResponse> proposalList() {
+        List<ProposalResponse> responses = Lists.newArrayList();
+        try {
+            List<Proposal> list = apiClient.proposalList();
+            if (CollectionUtils.isEmpty(list)) {
+                return responses;
+            }
+            for (Proposal proposal : list) {
+                ProposalResponse response = new ProposalResponse();
+                BeanUtils.copyProperties(proposal, response);
+                Proposal.Content content = proposal.getContent();
+                if (content != null) {
+                    Proposal.Upgrade upgrade = content.getUpgrade();
+                    if (upgrade != null) {
+                        response.setHandler(upgrade.getHandler());
+                    }
+                }
+                responses.add(response);
+            }
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        return responses;
+    }
+
+    @Deprecated
+    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    public List<Proposal> proposals() {
         List<Proposal> list = Lists.newArrayList();
         try {
             list = apiClient.proposalList();

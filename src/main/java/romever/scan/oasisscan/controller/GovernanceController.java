@@ -17,9 +17,10 @@ public class GovernanceController {
     @Autowired
     private GovernanceService governanceService;
 
+    @Deprecated
     @GetMapping("/proposals")
-    public ApiResult proposalList() {
-        return ApiResult.list(governanceService.proposalList());
+    public ApiResult proposals() {
+        return ApiResult.list(governanceService.proposals());
     }
 
     @GetMapping("/proposal")
@@ -41,5 +42,10 @@ public class GovernanceController {
             @RequestParam(value = "id") long id
     ) {
         return ApiResult.ok(governanceService.proposalWithVotes(id));
+    }
+
+    @GetMapping("/proposallist")
+    public ApiResult proposalList() {
+        return ApiResult.list(governanceService.proposalList());
     }
 }

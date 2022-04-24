@@ -33,6 +33,7 @@
 * [governance-proposal](#governance-proposal)
 * [governance-votes](#governance-votes)
 * [governance-proposalwithvotes](#governance-proposalwithvotes)
+* [governance-proposallist](#governance-proposallist)
 
 ### validator stats
 
@@ -1516,8 +1517,6 @@ Params
 ```
 
 ### governance-proposallist
-
-_Deprecated_
 
 ```
 // Request

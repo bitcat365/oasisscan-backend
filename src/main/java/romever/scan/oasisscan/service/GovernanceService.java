@@ -5,18 +5,21 @@ import com.alicp.jetcache.anno.Cached;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.entity.ValidatorInfo;
 import romever.scan.oasisscan.repository.ValidatorInfoRepository;
+import romever.scan.oasisscan.utils.Numeric;
 import romever.scan.oasisscan.vo.chain.AccountInfo;
 import romever.scan.oasisscan.vo.chain.Proposal;
 import romever.scan.oasisscan.vo.chain.Vote;
+import romever.scan.oasisscan.vo.response.ProposalResponse;
 import romever.scan.oasisscan.vo.response.VoteResponse;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +36,49 @@ public class GovernanceService {
     @Autowired
     private ValidatorInfoRepository validatorInfoRepository;
     @Autowired
-    private ValidatorService validatorService;
+    private GovernanceService governanceService;
+
+    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
+    public ProposalResponse proposalWithVotes(long id) {
+        ProposalResponse response = null;
+        try {
+            Proposal proposal = apiClient.proposal(id);
+            if (proposal == null) {
+                return response;
+            }
+            response = new ProposalResponse();
+            BeanUtils.copyProperties(proposal, response);
+            List<ProposalResponse.Option> options = Lists.newArrayList();
+            List<VoteResponse> voteResponses = governanceService.votes(id);
+            response.setVotes(voteResponses);
+            if (!CollectionUtils.isEmpty(voteResponses)) {
+                BigDecimal totalAmount = BigDecimal.ZERO;
+                Map<String, BigDecimal> optionMap = Maps.newHashMap();
+                for (VoteResponse voteResponse : voteResponses) {
+                    String optionName = voteResponse.getVote();
+                    BigDecimal amount = new BigDecimal(voteResponse.getAmount());
+                    totalAmount = amount.add(totalAmount);
+                    if (optionMap.containsKey(optionName)) {
+                        optionMap.put(optionName, amount.add(optionMap.get(optionName)));
+                    } else {
+                        optionMap.put(optionName, amount);
+                    }
+                }
+
+                for (Map.Entry<String, BigDecimal> entry : optionMap.entrySet()) {
+                    ProposalResponse.Option option = new ProposalResponse.Option();
+                    option.setName(entry.getKey());
+                    option.setAmount(entry.getValue().toString());
+                    option.setPercent(entry.getValue().divide(totalAmount, RoundingMode.HALF_UP).doubleValue());
+                    options.add(option);
+                }
+            }
+            response.setOptions(options);
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        return response;
+    }
 
     @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
     public List<Proposal> proposalList() {

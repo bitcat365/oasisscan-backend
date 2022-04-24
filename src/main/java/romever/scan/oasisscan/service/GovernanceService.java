@@ -102,13 +102,15 @@ public class GovernanceService {
             for (Proposal proposal : list) {
                 ProposalResponse response = new ProposalResponse();
                 BeanUtils.copyProperties(proposal, response);
+                String handler = "";
                 Proposal.Content content = proposal.getContent();
                 if (content != null) {
                     Proposal.Upgrade upgrade = content.getUpgrade();
                     if (upgrade != null) {
-                        response.setHandler(upgrade.getHandler());
+                        handler = upgrade.getHandler();
                     }
                 }
+                response.setHandler(handler);
                 responses.add(response);
             }
             Comparator<ProposalResponse> comparator = (c1, c2) -> Long.compare(c2.getId(), c1.getId());

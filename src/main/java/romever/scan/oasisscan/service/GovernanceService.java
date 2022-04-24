@@ -48,6 +48,13 @@ public class GovernanceService {
             }
             response = new ProposalResponse();
             BeanUtils.copyProperties(proposal, response);
+
+            Proposal.Content content = proposal.getContent();
+            if (content != null) {
+                Proposal.Upgrade upgrade = content.getUpgrade();
+                response.setHandler(upgrade.getHandler());
+            }
+
             List<ProposalResponse.Option> options = Lists.newArrayList();
             List<VoteResponse> voteResponses = governanceService.votes(id);
             response.setVotes(voteResponses);

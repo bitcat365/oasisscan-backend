@@ -1,6 +1,5 @@
 package romever.scan.oasisscan.repository;
 
-import org.hibernate.annotations.SortComparator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import romever.scan.oasisscan.entity.Delegator;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,5 +38,7 @@ public interface DelegatorRepository extends JpaRepository<Delegator, Integer>,
 
     Page<Delegator> findByDelegator(String delegator, Pageable pageable);
 
-    long deleteAllByValidator(String validator);
+    @Modifying
+    @Transactional
+    void deleteAllByValidator(String validator);
 }

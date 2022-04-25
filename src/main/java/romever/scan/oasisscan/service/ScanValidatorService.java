@@ -486,11 +486,11 @@ public class ScanValidatorService {
         List<ValidatorInfo> validatorInfos = validatorInfoRepository.findAll();
         if (!CollectionUtils.isEmpty(validatorInfos)) {
             log.info("delegators sync start, size: {}", validatorInfos.size());
-            List<Delegator> saveList = Lists.newArrayList();
             for (ValidatorInfo validatorInfo : validatorInfos) {
                 String v = validatorInfo.getEntityAddress();
                 Map<String, Delegations> delegationsMap = apiClient.delegationsTo(v, null);
                 if (!CollectionUtils.isEmpty(delegationsMap)) {
+                    List<Delegator> saveList = Lists.newArrayList();
                     for (Map.Entry<String, Delegations> delegationsEntry : delegationsMap.entrySet()) {
                         String delegatorId = delegationsEntry.getKey();
                         Delegator delegator = delegatorRepository.findByValidatorAndDelegator(v, delegatorId).orElse(new Delegator());
@@ -500,12 +500,12 @@ public class ScanValidatorService {
                         delegator.setShares(shares);
                         saveList.add(delegator);
                     }
+                    if (!CollectionUtils.isEmpty(saveList)) {
+                        delegatorRepository.deleteAllByValidator(v);
+                        delegatorRepository.saveAll(saveList);
+                        log.info("delegators sync done, {}, size: {}", v, saveList.size());
+                    }
                 }
-            }
-            if (!CollectionUtils.isEmpty(saveList)) {
-                delegatorRepository.deleteAll();
-                delegatorRepository.saveAll(saveList);
-                log.info("delegators sync done, size: {}", saveList.size());
             }
         }
     }

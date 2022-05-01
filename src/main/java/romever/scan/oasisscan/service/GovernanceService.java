@@ -48,15 +48,17 @@ public class GovernanceService {
             }
             response = new ProposalResponse();
             BeanUtils.copyProperties(proposal, response);
-
+            String type = "unknown";
             String handler = "";
             Proposal.Content content = proposal.getContent();
             if (content != null) {
                 Proposal.Upgrade upgrade = content.getUpgrade();
                 if (upgrade != null) {
                     handler = upgrade.getHandler();
+                    type = "upgrade";
                 }
             }
+            response.setType(type);
             response.setHandler(handler);
 
             List<ProposalResponse.Option> options = Lists.newArrayList();
@@ -102,14 +104,17 @@ public class GovernanceService {
             for (Proposal proposal : list) {
                 ProposalResponse response = new ProposalResponse();
                 BeanUtils.copyProperties(proposal, response);
+                String type = "unknown";
                 String handler = "";
                 Proposal.Content content = proposal.getContent();
                 if (content != null) {
                     Proposal.Upgrade upgrade = content.getUpgrade();
                     if (upgrade != null) {
                         handler = upgrade.getHandler();
+                        type = "upgrade";
                     }
                 }
+                response.setType(type);
                 response.setHandler(handler);
                 responses.add(response);
             }

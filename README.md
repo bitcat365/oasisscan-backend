@@ -1490,6 +1490,7 @@ Params
     "data": {
         "id": 1,
         "handler": "consensus-params-update-2021-08",
+        "type": "upgrade",
         "submitter": "oasis1qpydpeyjrneq20kh2jz2809lew6d9p64yymutlee",
         "state": "passed",
         "deposit": "10000000000000",
@@ -1532,6 +1533,7 @@ GET http://localhost:8181/governance/proposallist
     "data": {
         "id": 1,
         "handler": "consensus-params-update-2021-08",
+        "type": "upgrade",
         "submitter": "oasis1qpydpeyjrneq20kh2jz2809lew6d9p64yymutlee",
         "state": "passed",
         "deposit": "10000000000000",

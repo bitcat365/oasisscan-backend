@@ -10,6 +10,7 @@ import java.util.List;
 public class ProposalResponse {
     private long id;
     private String handler;
+    private String type;
     private String submitter;
     private String state;
     private String deposit;

@@ -171,230 +171,238 @@ public class ScanRuntimeService {
      */
     @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
 //    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
-    public void scanRuntimeStats() throws Exception {
+    public void scanRuntimeStats() {
         if (applicationConfig.isLocal()) {
             return;
         }
 
-        List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAllByOrderByStartRoundHeightAsc();
-        if (CollectionUtils.isEmpty(runtimes)) {
-            return;
-        }
-        long currentChainHeight = apiClient.getCurHeight();
-        for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
-            String runtimeId = runtime.getRuntimeId();
-            long scanHeight = runtime.getStatsHeight();
-            if (scanHeight == 0) {
-                scanHeight = runtime.getStartRoundHeight();
+        try {
+            List<romever.scan.oasisscan.entity.Runtime> runtimes = runtimeRepository.findAllByOrderByStartRoundHeightAsc();
+            if (CollectionUtils.isEmpty(runtimes)) {
+                return;
             }
-            long curRound = 0;
-            boolean roundDiscrepancy = false;
-            RuntimeState.Committee committee = null;
-            RuntimeState.Member currentScheduler = null;
-            while (scanHeight < currentChainHeight) {
-                Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (!optionalRuntime.isPresent()) {
-                    throw new RuntimeException("Runtime db read error.");
-                }
-                romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
-                _runtime.setStatsHeight(scanHeight);
-                runtimeRepository.saveAndFlush(_runtime);
-
-                List<Node> nodes = apiClient.registryNodes(scanHeight);
-                if (nodes == null) {
-                    throw new RuntimeException(String.format("Registry nodes api error. %s, %s", runtimeId, scanHeight));
-                }
-                //save node entity map
-                Map<String, String> nodeToEntity = Maps.newHashMap();
-                for (Node node : nodes) {
-                    nodeToEntity.put(node.getId(), node.getEntity_id());
-                    List<Node.Runtime> runtimeList = node.getRuntimes();
-                    if (CollectionUtils.isEmpty(runtimeList)) {
-                        continue;
-                    }
-                    for (Node.Runtime r : runtimeList) {
-                        if (r.getId().equalsIgnoreCase(runtimeId)) {
-                            //save in db
-                            Optional<RuntimeNode> optionalRuntimeNode = runtimeNodeRepository.findByRuntimeIdAndNodeId(runtimeId, node.getId());
-                            if (!optionalRuntimeNode.isPresent()) {
-                                RuntimeNode runtimeNode = new RuntimeNode();
-                                runtimeNode.setRuntimeId(runtimeId);
-                                runtimeNode.setNodeId(node.getId());
-                                runtimeNode.setEntityId(node.getEntity_id());
-                                runtimeNodeRepository.save(runtimeNode);
-                            }
-                        }
-                    }
-                }
-
-                RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
-                if (runtimeRound == null) {
-                    throw new RuntimeException(String.format("Runtime round api error. %s", scanHeight));
-                }
-                // If new round, check for proposer timeout.
-                // Need to look at submitted transactions if round failure was caused by a proposer timeout.
-                List<Transaction> txs = null;
+            long currentChainHeight = apiClient.getCurHeight();
+            for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
+                String runtimeId = runtime.getRuntimeId();
+                long scanHeight = runtime.getStatsHeight();
                 try {
-                    txs = transactionService.getEsTransactionsByHeight(scanHeight);
-                } catch (IOException e) {
-                    log.error("error", e);
-                    break;
-                }
-                boolean proposerTimeout = false;
-                if (!CollectionUtils.isEmpty(txs) && curRound != runtimeRound.getHeader().getRound() && committee != null) {
-                    for (Transaction tx : txs) {
-                        TransactionResult.Error error = tx.getError();
-                        if (error != null) {
-                            if (Texts.isNotBlank(error.getMessage())) {
-                                continue;
-                            }
-                        }
-                        if (!tx.getMethod().equalsIgnoreCase(MethodEnum.RoothashExecutorProposerTimeout.getName())) {
-                            continue;
-                        }
-                        if (!runtimeId.equalsIgnoreCase(tx.getBody().getId())) {
-                            continue;
-                        }
-                        saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(tx.getSignature().getPublic_key()), RuntimeStatsType.PROPOSED_TIMEOUT);
-                        if (currentScheduler != null) {
-                            saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(currentScheduler.getPublic_key()), RuntimeStatsType.PROPOSER_MISSED);
-                        }
-                        proposerTimeout = true;
-                        break;
+                    if (scanHeight == 0) {
+                        scanHeight = runtime.getStartRoundHeight();
                     }
-                }
+                    long curRound = 0;
+                    boolean roundDiscrepancy = false;
+                    RuntimeState.Committee committee = null;
+                    RuntimeState.Member currentScheduler = null;
+                    while (scanHeight < currentChainHeight) {
+                        Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                        if (!optionalRuntime.isPresent()) {
+                            throw new RuntimeException("Runtime db read error.");
+                        }
+                        romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
+                        _runtime.setStatsHeight(scanHeight);
+                        runtimeRepository.saveAndFlush(_runtime);
 
-                long headerType = runtimeRound.getHeader().getHeader_type();
-                // Go over events before updating potential new round committee info.
-                // Even if round transition happened at this height, all events emitted
-                // at this height belong to the previous round.
-                List<RoothashEvent> events = apiClient.roothashEvents(scanHeight);
-                if (events != null && curRound != 0) {
-                    for (RoothashEvent ev : events) {
-                        if (!runtimeId.equalsIgnoreCase(ev.getRuntime_id())) {
+                        List<Node> nodes = apiClient.registryNodes(scanHeight);
+                        if (nodes == null) {
+                            throw new RuntimeException(String.format("Registry nodes api error. %s, %s", runtimeId, scanHeight));
+                        }
+                        //save node entity map
+                        Map<String, String> nodeToEntity = Maps.newHashMap();
+                        for (Node node : nodes) {
+                            nodeToEntity.put(node.getId(), node.getEntity_id());
+                            List<Node.Runtime> runtimeList = node.getRuntimes();
+                            if (CollectionUtils.isEmpty(runtimeList)) {
+                                continue;
+                            }
+                            for (Node.Runtime r : runtimeList) {
+                                if (r.getId().equalsIgnoreCase(runtimeId)) {
+                                    //save in db
+                                    Optional<RuntimeNode> optionalRuntimeNode = runtimeNodeRepository.findByRuntimeIdAndNodeId(runtimeId, node.getId());
+                                    if (!optionalRuntimeNode.isPresent()) {
+                                        RuntimeNode runtimeNode = new RuntimeNode();
+                                        runtimeNode.setRuntimeId(runtimeId);
+                                        runtimeNode.setNodeId(node.getId());
+                                        runtimeNode.setEntityId(node.getEntity_id());
+                                        runtimeNodeRepository.save(runtimeNode);
+                                    }
+                                }
+                            }
+                        }
+
+                        RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
+                        if (runtimeRound == null) {
+                            throw new RuntimeException(String.format("Runtime round api error. %s", scanHeight));
+                        }
+                        // If new round, check for proposer timeout.
+                        // Need to look at submitted transactions if round failure was caused by a proposer timeout.
+                        List<Transaction> txs = null;
+                        try {
+                            txs = transactionService.getEsTransactionsByHeight(scanHeight);
+                        } catch (IOException e) {
+                            log.error("error", e);
+                            break;
+                        }
+                        boolean proposerTimeout = false;
+                        if (!CollectionUtils.isEmpty(txs) && curRound != runtimeRound.getHeader().getRound() && committee != null) {
+                            for (Transaction tx : txs) {
+                                TransactionResult.Error error = tx.getError();
+                                if (error != null) {
+                                    if (Texts.isNotBlank(error.getMessage())) {
+                                        continue;
+                                    }
+                                }
+                                if (!tx.getMethod().equalsIgnoreCase(MethodEnum.RoothashExecutorProposerTimeout.getName())) {
+                                    continue;
+                                }
+                                if (!runtimeId.equalsIgnoreCase(tx.getBody().getId())) {
+                                    continue;
+                                }
+                                saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(tx.getSignature().getPublic_key()), RuntimeStatsType.PROPOSED_TIMEOUT);
+                                if (currentScheduler != null) {
+                                    saveRuntimeStats(runtimeId, scanHeight, tx.getBody().getRound(), nodeToEntity.get(currentScheduler.getPublic_key()), RuntimeStatsType.PROPOSER_MISSED);
+                                }
+                                proposerTimeout = true;
+                                break;
+                            }
+                        }
+
+                        long headerType = runtimeRound.getHeader().getHeader_type();
+                        // Go over events before updating potential new round committee info.
+                        // Even if round transition happened at this height, all events emitted
+                        // at this height belong to the previous round.
+                        List<RoothashEvent> events = apiClient.roothashEvents(scanHeight);
+                        if (events != null && curRound != 0) {
+                            for (RoothashEvent ev : events) {
+                                if (!runtimeId.equalsIgnoreCase(ev.getRuntime_id())) {
+                                    continue;
+                                }
+                                if (ev.getExecution_discrepancy() != null) {
+                                    roundDiscrepancy = true;
+                                }
+                                if (ev.getFinalized() != null) {
+                                    RoothashEvent.Finalized _ev = ev.getFinalized();
+                                    // Skip the empty finalized event that is triggered on initial round.
+                                    if (CollectionUtils.isEmpty(_ev.getGood_compute_nodes()) && CollectionUtils.isEmpty(_ev.getBad_compute_nodes()) && committee == null) {
+                                        continue;
+                                    }
+                                    // Skip if epoch transition or suspended blocks.
+                                    if (headerType == RuntimeHeaderTypeEnum.EpochTransition.getCode() || headerType == RuntimeHeaderTypeEnum.Suspended.getCode()) {
+                                        continue;
+                                    }
+                                    if (proposerTimeout) {
+                                        continue;
+                                    }
+                                    // Update stats.
+                                    OUTER:
+                                    for (RuntimeState.Member member : committee.getMembers()) {
+                                        String entityId = nodeToEntity.get(member.getPublic_key());
+                                        // Primary workers are always required.
+                                        if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_INVOKED);
+                                        }
+                                        // In case of discrepancies backup workers were invoked as well.
+                                        if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_INVOKED);
+                                        }
+                                        // Go over good commitments.
+                                        if (_ev.getGood_compute_nodes() != null) {
+                                            for (String g : _ev.getGood_compute_nodes()) {
+                                                if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_GOOD_COMMIT);
+                                                    continue OUTER;
+                                                }
+                                                if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_GOOD_COMMIT);
+                                                    continue OUTER;
+                                                }
+                                            }
+                                        }
+                                        // Go over bad commitments.
+                                        if (_ev.getBad_compute_nodes() != null) {
+                                            for (String g : _ev.getBad_compute_nodes()) {
+                                                if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIM_BAD_COMMMIT);
+                                                    continue OUTER;
+                                                }
+                                                if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_BAD_COMMIT);
+                                                    continue OUTER;
+                                                }
+                                            }
+                                        }
+                                        // Neither good nor bad - missed commitment.
+                                        if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_MISSED);
+                                        }
+                                        if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_MISSED);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if (headerType == RuntimeHeaderTypeEnum.Suspended.getCode()) {
+                            log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
+                            scanHeight++;
                             continue;
                         }
-                        if (ev.getExecution_discrepancy() != null) {
-                            roundDiscrepancy = true;
+
+                        if (curRound != runtimeRound.getHeader().getRound()) {
+                            curRound = runtimeRound.getHeader().getRound();
+
+                            RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, scanHeight);
+                            if (runtimeState == null) {
+                                throw new RuntimeException(String.format("Runtime state api error. %s", scanHeight));
+                            }
+                            RuntimeState.ExecutorPool executorPool = runtimeState.getExecutor_pool();
+                            if (executorPool == null) {
+                                log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
+                                scanHeight++;
+                                continue;
+                            }
+
+                            committee = executorPool.getCommittee();
+                            currentScheduler = getTransactionScheduler(committee.getMembers(), curRound);
+                            roundDiscrepancy = false;
                         }
-                        if (ev.getFinalized() != null) {
-                            RoothashEvent.Finalized _ev = ev.getFinalized();
-                            // Skip the empty finalized event that is triggered on initial round.
-                            if (CollectionUtils.isEmpty(_ev.getGood_compute_nodes()) && CollectionUtils.isEmpty(_ev.getBad_compute_nodes()) && committee == null) {
-                                continue;
-                            }
-                            // Skip if epoch transition or suspended blocks.
-                            if (headerType == RuntimeHeaderTypeEnum.EpochTransition.getCode() || headerType == RuntimeHeaderTypeEnum.Suspended.getCode()) {
-                                continue;
-                            }
-                            if (proposerTimeout) {
-                                continue;
-                            }
-                            // Update stats.
-                            OUTER:
+
+                        // Update election stats.
+                        Set<String> seen = Sets.newHashSet();
+                        if (committee != null) {
                             for (RuntimeState.Member member : committee.getMembers()) {
-                                String entityId = nodeToEntity.get(member.getPublic_key());
-                                // Primary workers are always required.
+                                String pubKey = member.getPublic_key();
+                                String entityId = nodeToEntity.get(pubKey);
+                                if (Texts.isBlank(entityId)) {
+                                    throw new RuntimeException(String.format("Entity id not found. %s, %s", pubKey, scanHeight));
+                                }
+
+                                if (!seen.contains(pubKey)) {
+                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.ELECTED);
+                                }
+                                seen.add(pubKey);
+
                                 if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_INVOKED);
+                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY);
                                 }
-                                // In case of discrepancies backup workers were invoked as well.
-                                if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_INVOKED);
+                                if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
+                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BACKUP);
                                 }
-                                // Go over good commitments.
-                                if (_ev.getGood_compute_nodes() != null) {
-                                    for (String g : _ev.getGood_compute_nodes()) {
-                                        if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_GOOD_COMMIT);
-                                            continue OUTER;
-                                        }
-                                        if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_GOOD_COMMIT);
-                                            continue OUTER;
-                                        }
-                                    }
-                                }
-                                // Go over bad commitments.
-                                if (_ev.getBad_compute_nodes() != null) {
-                                    for (String g : _ev.getBad_compute_nodes()) {
-                                        if (member.getPublic_key().equalsIgnoreCase(g) && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIM_BAD_COMMMIT);
-                                            continue OUTER;
-                                        }
-                                        if (member.getPublic_key().equalsIgnoreCase(g) && roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_BAD_COMMIT);
-                                            continue OUTER;
-                                        }
-                                    }
-                                }
-                                // Neither good nor bad - missed commitment.
-                                if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY_MISSED);
-                                }
-                                if (roundDiscrepancy && member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BCKP_MISSED);
+                                if (currentScheduler != null && pubKey.equalsIgnoreCase(currentScheduler.getPublic_key())) {
+                                    saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PROPOSER);
                                 }
                             }
                         }
-                    }
-                }
 
-                if (headerType == RuntimeHeaderTypeEnum.Suspended.getCode()) {
-                    log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
-                    scanHeight++;
-                    continue;
-                }
-
-                if (curRound != runtimeRound.getHeader().getRound()) {
-                    curRound = runtimeRound.getHeader().getRound();
-
-                    RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, scanHeight);
-                    if (runtimeState == null) {
-                        throw new RuntimeException(String.format("Runtime state api error. %s", scanHeight));
-                    }
-                    RuntimeState.ExecutorPool executorPool = runtimeState.getExecutor_pool();
-                    if (executorPool == null) {
                         log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
                         scanHeight++;
-                        continue;
                     }
-
-                    committee = executorPool.getCommittee();
-                    currentScheduler = getTransactionScheduler(committee.getMembers(), curRound);
-                    roundDiscrepancy = false;
+                } catch (Exception e) {
+                    log.error(String.format("%s, %s", runtimeId, scanHeight), e);
                 }
-
-                // Update election stats.
-                Set<String> seen = Sets.newHashSet();
-                if (committee != null) {
-                    for (RuntimeState.Member member : committee.getMembers()) {
-                        String pubKey = member.getPublic_key();
-                        String entityId = nodeToEntity.get(pubKey);
-                        if (Texts.isBlank(entityId)) {
-                            throw new RuntimeException(String.format("Entity id not found. %s, %s", pubKey, scanHeight));
-                        }
-
-                        if (!seen.contains(pubKey)) {
-                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.ELECTED);
-                        }
-                        seen.add(pubKey);
-
-                        if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.WORKER.getName())) {
-                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PRIMARY);
-                        }
-                        if (member.getRole().equalsIgnoreCase(CommitteeRoleEnum.BACKUPWORKER.getName())) {
-                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.BACKUP);
-                        }
-                        if (currentScheduler != null && pubKey.equalsIgnoreCase(currentScheduler.getPublic_key())) {
-                            saveRuntimeStats(runtimeId, scanHeight, curRound, entityId, RuntimeStatsType.PROPOSER);
-                        }
-                    }
-                }
-
-                log.info(String.format("runtime stats: %s, %s", runtimeId, scanHeight));
-                scanHeight++;
             }
+        } catch (Exception e) {
+            log.error("", e);
         }
     }
 

@@ -48,13 +48,13 @@ public abstract class Mappers {
     }
 
     public static <T> T parseCbor(byte[] bytes, TypeReference<T> type) throws IOException {
-//        try {
-//            return cborMapper.readValue(bytes, type);
-//        } catch (IOException e) {
-//            log.warn("parse cbor failure", e);
-//            return null;
-//        }
-        return cborMapper.readValue(bytes, type);
+        try {
+            return cborMapper.readValue(bytes, type);
+        } catch (IOException e) {
+            log.warn("parse cbor failure", e);
+            return null;
+        }
+//        return cborMapper.readValue(bytes, type);
     }
 
     /*

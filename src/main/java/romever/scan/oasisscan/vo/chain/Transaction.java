@@ -100,6 +100,8 @@ public class Transaction {
 
         private Signature signature;
 
+        private Object policy;
+
         public String getAmount() {
             return Texts.numberFromBase64(amount);
         }

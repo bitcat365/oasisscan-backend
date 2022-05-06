@@ -73,7 +73,7 @@ public class ScanRuntimeService {
     /**
      * Get all runtimes info and save in elasticsearch
      */
-    @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
+//    @Scheduled(fixedDelay = 10 * 60 * 1000, initialDelay = 5 * 1000)
     public void scanRuntime() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
@@ -99,7 +99,7 @@ public class ScanRuntimeService {
     /**
      * Scan runtimes round and save in elasticsearch
      */
-    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
+//    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
     public void scanRuntimeRound() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
@@ -169,7 +169,7 @@ public class ScanRuntimeService {
     /**
      * See https://github.com/oasisprotocol/tools/tree/main/runtime-stats
      */
-    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
+//    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 20 * 1000)
 //    @Transactional(rollbackFor = Exception.class, isolation = Isolation.SERIALIZABLE)
     public void scanRuntimeStats() {
         if (applicationConfig.isLocal()) {
@@ -406,7 +406,7 @@ public class ScanRuntimeService {
         }
     }
 
-    @Scheduled(fixedDelay = 30 * 1000, initialDelay = 30 * 1000)
+//    @Scheduled(fixedDelay = 30 * 1000, initialDelay = 30 * 1000)
     public void scanRuntimeStatsInfo() {
         if (applicationConfig.isLocal()) {
             return;

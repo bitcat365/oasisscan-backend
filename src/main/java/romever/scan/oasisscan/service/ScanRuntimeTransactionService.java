@@ -62,7 +62,7 @@ public class ScanRuntimeTransactionService {
     /**
      * Currently only scan emerald transactions
      */
-    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
+//    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 10 * 1000)
     public void scanTransaction() throws Exception {
         if (applicationConfig.isLocal()) {
             return;
@@ -278,7 +278,7 @@ public class ScanRuntimeTransactionService {
         return runtimeState.getLast_normal_round();
     }
 
-    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
+//    @Scheduled(fixedDelay = 15 * 1000, initialDelay = 15 * 1000)
     public void scanEvents() throws Exception {
         if (applicationConfig.isLocal()) {
             return;

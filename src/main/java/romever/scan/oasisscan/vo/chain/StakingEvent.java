@@ -13,6 +13,7 @@ public class StakingEvent {
     private EscrowEvent escrow;
     private AllowanceChangeEvent allowance_change;
     private String type;
+    private long timestamp;
 
     @Data
     public static class TransferEvent {

@@ -20,6 +20,7 @@ import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.db.JestDao;
 import romever.scan.oasisscan.utils.Mappers;
 import romever.scan.oasisscan.vo.chain.StakingEvent;
+import romever.scan.oasisscan.vo.response.BlockDetailResponse;
 import romever.scan.oasisscan.vo.response.ListStakingEventResponse;
 
 import java.io.IOException;
@@ -35,6 +36,9 @@ public class StakingEventService {
     private RestHighLevelClient elasticsearchClient;
     @Autowired
     private ElasticsearchConfig elasticsearchConfig;
+
+    @Autowired
+    private BlockService blockService;
 
     public ApiResult stakingEvents(int size, int page, String address) {
         long total = 0;
@@ -96,6 +100,9 @@ public class StakingEventService {
                 });
                 if (stakingEvent != null) {
                     stakingEvent.setType(getType(stakingEvent));
+
+                    BlockDetailResponse block = blockService.detail(stakingEvent.getHeight());
+                    stakingEvent.setTimestamp(block.getTimestamp());
                 }
             }
         } catch (IOException e) {

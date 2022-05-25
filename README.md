@@ -1321,7 +1321,8 @@ Params
             "to": "oasis1qqw5qhuqkg88grepr2crvwrupwzyvwn07yt728ht",
             "amount": "405000000000"
         },
-        "type": "transfer"
+        "type": "transfer",
+        "timestamp": 1589216250
     }
 }
 ```

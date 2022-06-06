@@ -47,9 +47,11 @@ import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.AccountDebondingResponse;
 import romever.scan.oasisscan.vo.response.AccountResponse;
 import romever.scan.oasisscan.vo.response.AccountValidatorResponse;
+import romever.scan.oasisscan.vo.response.ProposalResponse;
 import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -210,6 +212,10 @@ public class AccountService {
                             responses.add(response);
                         }
                     }
+
+                    //sort
+                    Comparator<AccountDebondingResponse> comparator = (c1, c2) -> Double.compare(Double.parseDouble(c2.getShares()), Double.parseDouble(c1.getShares()));
+                    responses.sort(comparator);
                 }
             }
         } catch (Exception e) {
@@ -251,6 +257,10 @@ public class AccountService {
                     }
                     responses.add(response);
                 }
+                //sort
+                Comparator<AccountValidatorResponse> comparator = (c1, c2) -> Double.compare(Double.parseDouble(c2.getAmount()), Double.parseDouble(c1.getAmount()));
+                responses.sort(comparator);
+
                 responses = MemoryPageUtil.pageLimit(responses, page, size);
             }
         } catch (Exception e) {

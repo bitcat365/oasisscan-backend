@@ -25,6 +25,8 @@ spring:
       connection-test-query: SELECT 1
       transaction-isolation: TRANSACTION_READ_COMMITTED
       connection-timeout: 45000
+      minimum-idle: 10
+      maximum-pool-size: 60
   jpa:
     # generate-ddl: true
     database-platform: org.hibernate.dialect.MySQL57Dialect

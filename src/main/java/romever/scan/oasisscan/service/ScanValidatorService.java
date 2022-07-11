@@ -499,6 +499,8 @@ public class ScanValidatorService {
                         delegator.setDelegator(delegatorId);
                         delegator.setShares(shares);
                         saveList.add(delegator);
+
+                        //todo delegator reward, get current epoch from api, then get height, then get reward from active validators
                     }
                     if (!CollectionUtils.isEmpty(saveList)) {
                         delegatorRepository.deleteAllByValidator(v);

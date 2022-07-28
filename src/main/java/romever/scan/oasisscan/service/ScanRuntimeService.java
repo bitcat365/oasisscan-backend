@@ -113,39 +113,43 @@ public class ScanRuntimeService {
         long currentChainHeight = apiClient.getCurHeight();
         for (romever.scan.oasisscan.entity.Runtime runtime : runtimes) {
             String runtimeId = runtime.getRuntimeId();
-            long scanHeight = getScanRound(runtimeId);
-            log.info("runtime scan height: {}, {}", runtimeId, scanHeight);
-            if (scanHeight == 0) {
-                RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
-                long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp().toEpochSecond();
-                Long genesisHeight = getGenesisRoundHeight(genesisTime);
-                if (genesisHeight == null) {
-                    throw new RuntimeException(String.format("Genesis Height can not found. %s", runtimeId));
-                }
-                scanHeight = genesisHeight;
+            try {
+                long scanHeight = getScanRound(runtimeId);
+                log.info("runtime scan height: {}, {}", runtimeId, scanHeight);
+                if (scanHeight == 0) {
+                    RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
+                    long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp().toEpochSecond();
+                    Long genesisHeight = getGenesisRoundHeight(genesisTime);
+                    if (genesisHeight == null) {
+                        throw new RuntimeException(String.format("Genesis Height can not found. %s", runtimeId));
+                    }
+                    scanHeight = genesisHeight;
 
-                Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
-                if (!optionalRuntime.isPresent()) {
-                    throw new RuntimeException("Runtime db read error.");
+                    Optional<romever.scan.oasisscan.entity.Runtime> optionalRuntime = runtimeRepository.findByRuntimeId(runtimeId);
+                    if (!optionalRuntime.isPresent()) {
+                        throw new RuntimeException("Runtime db read error.");
+                    }
+                    romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
+                    _runtime.setStartRoundHeight(genesisHeight);
+                    runtimeRepository.saveAndFlush(_runtime);
+                    log.info("update runtime height: {}, {}", runtimeId, genesisHeight);
                 }
-                romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
-                _runtime.setStartRoundHeight(genesisHeight);
-                runtimeRepository.saveAndFlush(_runtime);
-                log.info("update runtime height: {}, {}", runtimeId, genesisHeight);
-            }
-            while (scanHeight < currentChainHeight) {
-                RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
-                if (runtimeRound == null) {
-                    throw new RuntimeException(String.format("Runtime round api error. %s, %s", runtimeId, scanHeight));
-                }
-                RuntimeRound.Header header = runtimeRound.getHeader();
-                String id = header.getNamespace() + "_" + header.getRound();
-                JestDao.index(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), Mappers.map(header), id);
+                while (scanHeight < currentChainHeight) {
+                    RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
+                    if (runtimeRound == null) {
+                        throw new RuntimeException(String.format("Runtime round api error. %s, %s", runtimeId, scanHeight));
+                    }
+                    RuntimeRound.Header header = runtimeRound.getHeader();
+                    String id = header.getNamespace() + "_" + header.getRound();
+                    JestDao.index(elasticsearchClient, elasticsearchConfig.getRuntimeRoundIndex(), Mappers.map(header), id);
 
-                //save scan height
-                saveScanRound(runtimeId, scanHeight);
-                log.info("Runtime round sync done. {} [{}]", scanHeight, id);
-                scanHeight++;
+                    //save scan height
+                    saveScanRound(runtimeId, scanHeight);
+                    log.info("Runtime round sync done. {} [{}]", scanHeight, id);
+                    scanHeight++;
+                }
+            } catch (Exception e) {
+                log.error(String.format("runtime round update error, %s", runtimeId), e);
             }
         }
     }

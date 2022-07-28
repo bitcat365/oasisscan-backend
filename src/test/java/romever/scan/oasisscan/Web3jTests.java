@@ -267,5 +267,4 @@ public class Web3jTests {
 //        System.out.println(res);
 //        run();
     }
-
 }

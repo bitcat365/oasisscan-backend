@@ -115,7 +115,6 @@ public class ScanRuntimeService {
             String runtimeId = runtime.getRuntimeId();
             try {
                 long scanHeight = getScanRound(runtimeId);
-                log.info("runtime scan height: {}, {}", runtimeId, scanHeight);
                 if (scanHeight == 0) {
                     RuntimeState runtimeState = apiClient.roothashRuntimeState(runtimeId, null);
                     long genesisTime = runtimeState.getGenesis_block().getHeader().getTimestamp().toEpochSecond();
@@ -132,7 +131,6 @@ public class ScanRuntimeService {
                     romever.scan.oasisscan.entity.Runtime _runtime = optionalRuntime.get();
                     _runtime.setStartRoundHeight(genesisHeight);
                     runtimeRepository.saveAndFlush(_runtime);
-                    log.info("update runtime height: {}, {}", runtimeId, genesisHeight);
                 }
                 while (scanHeight < currentChainHeight) {
                     RuntimeRound runtimeRound = apiClient.roothashLatestblock(runtimeId, scanHeight);
@@ -149,7 +147,7 @@ public class ScanRuntimeService {
                     scanHeight++;
                 }
             } catch (Exception e) {
-                log.error(String.format("runtime round update error, %s", runtimeId), e);
+                log.error(String.format("runtime round update has problem, %s", runtimeId), e);
             }
         }
     }

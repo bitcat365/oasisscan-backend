@@ -133,7 +133,7 @@ public class Web3jTests {
 
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "gljRo2F2AWJhaaJic2mBomVub25jZQxsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIC7G6fj+D5dhB3zzQW4nf/o4GB29dpGOdv438sXfh3dUY2ZlZaNjZ2FzGTqYZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQB5MdPDzVdOa2wLZxc33J1JZFsAK2ZhbW91bnSCSIrHIwSJ6AAAQGZtZXRob2RxY29uc2Vuc3VzLkRlcG9zaXSBoWlzaWduYXR1cmVYQMP1stHIA1rJLtobnV8q9KuWmzeinOvgY6rK1Xa1OpcM+gnVqBFXNsYzPQH8l4CgbtCtjemBaVQDW1ioEUDhjwA=";
+        String code = "gljNo2F2AWJhaaJic2mBomVub25jZQJsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ2VkMjU1MTlYIJeE4gWxTSokRBLXicsZ/oPH5ZhmnT6fn2cJOG5tui2yY2ZlZaNjZ2FzGTqYZmFtb3VudIJAQHJjb25zZW5zdXNfbWVzc2FnZXMBZGNhbGyiZGJvZHmiYnRvVQAVGnwS949KAxneB0coG4+VCvdgxmZhbW91bnSCRDuaygBAZm1ldGhvZHFjb25zZW5zdXMuRGVwb3NpdIGhaXNpZ25hdHVyZVhARNS7fthodB1WEMP+mkgyVveaoLiHZaeJU4AZKRLmrATWxLOB+MAOC4hYsMW2HWuMV99a1fyDjYOXGZM4yECiBQ==";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);

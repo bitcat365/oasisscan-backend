@@ -88,6 +88,7 @@ public class ScanRuntimeTransactionService {
         if (scanRound != 0) {
             scanRound++;
         }
+        log.info("runtime transaction sync start {} {}", scanRound, currentRound);
         for (; scanRound <= currentRound; scanRound++) {
             List<RuntimeTransactionWithResult> list = apiClient.runtimeTransactionsWithResults(runtimeId, scanRound);
             if (CollectionUtils.isEmpty(list)) {

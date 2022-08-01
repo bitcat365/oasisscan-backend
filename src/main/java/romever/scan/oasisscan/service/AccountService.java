@@ -180,7 +180,6 @@ public class AccountService {
         try {
             Map<String, List<romever.scan.oasisscan.vo.chain.Debonding>> debondingMap = apiClient.debondingdelegations(delegator, null);
             if (!CollectionUtils.isEmpty(debondingMap)) {
-                total = debondingMap.size();
                 long currentEpoch = apiClient.epoch(null);
                 List<Debonding> list = Lists.newArrayList();
                 for (Map.Entry<String, List<romever.scan.oasisscan.vo.chain.Debonding>> entry : debondingMap.entrySet()) {
@@ -194,7 +193,7 @@ public class AccountService {
                         list.add(debonding);
                     }
                 }
-                list = MemoryPageUtil.pageLimit(list, page, size);
+                total = list.size();
 
                 if (!CollectionUtils.isEmpty(list)) {
                     for (Debonding debonding : list) {
@@ -217,6 +216,8 @@ public class AccountService {
                     Comparator<AccountDebondingResponse> comparator = (c1, c2) -> Double.compare(Double.parseDouble(c2.getShares()), Double.parseDouble(c1.getShares()));
                     responses.sort(comparator);
                 }
+
+                responses = MemoryPageUtil.pageLimit(responses, page, size);
             }
         } catch (Exception e) {
             log.error("", e);

@@ -68,16 +68,6 @@ public class ScanRuntimeTransactionService {
             return;
         }
 
-        String emerald = null;
-        if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
-            emerald = "000000000000000000000000000000000000000000000000e2eaa99fc008f87f";
-        } else if ("test".equalsIgnoreCase(applicationConfig.getEnv())) {
-            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
-        }
-        if (Texts.isBlank(emerald)) {
-            return;
-        }
-
         List<String> runtimes = Lists.newArrayList();
         if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
             //emerald
@@ -297,113 +287,114 @@ public class ScanRuntimeTransactionService {
             return;
         }
 
-        String emerald = null;
+        List<String> runtimes = Lists.newArrayList();
         if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
-            emerald = "000000000000000000000000000000000000000000000000e2eaa99fc008f87f";
+            //emerald
+            runtimes.add("000000000000000000000000000000000000000000000000e2eaa99fc008f87f");
         } else if ("test".equalsIgnoreCase(applicationConfig.getEnv())) {
-            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
-        } else if ("local".equalsIgnoreCase(applicationConfig.getEnv())) {
-            emerald = "00000000000000000000000000000000000000000000000072c8215e60d5bca7";
-        }
-        if (Texts.isBlank(emerald)) {
-            return;
+            //emerald
+            runtimes.add("00000000000000000000000000000000000000000000000072c8215e60d5bca7");
+            //sapphire
+            runtimes.add("000000000000000000000000000000000000000000000000a6d1e3ebf60dff6c");
         }
 
-        String runtimeId = emerald;
-        Long currentRound = getCurrentRound(runtimeId);
-        if (currentRound == null) return;
+        for (String runtimeId : runtimes) {
+            Long currentRound = getCurrentRound(runtimeId);
+            if (currentRound == null) return;
 
-        Long scanRound = getScanEventRound(runtimeId);
-        if (scanRound == null) {
-            return;
-        }
-
-        if (scanRound != 0) {
-            scanRound++;
-        }
-        for (; scanRound <= currentRound; scanRound++) {
-            List<RuntimeEvent> events = apiClient.runtimeEvent(runtimeId, scanRound);
-            if (CollectionUtils.isEmpty(events)) {
-                //save scan height
-                saveScanEventRound(runtimeId, scanRound);
-                log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, 0));
-                continue;
+            Long scanRound = getScanEventRound(runtimeId);
+            if (scanRound == null) {
+                return;
             }
 
-            Map<String, Map<String, Object>> eventMap = Maps.newHashMap();
-            for (int i = 0; i < events.size(); i++) {
-                RuntimeEvent event = events.get(i);
-                String key = event.getKey();
-                String keyHex = Texts.base64ToHex(key);
-                if (keyHex.equalsIgnoreCase(Constants.RUNTIME_EVENT_EVM_HEX)) {
+            if (scanRound != 0) {
+                scanRound++;
+            }
+            for (; scanRound <= currentRound; scanRound++) {
+                List<RuntimeEvent> events = apiClient.runtimeEvent(runtimeId, scanRound);
+                if (CollectionUtils.isEmpty(events)) {
+                    //save scan height
+                    saveScanEventRound(runtimeId, scanRound);
+                    log.info(String.format("runtime event %s, round: %s, count: %s", runtimeId, scanRound, 0));
                     continue;
                 }
-                event.setKey(keyHex);
 
-                String value = event.getValue();
-                List<EventLog> eventLogs = Lists.newArrayList();
-                JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
-                });
-                if (eventJson.isArray()) {
-                    eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<EventLog>>() {
+                Map<String, Map<String, Object>> eventMap = Maps.newHashMap();
+                for (int i = 0; i < events.size(); i++) {
+                    RuntimeEvent event = events.get(i);
+                    String key = event.getKey();
+                    String keyHex = Texts.base64ToHex(key);
+                    if (keyHex.equalsIgnoreCase(Constants.RUNTIME_EVENT_EVM_HEX)) {
+                        continue;
+                    }
+                    event.setKey(keyHex);
+
+                    String value = event.getValue();
+                    List<EventLog> eventLogs = Lists.newArrayList();
+                    JsonNode eventJson = Mappers.parseCborFromBase64(value, new TypeReference<JsonNode>() {
                     });
-                } else {
-                    eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<EventLog>() {
-                    }));
-                }
-                if (!CollectionUtils.isEmpty(eventLogs)) {
-                    for (int logIndex = 0; logIndex < eventLogs.size(); logIndex++) {
-                        EventLog log = eventLogs.get(logIndex);
+                    if (eventJson.isArray()) {
+                        eventLogs = Mappers.parseCborFromBase64(value, new TypeReference<List<EventLog>>() {
+                        });
+                    } else {
+                        eventLogs.add(Mappers.parseCborFromBase64(value, new TypeReference<EventLog>() {
+                        }));
+                    }
+                    if (!CollectionUtils.isEmpty(eventLogs)) {
+                        for (int logIndex = 0; logIndex < eventLogs.size(); logIndex++) {
+                            EventLog log = eventLogs.get(logIndex);
 
-                        RuntimeEventES eventES = new RuntimeEventES();
-                        BeanUtils.copyProperties(log, eventES);
-                        eventES.setType(event.getKey());
-                        eventES.setTx_hash(event.getTx_hash());
-                        eventES.setRound(scanRound);
-                        eventES.setPosition((long) logIndex);
-                        eventES.setI((long) logIndex);
+                            //todo add event runtime id
+                            RuntimeEventES eventES = new RuntimeEventES();
+                            BeanUtils.copyProperties(log, eventES);
+                            eventES.setType(event.getKey());
+                            eventES.setTx_hash(event.getTx_hash());
+                            eventES.setRound(scanRound);
+                            eventES.setPosition((long) logIndex);
+                            eventES.setI((long) logIndex);
 
-                        if (Texts.isNotBlank(log.getFrom())) {
-                            String from = apiClient.base64ToBech32Address(log.getFrom());
-                            if (Texts.isBlank(from)) {
-                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            if (Texts.isNotBlank(log.getFrom())) {
+                                String from = apiClient.base64ToBech32Address(log.getFrom());
+                                if (Texts.isBlank(from)) {
+                                    throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                }
+                                eventES.setFrom(from);
                             }
-                            eventES.setFrom(from);
-                        }
-                        if (Texts.isNotBlank(log.getTo())) {
-                            String to = apiClient.base64ToBech32Address(log.getTo());
-                            if (Texts.isBlank(to)) {
-                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            if (Texts.isNotBlank(log.getTo())) {
+                                String to = apiClient.base64ToBech32Address(log.getTo());
+                                if (Texts.isBlank(to)) {
+                                    throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                }
+                                eventES.setTo(to);
                             }
-                            eventES.setTo(to);
-                        }
-                        if (Texts.isNotBlank(log.getOwner())) {
-                            String owner = apiClient.base64ToBech32Address(log.getOwner());
-                            if (Texts.isBlank(owner)) {
-                                throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                            if (Texts.isNotBlank(log.getOwner())) {
+                                String owner = apiClient.base64ToBech32Address(log.getOwner());
+                                if (Texts.isBlank(owner)) {
+                                    throw new RuntimeException(String.format("address parse failed, %s", scanRound));
+                                }
+                                eventES.setOwner(owner);
                             }
-                            eventES.setOwner(owner);
-                        }
 
-                        String esId = runtimeId + "_" + scanRound + "_" + i + "_" + logIndex;
-                        eventMap.put(esId, Mappers.map(eventES));
+                            String esId = runtimeId + "_" + scanRound + "_" + i + "_" + logIndex;
+                            eventMap.put(esId, Mappers.map(eventES));
+                        }
                     }
                 }
-            }
 
-            if (!CollectionUtils.isEmpty(eventMap)) {
-                BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), eventMap);
-                for (BulkItemResponse bulkItemResponse : bulkResponse) {
-                    if (bulkItemResponse.isFailed()) {
-                        BulkItemResponse.Failure failure = bulkItemResponse.getFailure();
-                        log.error(failure.getMessage());
-                        throw failure.getCause();
+                if (!CollectionUtils.isEmpty(eventMap)) {
+                    BulkResponse bulkResponse = JestDao.indexBulk(elasticsearchClient, elasticsearchConfig.getRuntimeEventIndex(), eventMap);
+                    for (BulkItemResponse bulkItemResponse : bulkResponse) {
+                        if (bulkItemResponse.isFailed()) {
+                            BulkItemResponse.Failure failure = bulkItemResponse.getFailure();
+                            log.error(failure.getMessage());
+                            throw failure.getCause();
+                        }
                     }
                 }
+                //save scan height
+                saveScanEventRound(runtimeId, scanRound);
+                log.info(String.format("runtime event %s, round: %s, count: %s", runtimeId, scanRound, eventMap.size()));
             }
-            //save scan height
-            saveScanEventRound(runtimeId, scanRound);
-            log.info(String.format("runtime event %s, round: %s, count: %s", emerald, scanRound, eventMap.size()));
         }
     }
 

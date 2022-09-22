@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface EscrowStatsRepository extends JpaRepository<EscrowStats, Integer>,
+public interface EscrowStatsRepository extends JpaRepository<EscrowStats, Long>,
         JpaSpecificationExecutor<EscrowStats> {
     Optional<EscrowStats> findFirstByOrderByHeightDesc();
 

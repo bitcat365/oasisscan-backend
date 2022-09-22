@@ -8,7 +8,7 @@ import romever.scan.oasisscan.entity.SystemProperty;
 import java.util.Optional;
 
 @Repository
-public interface SystemPropertyRepository extends JpaRepository<SystemProperty, Integer>,
+public interface SystemPropertyRepository extends JpaRepository<SystemProperty, Long>,
         JpaSpecificationExecutor<SystemProperty> {
     Optional<SystemProperty> findByProperty(String property);
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RuntimeStatsRepository extends JpaRepository<RuntimeStats, Integer>,
+public interface RuntimeStatsRepository extends JpaRepository<RuntimeStats, Long>,
         JpaSpecificationExecutor<RuntimeStats> {
     Optional<RuntimeStats> findFirstByRuntimeIdOrderByIdDesc(String runtimeId);
 

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RuntimeNodeRepository extends JpaRepository<RuntimeNode, Integer>,
+public interface RuntimeNodeRepository extends JpaRepository<RuntimeNode, Long>,
         JpaSpecificationExecutor<RuntimeNode> {
 
     Optional<RuntimeNode> findByRuntimeIdAndNodeId(String runtimeId, String nodeId);

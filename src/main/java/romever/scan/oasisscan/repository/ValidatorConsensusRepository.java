@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ValidatorConsensusRepository extends JpaRepository<ValidatorConsensus, Integer>,
+public interface ValidatorConsensusRepository extends JpaRepository<ValidatorConsensus, Long>,
         JpaSpecificationExecutor<ValidatorConsensus> {
 
     Optional<ValidatorConsensus> findByEntityIdAndNodeIdAndConsensusId(String entityId, String nodeId, String consensusId);

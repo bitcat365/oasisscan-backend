@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RuntimeStatsInfoRepository extends JpaRepository<RuntimeStatsInfo, Integer>,
+public interface RuntimeStatsInfoRepository extends JpaRepository<RuntimeStatsInfo, Long>,
         JpaSpecificationExecutor<RuntimeStatsInfo> {
     Optional<RuntimeStatsInfo> findByRuntimeIdAndEntityIdAndStatsType(String runtimeId, String entityId, RuntimeStatsType statsType);
 

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface RuntimeRepository extends JpaRepository<Runtime, Integer>,
+public interface RuntimeRepository extends JpaRepository<Runtime, Long>,
         JpaSpecificationExecutor<Runtime> {
     Optional<Runtime> findByRuntimeId(String runtimeId);
 

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DelegatorRepository extends JpaRepository<Delegator, Integer>,
+public interface DelegatorRepository extends JpaRepository<Delegator, Long>,
         JpaSpecificationExecutor<Delegator> {
     Optional<Delegator> findByValidatorAndDelegator(String validator, String delegator);
 

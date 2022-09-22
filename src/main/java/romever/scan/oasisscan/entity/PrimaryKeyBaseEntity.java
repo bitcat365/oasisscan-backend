@@ -8,7 +8,7 @@ import org.springframework.util.ClassUtils;
 import javax.persistence.*;
 
 @MappedSuperclass
-public abstract class PrimaryKeyBaseEntity implements Persistable<Integer> {
+public abstract class PrimaryKeyBaseEntity implements Persistable<Long> {
 
     private static final long serialVersionUID = 3883356025315786437L;
 

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ValidatorInfoRepository extends JpaRepository<ValidatorInfo, Integer>,
+public interface ValidatorInfoRepository extends JpaRepository<ValidatorInfo, Long>,
         JpaSpecificationExecutor<ValidatorInfo> {
 
     List<ValidatorInfo> findByOrderByEscrowDesc();

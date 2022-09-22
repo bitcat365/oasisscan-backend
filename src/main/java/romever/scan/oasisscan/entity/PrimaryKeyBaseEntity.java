@@ -17,7 +17,7 @@ public abstract class PrimaryKeyBaseEntity implements Persistable<Integer> {
     @Access(AccessType.PROPERTY) // http://256stuff.com/gray/docs/misc/hibernate_lazy_field_access_annotations.shtml
     protected @Getter
     @Setter
-    Integer id;
+    Long id;
 
     @Transient
     @Override

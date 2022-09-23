@@ -43,7 +43,7 @@ public class TransactionDetailResponse {
         response.setMethod(method);
         String feeAmount = transaction.getFee().getAmount();
         if (Texts.isNotBlank(feeAmount)) {
-            response.setFee(Texts.formatDecimals(feeAmount, Constants.DECIMALS, 9));
+            response.setFee(Texts.formatDecimals(feeAmount, Constants.DECIMALS, Constants.DECIMALS));
         }
         response.setTimestamp(transaction.getTimestamp());
         response.setTime(System.currentTimeMillis() / 1000 - transaction.getTimestamp());
@@ -58,11 +58,14 @@ public class TransactionDetailResponse {
                 switch (methodEnum) {
                     case StakingTransfer:
                         response.setTo(body.getTo());
-                        response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, 9));
+                        response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, Constants.DECIMALS));
                         break;
                     case StakingAddEscrow:
                         response.setTo(body.getAccount());
-                        response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, 9));
+                        response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, Constants.DECIMALS));
+                        break;
+                    case StakingBurn:
+                        response.setAmount(Texts.formatDecimals(body.getAmount(), Constants.DECIMALS, Constants.DECIMALS));
                         break;
                     case StakingReclaimEscrow:
                         //tokens = shares * balance / total_shares

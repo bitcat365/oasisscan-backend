@@ -57,6 +57,13 @@ public class ListTransactionResponse {
                 double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
                 response.setAmount(Numeric.formatDouble(amount));
                 response.setTo(body.getTo());
+            } else if (methodEnum.equals(MethodEnum.StakingBurn)) {
+                String a = body.getAmount();
+                if (Texts.isBlank(a)) {
+                    a = "0";
+                }
+                double amount = Double.parseDouble(Texts.toBigDecimal(a, Constants.DECIMALS));
+                response.setAmount(Numeric.formatDouble(amount));
             } else if (methodEnum.equals(MethodEnum.StakingAllow)) {
                 String a = body.getAmount_change();
                 if (Texts.isBlank(a)) {
@@ -77,13 +84,8 @@ public class ListTransactionResponse {
                 response.setAmount(Numeric.formatDouble(amount));
                 response.setFrom(body.getFrom());
                 response.setTo(transaction.getSignature().getAddress());
-            }
-        }
-
-        if (methodEnum != null && body != null) {
-            //shares = amount * total_shares / balance
-            //tokens = shares * balance / total_shares
-            if (methodEnum.equals(MethodEnum.StakingAddEscrow)) {
+            } else if (methodEnum.equals(MethodEnum.StakingAddEscrow)) {
+                //shares = amount * total_shares / balance
                 String a = body.getAmount();
                 if (Texts.isBlank(a)) {
                     a = "0";
@@ -98,6 +100,7 @@ public class ListTransactionResponse {
                 response.setTo(body.getAccount());
                 response.setAdd(true);
             } else if (methodEnum.equals(MethodEnum.StakingReclaimEscrow)) {
+                //tokens = shares * balance / total_shares
                 double shares = Double.parseDouble(Texts.formatDecimals(body.getShares(), Constants.DECIMALS, 2));
                 double amount = 0;
                 if (totalShares != 0) {

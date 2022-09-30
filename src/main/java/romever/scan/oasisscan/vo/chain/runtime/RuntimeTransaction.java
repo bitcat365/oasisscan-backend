@@ -20,7 +20,7 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
 
     @Data
     public static class Si {
-        private long nonce;
+        private Long nonce;
         private AddressSpec address_spec;
     }
 
@@ -38,20 +38,25 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
 
     @Data
     public static class Fee {
-        private long gas;
+        private Long gas;
         private List<String> amount;
-        private long consensus_messages;
+        private Long consensus_messages;
     }
 
     @Data
     public static class Call {
         private Body body;
         private String method;
+        private Long format;
     }
 
     @Data
     public static class Body {
         private String to;
         private List<String> amount;
+
+        private String pk;
+        private String data;
+        private String nonce;
     }
 }

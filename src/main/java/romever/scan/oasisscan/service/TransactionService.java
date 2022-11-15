@@ -33,6 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApiResult;
 import romever.scan.oasisscan.common.ApplicationConfig;
+import romever.scan.oasisscan.common.Constants;
 import romever.scan.oasisscan.common.ElasticsearchConfig;
 import romever.scan.oasisscan.common.client.ApiClient;
 import romever.scan.oasisscan.db.JestDao;
@@ -75,6 +76,8 @@ public class TransactionService {
 
     @Autowired
     private RuntimeService runtimeService;
+    @Autowired
+    private SystemPropertyService systemPropertyService;
 
     private static final int HISTORY_DAY_SIZE = 30;
 
@@ -355,7 +358,8 @@ public class TransactionService {
                 .should(QueryBuilders.termQuery(TRANSACTION_METHOD, MethodEnum.StakingReclaimEscrow.getName()))
         );
         boolQueryBuilder.mustNot(QueryBuilders.existsQuery(TRANSACTION_ERROR_MESSAGE));
-        boolQueryBuilder.filter(QueryBuilders.rangeQuery(TRANSACTION_HEIGHT).from(applicationConfig.getUpgradeStartHeight(), true));
+        long startHeight = Long.parseLong(systemPropertyService.getSystemPropertyValue(Constants.SCAN_START_HEIGHT_PROPERTY));
+        boolQueryBuilder.filter(QueryBuilders.rangeQuery(TRANSACTION_HEIGHT).from(startHeight, true));
         searchSourceBuilder.query(boolQueryBuilder);
         searchSourceBuilder.sort(TRANSACTION_TIMESTAMP, SortOrder.DESC);
         searchSourceBuilder.from(size * (page - 1));

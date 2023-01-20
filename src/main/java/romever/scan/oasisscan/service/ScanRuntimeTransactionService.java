@@ -72,6 +72,8 @@ public class ScanRuntimeTransactionService {
         if ("prod".equalsIgnoreCase(applicationConfig.getEnv())) {
             //emerald
             runtimes.add("000000000000000000000000000000000000000000000000e2eaa99fc008f87f");
+            //sapphire
+            runtimes.add("000000000000000000000000000000000000000000000000f80306c9858e7279");
         } else if ("test".equalsIgnoreCase(applicationConfig.getEnv())) {
             //emerald
             runtimes.add("00000000000000000000000000000000000000000000000072c8215e60d5bca7");

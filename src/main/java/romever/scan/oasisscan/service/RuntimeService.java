@@ -217,7 +217,16 @@ public class RuntimeService {
             }
             Set<String> onlineNodeSet = Sets.newHashSet();
             for (Node node : nodes) {
-                onlineNodeSet.add(node.getEntity_id());
+                List<Node.Runtime> runtimeList = node.getRuntimes();
+                if (CollectionUtils.isEmpty(runtimeList)) {
+                    continue;
+                }
+                for (Node.Runtime r : runtimeList) {
+                    if (r.getId().equalsIgnoreCase(runtimeId)) {
+                        onlineNodeSet.add(node.getEntity_id());
+                        break;
+                    }
+                }
             }
 
             RuntimeStatsType[] types = RuntimeStatsType.class.getEnumConstants();

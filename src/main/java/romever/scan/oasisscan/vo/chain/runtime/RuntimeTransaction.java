@@ -34,6 +34,7 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
         private String ed25519;
         private String address;
         private String secp256k1eth;
+        private String sr25519;
     }
 
     @Data

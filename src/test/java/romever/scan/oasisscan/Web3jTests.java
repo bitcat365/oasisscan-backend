@@ -133,7 +133,7 @@ public class Web3jTests {
 
 
     public static void main(String[] args) throws IOException, SignatureException {
-        String code = "glkBJaNhdgFiYWmiYnNpgaJlbm9uY2UBbGFkZHJlc3Nfc3BlY6Fpc2lnbmF0dXJloWdlZDI1NTE5WCCyTmS8Edpn+yLTFdF2OWUg7E6CvujZ3Ur5yRVpTed0bmNmZWWiY2dhcxku4GZhbW91bnSCRwRDZMW7AABAZGNhbGyiZGJvZHmjYnBrWCBAidYM57h/ECMzC1ZP+W+bQVfxajxiZE5/L15nxP94RmRkYXRhWFuAOcyTKJG7vG9QujrrLixV9gznVb1ihW4TW0Zzuau5gXVVFblmmiMVwcg/MIUt5kcTvEUO8vt8wEBQ9a0Zowh8TPDsOXx9YF/1aYIT2JpS3fFCikwLsgJqBImWZW5vbmNlT2v/wDV9iqd7PodJUq5rAGZmb3JtYXQBgaFpc2lnbmF0dXJlWEAqgOvu4/TZtl9Dl0kvrNF49rv2IRrpFGAK5JXB6vacPREnC2ShDry4Q8xxQdQbcrAEPOycjL8wxOiWnPlkDcMC";
+        String code = "gljDo2F2AWJhaaJic2mBomVub25jZQBsYWRkcmVzc19zcGVjoWlzaWduYXR1cmWhZ3NyMjU1MTlYINQkrCkLoxZAd1/vHIf/rpgu/rjS/+LEsz1iX2wB8ZRtY2ZlZaJjZ2FzGQkGZmFtb3VudIJG0hfg8XAAQGRjYWxsomRib2R5omJ0b1UA9uqO7AntCUSG0FSVzsI+q75iI81mYW1vdW50gkgMfXE7SdoAAEBmbWV0aG9kcWFjY291bnRzLlRyYW5zZmVygaFpc2lnbmF0dXJlWED+CBxP0iQCydLMT6hpYcQyu/jJROIPApVyTKt3kobvKBDwon8m0gxmuQBxPUO1n+S4cRAAdi+ER2WwSNeh/xmA";
         JsonNode rawJson = Mappers.parseCborFromBase64(code, new TypeReference<JsonNode>() {
         });
         System.out.println(rawJson);
@@ -172,6 +172,9 @@ public class Web3jTests {
             RuntimeTransaction runtimeTransaction = Mappers.parseCborFromBase64(raw, new TypeReference<RuntimeTransaction>() {
             });
             System.out.println(Mappers.json(runtimeTransaction));
+
+            String hexCompressed = Texts.base64ToHex("1CSsKQujFkB3X+8ch/+umC7+uNL/4sSzPWJfbAHxlG0=");
+            System.out.println(hexCompressed);;
         }
 
 //        String test = "oWRmYWlso2Rjb2RlAmZtb2R1bGVjZXZtZ21lc3NhZ2V4HGV4ZWN1dGlvbiBmYWlsZWQ6IG91dCBvZiBnYXM=";

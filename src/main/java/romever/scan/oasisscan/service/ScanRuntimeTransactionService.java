@@ -173,6 +173,10 @@ public class ScanRuntimeTransactionService {
                                         String address = Keys.toChecksumAddress(Keys.getAddress(new BigInteger(Texts.toHex(uc), 16))).toLowerCase();
                                         signature.setAddress(address);
                                     }
+                                    if (Texts.isNotBlank(signature.getSr25519())) {
+                                        String hex = Texts.base64ToHex(signature.getSr25519());
+                                        signature.setAddress(hex);
+                                    }
                                 }
                             }
                         }

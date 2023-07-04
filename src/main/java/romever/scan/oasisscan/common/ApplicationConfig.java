@@ -5,6 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import romever.scan.oasisscan.common.client.ApiClient;
+import romever.scan.oasisscan.common.client.CoinGeckoClient;
 
 @Data
 @Configuration
@@ -24,6 +25,11 @@ public class ApplicationConfig {
     public ApiClient apiClient() {
         OasisConfig.Api api = oasis.getApi();
         return new ApiClient(api.getUrl(), api.getName());
+    }
+
+    @Bean
+    public CoinGeckoClient coinGeckoClient() {
+        return new CoinGeckoClient();
     }
 
 }

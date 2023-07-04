@@ -14,9 +14,7 @@ import romever.scan.oasisscan.utils.Mappers;
 
 import javax.net.ssl.*;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
-import java.net.URL;
+import java.net.*;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -50,26 +48,34 @@ public class OkHttp {
     private static final int READ_TIMEOUT = 1200;
     public static final int MAX_IDLE_CONNECTIONS = 50;
 
+    private static final String CLASH_HOST = "127.0.0.1";
+    private static final int CLASH_PORT = 7890;
+
     //    private static OkHttpClient client = getOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT);
     private boolean del = false;
     private OkHttpClient client;
 
     private static OkHttpClient httpsClient = getOkHttpsClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, MAX_IDLE_CONNECTIONS);
     private static OkHttpClient httpClient = getUnsafeOkHttpClient(CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, MAX_IDLE_CONNECTIONS, 60 * 30);
+    private static OkHttpClient proxyClient = getOkHttpProxyClient(CLASH_HOST, CLASH_PORT, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, MAX_IDLE_CONNECTIONS);
 
     public static OkHttp of(String url) {
-        return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, false);
+        return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, false, false);
     }
 
     public static OkHttp of(String url, boolean unsafe) {
-        return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, unsafe);
+        return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, unsafe, false);
     }
 
     public static OkHttp of(String url, int connTimeout, int writeTimeout, int readTimeout) {
-        return of(url, connTimeout, writeTimeout, readTimeout, false);
+        return of(url, connTimeout, writeTimeout, readTimeout, false, false);
     }
 
-    public static OkHttp of(String url, int connTimeout, int writeTimeout, int readTimeout, boolean unsafe) {
+    public static OkHttp ofProxy(String url) {
+        return of(url, CONN_TIMEOUT, WRITE_TIMEOUT, READ_TIMEOUT, false, true);
+    }
+
+    public static OkHttp of(String url, int connTimeout, int writeTimeout, int readTimeout, boolean unsafe, boolean proxy) {
         OkHttp okHttp = new OkHttp();
         String userInfo = "";
 
@@ -99,11 +105,18 @@ public class OkHttp {
 
         }
 
+        OkHttpClient okHttpClient;
         if (unsafe) {
-            okHttp.setClient(httpClient);
+            okHttpClient = httpClient;
         } else {
-            okHttp.setClient(httpsClient);
+            okHttpClient = httpsClient;
         }
+
+        if (proxy) {
+            okHttpClient = proxyClient;
+        }
+
+        okHttp.setClient(okHttpClient);
 
         // OkHttpClient client = getOkHttpClient(connTimeout, writeTimeout, readTimeout);
         // okHttp.setClient(client);
@@ -129,6 +142,22 @@ public class OkHttp {
                         // .addQueryParam("query", "0")
                         // .executor(Executors.newSingleThreadExecutor())
                         .build());
+        OkHttpClient okHttpClient = builder.build();
+        // new RetryAndFollowUpInterceptor(okHttpClient,false);
+        return okHttpClient;
+    }
+
+    public static OkHttpClient getOkHttpProxyClient(String host, int port, int connTimeout, int writeTimeout, int readTimeout, int maxIdleConnections) {
+        OkHttpClient.Builder builder = new OkHttpClient.Builder().retryOnConnectionFailure(true)
+                .connectTimeout(connTimeout, TimeUnit.SECONDS).writeTimeout(writeTimeout, TimeUnit.SECONDS)
+                .readTimeout(readTimeout, TimeUnit.SECONDS).connectionPool(new ConnectionPool(maxIdleConnections, 60 * 30, TimeUnit.SECONDS))
+                .addInterceptor(new LoggingInterceptor.Builder().loggable(true).log(Platform.INFO).request("OkHttp")
+                        .response("OkHttp")
+                        // .addQueryParam("query", "0")
+                        // .executor(Executors.newSingleThreadExecutor())
+                        .build())
+                .addInterceptor(new SwitchProxyInterceptor())
+                .proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port)));
         OkHttpClient okHttpClient = builder.build();
         // new RetryAndFollowUpInterceptor(okHttpClient,false);
         return okHttpClient;

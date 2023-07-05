@@ -40,10 +40,7 @@ import romever.scan.oasisscan.vo.chain.Delegations;
 import romever.scan.oasisscan.vo.response.*;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static romever.scan.oasisscan.common.ESFields.*;
@@ -468,6 +465,7 @@ public class ValidatorService {
             c.setKey(item.getKey());
             responses.add(c);
         }
+        Collections.reverse(responses);
         return responses;
     }
 

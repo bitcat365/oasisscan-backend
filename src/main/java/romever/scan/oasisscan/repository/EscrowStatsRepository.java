@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import romever.scan.oasisscan.entity.EscrowStats;
+import romever.scan.oasisscan.entity.IChartResponse;
 import romever.scan.oasisscan.vo.response.ChartResponse;
 
 import java.util.List;
@@ -21,5 +22,5 @@ public interface EscrowStatsRepository extends JpaRepository<EscrowStats, Long>,
     List<EscrowStats> findByEntityAddressOrderByHeightDesc(String address, Pageable pageable);
 
     @Query(value = "select sum(cast(`escrow` as signed)) as 'value', date as 'key' from escrow_stats group by date order by date desc limit ?1", nativeQuery = true)
-    List<ChartResponse> escrowTotalStats(int limit);
+    List<IChartResponse> escrowTotalStats(int limit);
 }

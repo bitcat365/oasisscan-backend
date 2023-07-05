@@ -457,7 +457,17 @@ public class ValidatorService {
 
     @Cached(expire = 5, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.MINUTES)
     public List<ChartResponse> escrowTotal() {
-        List<ChartResponse> responses = escrowStatsRepository.escrowTotalStats(30);;
+        List<ChartResponse> responses = Lists.newArrayList();
+        List<IChartResponse> items = escrowStatsRepository.escrowTotalStats(30);
+        if (CollectionUtils.isEmpty(items)) {
+            return responses;
+        }
+        for (IChartResponse item : items) {
+            ChartResponse c = new ChartResponse();
+            c.setValue(item.getValue());
+            c.setKey(item.getKey());
+            responses.add(c);
+        }
         return responses;
     }
 

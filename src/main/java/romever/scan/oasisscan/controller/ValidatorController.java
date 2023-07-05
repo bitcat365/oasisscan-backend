@@ -28,7 +28,7 @@ public class ValidatorController {
 
     @GetMapping("/list")
     public ApiResult validators(
-            @RequestParam(value = "orderBy", required = false, defaultValue = "escrow") String orderBy,
+            @RequestParam(value = "orderBy", required = false, defaultValue = "delegators") String orderBy,
             @RequestParam(value = "sort", required = false, defaultValue = "desc") String sort,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "pageSize", required = false, defaultValue = "300") int pageSize) throws IOException {

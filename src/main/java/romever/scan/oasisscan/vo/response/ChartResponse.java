@@ -3,7 +3,7 @@ package romever.scan.oasisscan.vo.response;
 import lombok.Data;
 
 @Data
-public class HistogramResponse {
+public class ChartResponse {
     private String key;
     private Number value;
 }

@@ -63,4 +63,9 @@ public class ValidatorController {
     public ApiResult escrowStats(@RequestParam("address") String address) {
         return ApiResult.list(validatorService.escrowStats(address));
     }
+
+    @GetMapping("/escrowtotalchart")
+    public ApiResult escrowStats() {
+        return ApiResult.list(validatorService.escrowTotal());
+    }
 }

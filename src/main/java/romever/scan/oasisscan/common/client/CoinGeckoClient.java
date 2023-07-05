@@ -58,6 +58,8 @@ public class CoinGeckoClient {
         Map<String, Object> params = Maps.newHashMap();
         params.put("vs_currency", "usd");
         params.put("days", days);
+        params.put("interval", "daily");
+        params.put("precision", 8);
 
         String url = String.format("%s/api/v3/coins/%s/market_chart", BASE_URL, COINGECKO_ID);
 

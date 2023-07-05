@@ -16,8 +16,6 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import romever.scan.oasisscan.common.ApiResult;
@@ -454,6 +452,12 @@ public class ValidatorService {
                 responses.add(response);
             }
         }
+        return responses;
+    }
+
+    @Cached(expire = 5, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.MINUTES)
+    public List<ChartResponse> escrowTotal() {
+        List<ChartResponse> responses = escrowStatsRepository.escrowTotalStats(30);;
         return responses;
     }
 

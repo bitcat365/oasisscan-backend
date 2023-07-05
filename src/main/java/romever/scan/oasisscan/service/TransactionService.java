@@ -5,11 +5,9 @@ import com.alicp.jetcache.anno.Cached;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.MultiSearchResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountResponse;
@@ -48,7 +46,7 @@ import romever.scan.oasisscan.vo.chain.runtime.AbstractRuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.RuntimeTransaction;
 import romever.scan.oasisscan.vo.chain.runtime.emerald.EmeraldTransaction;
 import romever.scan.oasisscan.vo.response.AccountSimple;
-import romever.scan.oasisscan.vo.response.HistogramResponse;
+import romever.scan.oasisscan.vo.response.ChartResponse;
 import romever.scan.oasisscan.vo.response.ListTransactionResponse;
 import romever.scan.oasisscan.vo.response.TransactionDetailResponse;
 import romever.scan.oasisscan.vo.response.runtime.ListRuntimeTransactionResponse;
@@ -308,9 +306,9 @@ public class TransactionService {
         return methodList;
     }
 
-    @Cached(expire = 30, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.SECONDS)
-    public List<HistogramResponse> transactionHistory() {
-        List<HistogramResponse> list = Lists.newArrayList();
+    @Cached(expire = 5, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.MINUTES)
+    public List<ChartResponse> transactionHistory() {
+        List<ChartResponse> list = Lists.newArrayList();
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         boolQueryBuilder.filter(QueryBuilders.rangeQuery(TRANSACTION_TIME).from(OffsetDateTime.now().minusDays(HISTORY_DAY_SIZE), true));
@@ -330,7 +328,7 @@ public class TransactionService {
                 List<? extends Histogram.Bucket> buckets = histogram.getBuckets();
                 if (!CollectionUtils.isEmpty(buckets)) {
                     for (Histogram.Bucket bucket : buckets) {
-                        HistogramResponse response = new HistogramResponse();
+                        ChartResponse response = new ChartResponse();
                         bucket.getKey();
                         ZonedDateTime zonedDateTime = (ZonedDateTime) bucket.getKey();
                         response.setKey(String.valueOf(zonedDateTime.toEpochSecond()));

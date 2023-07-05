@@ -65,7 +65,7 @@ public class ValidatorController {
     }
 
     @GetMapping("/escrowtotalchart")
-    public ApiResult escrowStats() {
+    public ApiResult escrowStatsTotal() {
         return ApiResult.list(validatorService.escrowTotal());
     }
 }

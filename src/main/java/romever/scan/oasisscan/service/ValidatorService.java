@@ -464,7 +464,7 @@ public class ValidatorService {
             ChartResponse c = new ChartResponse();
             LocalDateTime date = Times.parseDay(item.getKey());
             c.setKey(String.valueOf(Times.toEpochSecond(date)));
-            c.setValue(item.getValue());
+            c.setValue(Double.parseDouble(Texts.formatDecimals(String.valueOf(item.getValue()), Constants.DECIMALS, 2)));
             responses.add(c);
         }
         Collections.reverse(responses);

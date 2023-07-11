@@ -40,6 +40,7 @@ import romever.scan.oasisscan.vo.chain.Delegations;
 import romever.scan.oasisscan.vo.response.*;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -455,14 +456,15 @@ public class ValidatorService {
     @Cached(expire = 5, cacheType = CacheType.LOCAL, timeUnit = TimeUnit.MINUTES)
     public List<ChartResponse> escrowTotal() {
         List<ChartResponse> responses = Lists.newArrayList();
-        List<IChartResponse> items = escrowStatsRepository.escrowTotalStats(30);
+        List<IChartResponse> items = escrowStatsRepository.escrowTotalStats(31);
         if (CollectionUtils.isEmpty(items)) {
             return responses;
         }
         for (IChartResponse item : items) {
             ChartResponse c = new ChartResponse();
+            LocalDateTime date = Times.parseDay(item.getKey());
+            c.setKey(String.valueOf(Times.toEpochSecond(date)));
             c.setValue(item.getValue());
-            c.setKey(item.getKey());
             responses.add(c);
         }
         Collections.reverse(responses);

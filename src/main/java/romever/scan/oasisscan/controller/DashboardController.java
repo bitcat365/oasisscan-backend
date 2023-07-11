@@ -2,6 +2,7 @@ package romever.scan.oasisscan.controller;
 
 import com.alicp.jetcache.anno.CacheType;
 import com.alicp.jetcache.anno.Cached;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +28,6 @@ public class DashboardController {
     @Autowired
     private TransactionService transactionService;
     @Autowired
-    private BlockService blockService;
-    @Autowired
     private ValidatorService validatorService;
     @Autowired
     private ApiClient apiClient;
@@ -53,5 +52,12 @@ public class DashboardController {
         response.setTotalDelegate(delegatorRepository.countDistinctDelegator());
 
         return ApiResult.ok(response);
+    }
+
+    @GetMapping("/trend")
+    public ApiResult trendChart() {
+        return ApiResult.ok(ImmutableMap.of(
+                "tx", transactionService.transactionHistory(),
+                "escrow", validatorService.escrowTotal()));
     }
 }

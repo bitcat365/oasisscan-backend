@@ -53,7 +53,9 @@ public class RuntimeTransaction extends AbstractRuntimeTransaction {
 
     @Data
     public static class Body {
+        private String from;
         private String to;
+        private String shares;
         private List<String> amount;
 
         private String pk;

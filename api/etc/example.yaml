@@ -1,0 +1,13 @@
+Name: oasisscan-api
+Host: 0.0.0.0
+Port: 9191
+Timeout: 30000
+Verbose: true
+
+Log:
+  Stat: false
+
+DataSource: postgres://xxx:xxx@127.0.0.1:5432/oasis?sslmode=disable
+#oasis-node grpc service
+Node:
+  Url: xx.xx.xx.xx:xxx

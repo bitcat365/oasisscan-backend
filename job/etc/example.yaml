@@ -1,0 +1,12 @@
+Name: job.rpc
+ListenOn: 0.0.0.0:9192
+Timeout: 10000
+
+DataSource: postgres://xxx:xxx@127.0.0.1:5432/oasis?sslmode=disable
+#oasis-node grpc service
+Node:
+  Url: xx.xx.xx.xx:xxx
+
+Validator:
+  GitInfo: https://api.github.com/repos/oasisprotocol/metadata-registry/contents/registry/entity
+  KeybaseJson: https://keybase.io/_/api/1.0/user/lookup.json

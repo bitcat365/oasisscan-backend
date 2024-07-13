@@ -1,0 +1,649 @@
+/** common **/
+type (
+	HealthRequest  {}
+	HealthResponse  {}
+	Page {
+		Page      int64 `json:"page"`
+		Size      int64 `json:"size"`
+		MaxPage   int64 `json:"maxPage"`
+		TotalSize int64 `json:"totalSize"`
+	}
+	NetworkTrendRequest  {}
+	Chart {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}
+	NetworkTrendResponse {
+		Tx     []*Chart `json:"tx"`
+		Escrow []*Chart `json:"escrow"`
+	}
+)
+
+/** validator **/
+type (
+	ValidatorInfo {
+		Rank               int           `json:"rank"`
+		EntityId           string        `json:"entityId"`
+		EntityAddress      string        `json:"entityAddress"`
+		NodeId             string        `json:"nodeId"`
+		NodeAddress        string        `json:"nodeAddress"`
+		Name               string        `json:"name"`
+		Icon               string        `json:"icon"`
+		Website            string        `json:"website"`
+		Twitter            string        `json:"twitter"`
+		Keybase            string        `json:"keybase"`
+		Email              string        `json:"email"`
+		Description        string        `json:"description"`
+		Escrow             string        `json:"escrow"`
+		EscrowChange24     string        `json:"escrowChange24"`
+		EscrowPercent      float64       `json:"escrowPercent"`
+		Balance            string        `json:"balance"`
+		TotalShares        string        `json:"totalShares"`
+		Signs              int64         `json:"signs"`
+		Proposals          int64         `json:"proposals"`
+		Nonce              int64         `json:"nonce"`
+		Score              int64         `json:"score"`
+		Delegators         int64         `json:"delegators"`
+		Nodes              []string      `json:"nodes"`
+		Uptime             string        `json:"uptime"`
+		Active             bool          `json:"active"`
+		Commission         float64       `json:"commission"`
+		Bound              *Bound        `json:"bound"`
+		Rates              []Rate        `json:"rates"`
+		Bounds             []Bound       `json:"bounds"`
+		EscrowSharesStatus *EscrowStatus `json:"escrowSharesStatus,omitempty"`
+		EscrowAmountStatus *EscrowStatus `json:"escrowAmountStatus,omitempty"`
+		Status             bool          `json:"status"`
+	}
+	Bound {
+		Start int64   `json:"start"`
+		Min   float64 `json:"min"`
+		Max   float64 `json:"max"`
+	}
+	Rate {
+		Start int64   `json:"start"`
+		Rate  float64 `json:"rate"`
+	}
+	EscrowStatus {
+		Self  string `json:"self"`
+		Other string `json:"other"`
+		Total string `json:"total"`
+	}
+	ValidatorListRequest {
+		OrderBy string `form:"orderBy,default=escrow"`
+		Sort    string `form:"sort,default=desc"`
+	}
+	ValidatorListResponse {
+		List       []ValidatorInfo `json:"list"`
+		Active     int64           `json:"active"`
+		Inactive   int64           `json:"inactive"`
+		Delegators int64           `json:"delegators"`
+	}
+	ValidatorInfoRequest {
+		Address string `form:"address"`
+	}
+	ValidatorInfoResponse {
+		ValidatorInfo
+	}
+	DelegatorsRequest {
+		Validator string `form:"validator"`
+		Page      int64  `form:"page,default=1"`
+		Size      int64  `form:"size,default=5"`
+	}
+	DelegatorsInfo {
+		Address string  `json:"address"`
+		Amount  string  `json:"amount"`
+		Shares  string  `json:"shares"`
+		Percent float64 `json:"percent"`
+		Self    bool    `json:"self"`
+	}
+	DelegatorsResponse {
+		List []*DelegatorsInfo `json:"list"`
+		Page
+	}
+	ValidatorBlocksStatsRequest {
+		Address string `form:"address"`
+	}
+	ValidatorBlocksStatsInfo {
+		Height int64 `json:"height"`
+		Block  bool  `json:"block"`
+	}
+	ValidatorBlocksStatsResponse {
+		Signs     []*ValidatorBlocksStatsInfo `json:"signs"`
+		Proposals []*ValidatorBlocksStatsInfo `json:"proposals"`
+	}
+	ValidatorEscrowStatsRequest {
+		Address string `form:"address"`
+	}
+	ValidatorEscrowStatsInfo {
+		Timestamp int64  `json:"timestamp"`
+		Escrow    string `json:"escrow"`
+	}
+	ValidatorEscrowStatsResponse {
+		List []*ValidatorEscrowStatsInfo `json:"list"`
+	}
+)
+
+/** account **/
+type (
+	AccountRewardRequest {
+		Account string `form:"account"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=5"`
+	}
+	AccountRewardInfo {
+		ValidatorAddress string `json:"validatorAddress"`
+		ValidatorName    string `json:"validatorName"`
+		ValidatorIcon    string `json:"validatorIcon"`
+		Epoch            int64  `json:"epoch"`
+		Timestamp        int64  `json:"timestamp"`
+		Reward           string `json:"reward"`
+	}
+	AccountRewardResponse {
+		List []AccountRewardInfo `json:"list"`
+		Page
+	}
+	AccountRewardStatsRequest {
+		Account string `form:"account"`
+	}
+	AccountRewardStatsItem {
+		DateTime uint64 `json:"dateTime"`
+		Reward   string `json:"reward"`
+	}
+	AccountRewardStatsInfo {
+		ValidatorName string                    `json:"validatorName"`
+		RewardList    []*AccountRewardStatsItem `json:"rewardList"`
+		Total         string                    `json:"total"`
+	}
+	AccountRewardStatsResponse {
+		Stats map[string]*AccountRewardStatsInfo `json:"stats"`
+		Time  []int64                            `json:"time"`
+	}
+	AccountRewardExportRequest {
+		Account string `form:"account"`
+	}
+	AccountRewardExportResponse  {}
+	AccountInfoRequest {
+		Address string `path:"address"`
+	}
+	AccountInfoResponse {
+		Address    string              `json:"address"`
+		Available  string              `json:"available"`
+		Escrow     string              `json:"escrow"`
+		Debonding  string              `json:"debonding"`
+		Total      string              `json:"total"`
+		Nonce      uint64              `json:"nonce"`
+		Allowances []*AccountAllowance `json:"allowances"`
+	}
+	AccountAllowance {
+		Address string `path:"address"`
+		Amount  string `path:"amount"`
+	}
+	AccountDelegationsRequest {
+		Address string `form:"address"`
+		All     bool   `form:"all,default=false"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=5"`
+	}
+	AccountDelegationsInfo {
+		ValidatorAddress string `json:"validatorAddress"`
+		ValidatorName    string `json:"validatorName"`
+		Icon             string `json:"icon"`
+		EntityAddress    string `json:"entityAddress"`
+		Shares           string `json:"shares"`
+		Amount           string `json:"amount"`
+		Active           bool   `json:"active"`
+	}
+	AccountDelegationsResponse {
+		List []*AccountDelegationsInfo `json:"list"`
+		Page
+	}
+	AccountDebondingRequest {
+		Address string `form:"address"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=5"`
+	}
+	AccountDebondingInfo {
+		ValidatorAddress string `json:"validatorAddress"`
+		ValidatorName    string `json:"validatorName"`
+		Icon             string `json:"icon"`
+		Shares           string `json:"shares"`
+		DebondEnd        int64  `json:"debondEnd"`
+		EpochLeft        int64  `json:"epochLeft"`
+	}
+	AccountDebondingResponse {
+		List []*AccountDebondingInfo `json:"list"`
+		Page
+	}
+	AccountStakingEventsRequest {
+		Address string `form:"address"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=5"`
+	}
+	AccountStakingEventsInfo {
+		Id     string `json:"id"`
+		Height int64  `json:"height"`
+		TxHash string `json:"txHash"`
+		Kind   string `json:"kind"`
+	}
+	AccountStakingEventsResponse {
+		List []*AccountStakingEventsInfo `json:"list"`
+		Page
+	}
+	AccountStakingEventsInfoRequest {
+		Id string `form:"id"`
+	}
+	AccountStakingEventsInfoResponse {
+		Height          int64       `json:"height"`
+		TxHash          string      `json:"txHash"`
+		Kind            string      `json:"kind"`
+		Timestamp       int64       `json:"timestamp"`
+		Transafer       interface{} `json:"transafer,omitempty"`
+		Burn            interface{} `json:"burn,omitempty"`
+		Escrow          interface{} `json:"Escrow,omitempty"`
+		AllowanceChange interface{} `json:"allowanceChange,omitempty"`
+	}
+)
+
+/** block data **/
+type (
+	ChainTransactionInfoRequest {
+		Hash string `path:"hash"`
+	}
+	ChainTransactionInfoResponse {
+		TxHash       string `json:"txHash"`
+		Timestamp    uint64 `json:"timestamp"`
+		Time         uint64 `json:"time"`
+		Height       int64  `json:"height"`
+		Fee          string `json:"fee"`
+		Nonce        int64  `json:"nonce"`
+		Method       string `json:"method"`
+		From         string `json:"from"`
+		To           string `json:"to"`
+		Amount       string `json:"amount"`
+		Raw          string `json:"raw"`
+		Status       bool   `json:"status"`
+		ErrorMessage string `json:"errorMessage"`
+	}
+	ChainTransactionsRequest {
+		Height  int64  `form:"height,optional"`
+		Address string `form:"address,optional"`
+		Method  string `form:"method,optional"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=10"`
+	}
+	ChainTransactionListInfo {
+		TxHash    string `json:"txHash"`
+		Height    int64  `json:"height"`
+		Method    string `json:"method"`
+		Fee       string `json:"fee"`
+		Amount    string `json:"amount"`
+		Shares    string `json:"shares"`
+		Add       bool   `json:"add"`
+		Timestamp uint64 `json:"timestamp"`
+		Time      uint64 `json:"time"`
+		Status    bool   `json:"status"`
+		From      string `json:"from"`
+		To        string `json:"to"`
+	}
+	ChainTransactionsResponse {
+		List []*ChainTransactionListInfo `json:"list"`
+		Page
+	}
+	ChainBlocksRequest {
+		Page int64 `form:"page,default=1"`
+		Size int64 `form:"size,default=10"`
+	}
+	ChainBlockInfo {
+		Height        int64  `json:"height"`
+		Epoch         int64  `json:"epoch"`
+		Timestamp     uint64 `json:"timestamp"`
+		Time          uint64 `json:"time"`
+		Hash          string `json:"hash"`
+		txs           int64  `json:"txs"`
+		EntityAddress string `json:"entityAddress"`
+		Name          string `json:"name"`
+	}
+	ChainBlocksResponse {
+		List []*ChainBlockInfo `json:"list"`
+		Page
+	}
+	ChainBlockInfoRequest {
+		Height int64 `path:"height"`
+	}
+	ChainBlockInfoResponse {
+		ChainBlockInfo
+	}
+	ChainProposedBlocksRequest {
+		Validator string `form:"validator,optional"`
+		Page      int64  `form:"page,default=1"`
+		Size      int64  `form:"size,default=5"`
+	}
+	ChainProposedBlocksResponse {
+		List []*ChainBlockInfo `json:"list"`
+		Page
+	}
+	ChainSearchRequest {
+		Key string `form:"key"`
+	}
+	ChainSearchResponse {
+		Key    string `json:"key"`
+		Type   string `json:"type"`
+		Result string `json:"result"`
+	}
+)
+
+/** runtime **/
+type (
+	RuntimeListRequest  {}
+	RuntimeListInfo {
+		RuntimeId string `json:"runtimeId"`
+		Name      string `json:"name"`
+	}
+	RuntimeListResponse {
+		List []*RuntimeListInfo `json:"list"`
+	}
+	RuntimeTransactionListRequest {
+		Id    string `form:"id"`
+		Round int64  `form:"round,optional"`
+		Page  int64  `form:"page,default=1"`
+		Size  int64  `form:"size,default=10"`
+	}
+	RuntimeTransactionListInfo {
+		RuntimeId string `json:"runtimeId"`
+		TxHash    string `json:"txHash"`
+		Round     int64  `json:"round"`
+		Result    bool   `json:"result"`
+		Timestamp uint64 `json:"timestamp"`
+		Type      string `json:"type"`
+	}
+	RuntimeTransactionListResponse {
+		List []RuntimeTransactionListInfo `json:"list"`
+		Page
+	}
+	RuntimeTransactionInfoRequest {
+		Id    string `form:"id"`
+		Round int64  `form:"round"`
+		Hash  string `form:"hash"`
+	}
+	RuntimeTransactionInfoResponse {
+		RuntimeId   string                         `json:"runtimeId"`
+		RuntimeName string                         `json:"runtimeName"`
+		TxHash      string                         `json:"txHash"`
+		Round       int64                          `json:"round"`
+		Result      bool                           `json:"result"`
+		Message     string                         `json:"message"`
+		Timestamp   uint64                         `json:"timestamp"`
+		Type        string                         `json:"type"`
+		Ctx         *RuntimeTransactionConsensusTx `json:"ctx"`
+		Etx         *RuntimeTransactionEvmTx       `json:"etx"`
+		Events      interface{}                    `json:"events"`
+	}
+	RuntimeTransactionConsensusTx {
+		Method string `json:"method"`
+		From   string `json:"from"`
+		To     string `json:"to"`
+		Amount string `json:"amount"`
+		Nonce  int64  `json:"nonce"`
+	}
+	RuntimeTransactionEvmTx {
+		From     string `json:"from"`
+		To       string `json:"to"`
+		Nonce    int64  `json:"nonce"`
+		GasPrice int64  `json:"gasPrice"`
+		GasLimit int64  `json:"gasLimit"`
+		Data     string `json:"data"`
+		Value    string `json:"value"`
+	}
+	RuntimeTransactionEventError {
+		Code   int64  `json:"code"`
+		Module string `json:"module"`
+	}
+	RuntimeRoundListRequest {
+		Id   string `form:"id"`
+		Page int64  `form:"page,default=1"`
+		Size int64  `form:"size,default=10"`
+	}
+	RuntimeRoundInfo {
+		Version      int64  `json:"version"`
+		RuntimeId    string `json:"runtimeId"`
+		RuntimeName  string `json:"runtimeName"`
+		round        int64  `json:"round"`
+		Timestamp    int64  `json:"timestamp"`
+		HeaderType   int64  `json:"header_type"`
+		PreviousHash string `json:"previous_hash"`
+		IoRoot       string `json:"io_root"`
+		StateRoot    string `json:"state_root"`
+		MessagesHash string `json:"messages_hash"`
+		Next         bool   `json:"next"`
+	}
+	RuntimeRoundListResponse {
+		List []*RuntimeRoundInfo `json:"list"`
+		Page
+	}
+	RuntimeRoundInfoRequest {
+		Id    string `form:"id"`
+		Round int64  `form:"round"`
+	}
+	RuntimeRoundInfoResponse {
+		RuntimeRoundInfo
+	}
+	RuntimeStatsRequest {
+		Id string `form:"id"`
+	}
+	RuntimeStatsResponse {
+		Online  int64               `json:"online"`
+		Offline int64               `json:"offline"`
+		List    []*RuntimeStatsInfo `json:"list"`
+	}
+	RuntimeStatsInfo {
+		EntityId  string            `json:"entityId"`
+		Name      string            `json:"name"`
+		Address   string            `json:"address"`
+		Validator bool              `json:"validator"`
+		Icon      string            `json:"icon"`
+		Status    bool              `json:"status"`
+		Stats     *RuntimeStatsItem `json:"stats"`
+	}
+	RuntimeStatsItem {
+		Elected  int64 `json:"elected"`
+		Primary  int64 `json:"primary"`
+		Backup   int64 `json:"backup"`
+		Proposer int64 `json:"proposer"`
+	}
+)
+
+/** market **/
+type (
+	MarketChartRequest  {}
+	MarketChartResponse {
+		Price     []*Chart `json:"price"`
+		MarketCap []*Chart `json:"marketCap"`
+		Volume    []*Chart `json:"volume"`
+	}
+	MarketInfoRequest  {}
+	MarketInfoResponse {
+		Price                 float64 `json:"price"`
+		PriceChangePct24h     float64 `json:"priceChangePct24h"`
+		Rank                  int64   `json:"rank"`
+		MarketCap             int64   `json:"marketCap"`
+		MarketCapChangePct24h float64 `json:"marketCapChangePct24h"`
+		Volume                int64   `json:"volume"`
+		VolumeChangePct24h    float64 `json:"volumeChangePct24h"`
+	}
+)
+
+/** governance **/
+type (
+	GovernanceProposalListRequest  {}
+	GovernanceProposalInfo {
+		Id        int64  `json:"id"`
+		Title     string `json:"title"`
+		Type      string `json:"type"`
+		Submitter string `json:"submitter"`
+		State     string `json:"state"`
+		Deposit   string `json:"deposit"`
+		CreatedAt int64  `json:"created_at"`
+		ClosesAt  int64  `json:"closes_at"`
+	}
+	GovernanceProposalListResponse {
+		List []*GovernanceProposalInfo `json:"list"`
+	}
+	GovernanceProposalWithVotesRequest {
+		Id int64 `form:"id"`
+	}
+	GovernanceProposalWithVotesResponse {
+		*GovernanceProposalInfo
+		Options []*ProposalOption `json:"options"`
+		Votes   []*ProposalVote   `json:"votes"`
+	}
+	ProposalOption {
+		Name    string  `json:"name"`
+		Amount  string  `json:"amount"`
+		Percent float64 `json:"percent"`
+	}
+	ProposalVote {
+		Name    string  `json:"name"`
+		Icon    string  `json:"icon"`
+		Address string  `json:"address"`
+		Vote    string  `json:"vote"`
+		Amount  string  `json:"amount"`
+		Percent float64 `json:"percent"`
+	}
+)
+
+@server (
+	prefix: /v2
+	group:  common
+)
+service oasisscan-api {
+	@handler HealthHandler
+	get /health (HealthRequest) returns (HealthResponse)
+
+	@handler NetworkTrendHandler
+	get /trend (NetworkTrendRequest) returns (NetworkTrendResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  validator
+)
+service oasisscan-api {
+	@handler ValidatorListHandler
+	get /validator/list (ValidatorListRequest) returns (ValidatorListResponse)
+
+	@handler ValidatorInfoHandler
+	get /validator/info (ValidatorInfoRequest) returns (ValidatorInfoResponse)
+
+	@handler DelegatorsHandler
+	get /validator/delegators (DelegatorsRequest) returns (DelegatorsResponse)
+
+	@handler ValidatorBlocksStatsHandler
+	get /validator/blocksstats (ValidatorBlocksStatsRequest) returns (ValidatorBlocksStatsResponse)
+
+	@handler ValidatorEscrowStatsHandler
+	get /validator/escrowstats (ValidatorEscrowStatsRequest) returns (ValidatorEscrowStatsResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  account
+)
+service oasisscan-api {
+	@handler AccountRewardHandler
+	get /account/reward/list (AccountRewardRequest) returns (AccountRewardResponse)
+
+	@handler AccountRewardStatsHandler
+	get /account/reward/stats (AccountRewardStatsRequest) returns (AccountRewardStatsResponse)
+
+	@handler AccountRewardExportHandler
+	get /account/reward/export (AccountRewardExportRequest) returns (AccountRewardExportResponse)
+
+	@handler AccountInfoHandler
+	get /account/info/:address (AccountInfoRequest) returns (AccountInfoResponse)
+
+	@handler AccountDelegationsHandler
+	get /account/delegations (AccountDelegationsRequest) returns (AccountDelegationsResponse)
+
+	@handler AccountDebondingHandler
+	get /account/debonding (AccountDebondingRequest) returns (AccountDebondingResponse)
+
+	@handler AccountStakingEventsHandler
+	get /account/staking/events (AccountStakingEventsRequest) returns (AccountStakingEventsResponse)
+
+	@handler AccountStakingEventsInfoHandler
+	get /account/staking/events/info (AccountStakingEventsInfoRequest) returns (AccountStakingEventsInfoResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  chain
+)
+service oasisscan-api {
+	@handler ChainTransactionInfoHandler
+	get /chain/transaction/:hash (ChainTransactionInfoRequest) returns (ChainTransactionInfoResponse)
+
+	@handler ChainTransactionsHandler
+	get /chain/transactions (ChainTransactionsRequest) returns (ChainTransactionsResponse)
+
+	@handler ChainBlocksHandler
+	get /chain/blocks (ChainBlocksRequest) returns (ChainBlocksResponse)
+
+	@handler ChainBlockInfoHandler
+	get /chain/block/:height (ChainBlockInfoRequest) returns (ChainBlockInfoResponse)
+
+	@handler ChainProposedBlocksHandler
+	get /chain/proposedblocks (ChainProposedBlocksRequest) returns (ChainProposedBlocksResponse)
+
+	@handler ChainSearchHandler
+	get /chain/search (ChainSearchRequest) returns (ChainSearchResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  runtime
+)
+service oasisscan-api {
+	@handler RuntimeListHandler
+	get /runtime/list (RuntimeListRequest) returns (RuntimeListResponse)
+
+	@handler RuntimeTransactionListHandler
+	get /runtime/transaction/list (RuntimeTransactionListRequest) returns (RuntimeTransactionListResponse)
+
+	@handler RuntimeTransactionInfoHandler
+	get /runtime/transaction/info (RuntimeTransactionInfoRequest) returns (RuntimeTransactionInfoResponse)
+
+	@handler RuntimeRoundListHandler
+	get /runtime/round/list (RuntimeRoundListRequest) returns (RuntimeRoundListResponse)
+
+	@handler RuntimeRoundInfoHandler
+	get /runtime/round/info (RuntimeRoundInfoRequest) returns (RuntimeRoundInfoResponse)
+
+	@handler RuntimeStatsHandler
+	get /runtime/stats (RuntimeStatsRequest) returns (RuntimeStatsResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  market
+)
+service oasisscan-api {
+	@handler MarketChartHandler
+	get /market/chart (MarketChartRequest) returns (MarketChartResponse)
+
+	@handler MarketInfoHandler
+	get /market/info (MarketInfoRequest) returns (MarketInfoResponse)
+}
+
+@server (
+	prefix: /v2
+	group:  governance
+)
+service oasisscan-api {
+	@handler GovernanceProposalListHandler
+	get /governance/proposallist (GovernanceProposalListRequest) returns (GovernanceProposalListResponse)
+
+	@handler GovernanceProposalWithVotesHandler
+	get /governance/proposalwithvotes (GovernanceProposalWithVotesRequest) returns (GovernanceProposalWithVotesResponse)
+}
+

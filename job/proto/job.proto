@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package job;
+
+option go_package = "oasisscan-backend/job/proto";
+
+message ScanHeightRequest {
+}
+
+message ScanHeightResponse {
+  int64 latestHeight = 1;
+  int64 scanHeight = 2;
+}
+
+service Job {
+  rpc ScanHeight(ScanHeightRequest) returns(ScanHeightResponse);
+}

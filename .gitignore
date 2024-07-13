@@ -1,4 +1,4 @@
-/.idea/
-/oasisscan.iml
-/target/
-/logs/
+.idea
+*.iml
+/api/etc/oasisscan-api.yaml
+/job/etc/job.yaml

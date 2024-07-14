@@ -77,7 +77,7 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 		proposalHeight, err := l.svcCtx.Beacon.GetEpochBlock(l.ctx, beacon.EpochTime(m.ClosedEpoch))
 		if err != nil {
 			logc.Errorf(l.ctx, "getEpochBlock error, %v", err)
-			proposalHeight = chainStatus.GenesisHeight
+			proposalHeight = currentHeight
 		}
 
 		totalVotes := quantity.NewQuantity()

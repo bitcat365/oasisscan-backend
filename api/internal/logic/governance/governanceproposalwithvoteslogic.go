@@ -76,8 +76,8 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 
 		proposalHeight, err := l.svcCtx.Beacon.GetEpochBlock(l.ctx, beacon.EpochTime(m.ClosedEpoch))
 		if err != nil {
-			logc.Errorf(l.ctx, "getEpochBlock error, %v", err)
-			proposalHeight = currentHeight
+			//logc.Errorf(l.ctx, "getEpochBlock error, %v", err)
+			proposalHeight = chainStatus.GenesisHeight
 		}
 
 		totalVotes := quantity.NewQuantity()
@@ -143,6 +143,12 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 				return nil, errort.NewDefaultError()
 			}
 
+			name, icon := "", ""
+			if validatorInfo != nil {
+				name = validatorInfo.Name
+				icon = validatorInfo.Icon
+			}
+
 			optionVoteFloat := new(big.Float).SetInt(voteMap[vote.Voter].ToBigInt())
 			p, _ := new(big.Float).Quo(optionVoteFloat, new(big.Float).SetInt(totalVotes.ToBigInt())).Float64()
 			percent, err := strconv.ParseFloat(fmt.Sprintf("%.4f", p), 64)
@@ -152,8 +158,8 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 			}
 
 			voteList = append(voteList, &types.ProposalVote{
-				Name:    validatorInfo.Name,
-				Icon:    validatorInfo.Icon,
+				Name:    name,
+				Icon:    icon,
 				Address: vote.Voter.String(),
 				Vote:    vote.Vote.String(),
 				Amount:  fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(voteMap[vote.Voter].ToBigInt(), common.Decimals)),

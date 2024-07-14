@@ -127,7 +127,7 @@ type AccountStakingEventsInfoResponse struct {
 	Timestamp       int64       `json:"timestamp"`
 	Transafer       interface{} `json:"transafer,omitempty"`
 	Burn            interface{} `json:"burn,omitempty"`
-	Escrow          interface{} `json:"Escrow,omitempty"`
+	Escrow          interface{} `json:"escrow,omitempty"`
 	AllowanceChange interface{} `json:"allowanceChange,omitempty"`
 }
 

@@ -18,6 +18,8 @@ type (
 		delegatorModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *Delegator) (sql.Result, error)
 		SessionDeleteAllByValidator(ctx context.Context, session sqlx.Session, validatorAddress string) error
+		SessionDeleteAll(ctx context.Context, session sqlx.Session) error
+		SessionResetSequence(ctx context.Context, session sqlx.Session) error
 		CountByValidator(ctx context.Context, validatorAddress string) (int64, error)
 		FindByValidator(ctx context.Context, validatorAddress string, pageable common.Pageable) ([]*Delegator, error)
 	}
@@ -43,6 +45,18 @@ func (m *customDelegatorModel) SessionInsert(ctx context.Context, session sqlx.S
 func (m *customDelegatorModel) SessionDeleteAllByValidator(ctx context.Context, session sqlx.Session, validatorAddress string) error {
 	query := fmt.Sprintf("delete from %s where validator = $1", m.table)
 	_, err := session.ExecCtx(ctx, query, validatorAddress)
+	return err
+}
+
+func (m *customDelegatorModel) SessionDeleteAll(ctx context.Context, session sqlx.Session) error {
+	query := fmt.Sprintf("delete from %s", m.table)
+	_, err := session.ExecCtx(ctx, query)
+	return err
+}
+
+func (m *customDelegatorModel) SessionResetSequence(ctx context.Context, session sqlx.Session) error {
+	query := fmt.Sprintf("alter sequence delegator_id_seq restart with 1")
+	_, err := session.ExecCtx(ctx, query)
 	return err
 }
 

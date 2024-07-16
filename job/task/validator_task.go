@@ -422,6 +422,14 @@ func DelegatorSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		return
 	}
 	err = svcCtx.PostgreDB.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
+		err = svcCtx.DelegatorModel.SessionDeleteAll(ctx, session)
+		if err != nil {
+			return fmt.Errorf("delegator SessionDeleteAll error, %v", err)
+		}
+		err = svcCtx.DelegatorModel.SessionResetSequence(ctx, session)
+		if err != nil {
+			return fmt.Errorf("delegator table reset sequence error, %v", err)
+		}
 		for _, validator := range validators {
 			var validatorAddress staking.Address
 			err := validatorAddress.UnmarshalText([]byte(validator.EntityAddress))
@@ -434,16 +442,12 @@ func DelegatorSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				return fmt.Errorf("staking api DelegationsTo error, %v", err)
 			}
 
-			err = svcCtx.DelegatorModel.SessionDeleteAllByValidator(ctx, session, validatorAddress.String())
-			if err != nil {
-				return fmt.Errorf("delegator SessionDeleteAllByValidator error, %v", err)
-			}
+			//err = svcCtx.DelegatorModel.SessionDeleteAllByValidator(ctx, session, validatorAddress.String())
+			//if err != nil {
+			//	return fmt.Errorf("delegator SessionDeleteAllByValidator error, %v", err)
+			//}
 			for delegatorAddress, shares := range delegationsTo {
-				delegatorModel, err := svcCtx.DelegatorModel.FindOneByValidatorDelegator(ctx, validatorAddress.String(), delegatorAddress.String())
-				if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
-					return fmt.Errorf("findOneByValidatorDelegator error, %v", err)
-				}
-				delegatorModel = &model.Delegator{
+				delegatorModel := &model.Delegator{
 					Validator: validatorAddress.String(),
 					Delegator: delegatorAddress.String(),
 					Shares:    shares.Shares.ToBigInt().Int64(),

@@ -454,6 +454,7 @@ type RuntimeTransactionEventError struct {
 }
 
 type RuntimeTransactionEvmTx struct {
+	Hash     string `json:"hash"`
 	From     string `json:"from"`
 	To       string `json:"to"`
 	Nonce    int64  `json:"nonce"`

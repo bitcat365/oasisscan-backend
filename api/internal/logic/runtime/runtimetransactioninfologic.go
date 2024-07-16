@@ -49,10 +49,18 @@ func (l *RuntimeTransactionInfoLogic) RuntimeTransactionInfo(req *types.RuntimeT
 		return nil, errort.NewDefaultError()
 	}
 
+	if txModel == nil {
+		return nil, nil
+	}
+
+	runtimeName := ""
 	runtimeModel, err := l.svcCtx.RuntimeModel.FindOneByRuntimeId(l.ctx, runtimeId)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "find runtime info error, %v", err)
 		return nil, errort.NewDefaultError()
+	}
+	if runtimeModel != nil {
+		runtimeName = runtimeModel.Name
 	}
 
 	var consensusTx *types.RuntimeTransactionConsensusTx = nil
@@ -71,6 +79,7 @@ func (l *RuntimeTransactionInfoLogic) RuntimeTransactionInfo(req *types.RuntimeT
 			return nil, errort.NewDefaultError()
 		}
 		evmTx = &types.RuntimeTransactionEvmTx{
+			Hash:     txModel.EvmHash,
 			From:     txModel.EvmFrom,
 			To:       txModel.EvmTo,
 			Nonce:    int64(txData.Nonce()),
@@ -150,7 +159,7 @@ func (l *RuntimeTransactionInfoLogic) RuntimeTransactionInfo(req *types.RuntimeT
 
 	resp = &types.RuntimeTransactionInfoResponse{
 		RuntimeId:   runtimeId,
-		RuntimeName: runtimeModel.Name,
+		RuntimeName: runtimeName,
 		TxHash:      txModel.TxHash,
 		Round:       txModel.Round,
 		Result:      txModel.Result,

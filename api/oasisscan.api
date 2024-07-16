@@ -387,6 +387,7 @@ type (
 		Nonce  int64  `json:"nonce"`
 	}
 	RuntimeTransactionEvmTx {
+		Hash     string `json:"hash"`
 		From     string `json:"from"`
 		To       string `json:"to"`
 		Nonce    int64  `json:"nonce"`

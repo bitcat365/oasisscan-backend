@@ -6,12 +6,14 @@ replace github.com/cometbft/cometbft => github.com/oasisprotocol/cometbft v0.37.
 
 require (
 	github.com/cometbft/cometbft v0.0.0-00010101000000-000000000000
+	github.com/ethereum/go-ethereum v1.13.12
 	github.com/lib/pq v1.10.9
-	github.com/oasisprotocol/nexus v0.2.11
 	github.com/oasisprotocol/oasis-core/go v0.2300.10
 	github.com/oasisprotocol/oasis-sdk/client-sdk/go v0.8.2
 	github.com/robfig/cron/v3 v3.0.0
+	github.com/xuri/excelize/v2 v2.8.1
 	github.com/zeromicro/go-zero v1.5.4
+	golang.org/x/crypto v0.21.0
 	google.golang.org/grpc v1.61.1
 	google.golang.org/protobuf v1.32.0
 )
@@ -20,8 +22,9 @@ require (
 	github.com/a8m/envsubst v1.4.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
-	github.com/btcsuite/btcd v0.20.1-beta // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -38,7 +41,6 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/ethereum/c-kzg-4844 v0.4.1 // indirect
-	github.com/ethereum/go-ethereum v1.13.12 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
@@ -128,7 +130,6 @@ require (
 	github.com/tidwall/btree v1.6.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xuri/efp v0.0.0-20231025114914-d1ff6096ae53 // indirect
-	github.com/xuri/excelize/v2 v2.8.1 // indirect
 	github.com/xuri/nfp v0.0.0-20230919160717-d98342af3f05 // indirect
 	go.etcd.io/etcd/api/v3 v3.5.9 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.9 // indirect
@@ -147,7 +148,6 @@ require (
 	go.uber.org/automaxprocs v1.5.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
 	golang.org/x/net v0.21.0 // indirect
 	golang.org/x/oauth2 v0.14.0 // indirect

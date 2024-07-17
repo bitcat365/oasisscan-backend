@@ -5,17 +5,17 @@ go 1.22
 replace github.com/cometbft/cometbft => github.com/oasisprotocol/cometbft v0.37.2-oasis1
 
 require (
-	github.com/cometbft/cometbft v0.0.0-00010101000000-000000000000
-	github.com/ethereum/go-ethereum v1.13.12
+	github.com/cometbft/cometbft v1.0.0-rc1
+	github.com/ethereum/go-ethereum v1.13.15
 	github.com/lib/pq v1.10.9
 	github.com/oasisprotocol/oasis-core/go v0.2300.10
 	github.com/oasisprotocol/oasis-sdk/client-sdk/go v0.8.2
 	github.com/robfig/cron/v3 v3.0.0
 	github.com/xuri/excelize/v2 v2.8.1
 	github.com/zeromicro/go-zero v1.5.4
-	golang.org/x/crypto v0.21.0
+	golang.org/x/crypto v0.23.0
 	google.golang.org/grpc v1.61.1
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
@@ -149,12 +149,12 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.26.0 // indirect
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.14.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
+	golang.org/x/term v0.20.0 // indirect
+	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240205150955-31a09d347014 // indirect

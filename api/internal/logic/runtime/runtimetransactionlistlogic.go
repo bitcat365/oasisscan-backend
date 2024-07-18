@@ -3,6 +3,7 @@ package runtime
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/errort"
@@ -34,6 +35,9 @@ func (l *RuntimeTransactionListLogic) RuntimeTransactionList(req *types.RuntimeT
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
+	if pageable.Offset > common.MaxSizeLimit {
+		return nil, errort.NewCodeError(errort.RequestParameterErrCode, fmt.Sprintf("%s: (size * page) must be less than %d", errort.RequestParameterErrMsg, common.MaxSizeLimit))
+	}
 	txModels, err := l.svcCtx.RuntimeTransactionModel.FindAll(l.ctx, runtimeId, pageable)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "find runtime transactions error, %v", err)
@@ -60,6 +64,9 @@ func (l *RuntimeTransactionListLogic) RuntimeTransactionList(req *types.RuntimeT
 	if err != nil {
 		logc.Errorf(l.ctx, "runtime transaction CountAll error: %v", err)
 		return nil, errort.NewDefaultError()
+	}
+	if totalSize > common.MaxSizeLimit {
+		totalSize = common.MaxSizeLimit
 	}
 	page := types.Page{
 		Page:      req.Page,

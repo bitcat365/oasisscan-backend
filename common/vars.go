@@ -7,6 +7,7 @@ const (
 	ProposalScore int64 = 2
 	UptimeHeight  int64 = 1000
 	OneDayHeight  int64 = 14400
+	MaxSizeLimit  int64 = 200000
 
 	NodeHeightProperty       = "node_height"
 	RewardEpochProperty      = "reward_epoch"

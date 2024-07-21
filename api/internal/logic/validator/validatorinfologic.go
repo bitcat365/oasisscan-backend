@@ -2,10 +2,14 @@ package validator
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
 	"github.com/oasisprotocol/oasis-core/go/common/quantity"
+	registry "github.com/oasisprotocol/oasis-core/go/registry/api"
 	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
 	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"math/big"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
@@ -33,9 +37,12 @@ func NewValidatorInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 
 func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (resp *types.ValidatorInfoResponse, err error) {
 	m, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Address)
-	if err != nil {
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "validator FindOneByEntityAddress error, %v", err)
 		return nil, errort.NewDefaultError()
+	}
+	if m == nil {
+		return nil, errort.NewCodeError(errort.NotFoundErrCode, errort.NotFoundErrMsg)
 	}
 	validatorInfo := response.ValidatorResponseFormat(m)
 
@@ -167,6 +174,39 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 	}
 	validatorInfo.EscrowSharesStatus = escrowSharesStatus
 	validatorInfo.EscrowAmountStatus = escrowAmountStatus
+
+	//paratimes
+	var pubKey signature.PublicKey
+	err = pubKey.UnmarshalText([]byte(validatorInfo.NodeId))
+	if err != nil {
+		logc.Errorf(l.ctx, "base64 decode error: %s, %v", validatorInfo.NodeId, err)
+		return nil, err
+	}
+	idQuery := registry.IDQuery{Height: currentHeight, ID: pubKey}
+	node, err := l.svcCtx.Registry.GetNode(l.ctx, &idQuery)
+	if err != nil {
+		logc.Errorf(l.ctx, "GetNode error, %v", err)
+	} else {
+		runtimeMap := make(map[string]bool, 0)
+		for _, runtime := range node.Runtimes {
+			runtimeMap[runtime.ID.Hex()] = true
+		}
+		runtimes, err := l.svcCtx.RuntimeModel.FindAllByStatus(l.ctx, 0)
+		if err != nil {
+			logc.Errorf(l.ctx, "runtime RuntimeModel FindAll error, %v", err)
+			return nil, errort.NewDefaultError()
+		}
+		validatorRuntimes := make([]*types.ValidatorRuntime, 0)
+		for _, runtime := range runtimes {
+			online := runtimeMap[runtime.RuntimeId]
+			validatorRuntimes = append(validatorRuntimes, &types.ValidatorRuntime{
+				Name:   runtime.Name,
+				Id:     runtime.RuntimeId,
+				Online: online,
+			})
+		}
+		validatorInfo.Runtimes = validatorRuntimes
+	}
 
 	resp = &types.ValidatorInfoResponse{
 		ValidatorInfo: *validatorInfo,

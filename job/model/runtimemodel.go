@@ -45,7 +45,7 @@ func (m *customRuntimeModel) FindAll(ctx context.Context) ([]*Runtime, error) {
 }
 
 func (m *customRuntimeModel) FindAllByStatus(ctx context.Context, status int64) ([]*Runtime, error) {
-	query := fmt.Sprintf("select %s from %s where status=$1", runtimeRows, m.table)
+	query := fmt.Sprintf("select %s from %s where status=$1 order by id", runtimeRows, m.table)
 	var resp []*Runtime
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, status)
 	switch err {

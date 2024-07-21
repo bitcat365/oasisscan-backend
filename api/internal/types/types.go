@@ -533,38 +533,39 @@ type ValidatorEscrowStatsResponse struct {
 }
 
 type ValidatorInfo struct {
-	Rank               int           `json:"rank"`
-	EntityId           string        `json:"entityId"`
-	EntityAddress      string        `json:"entityAddress"`
-	NodeId             string        `json:"nodeId"`
-	NodeAddress        string        `json:"nodeAddress"`
-	Name               string        `json:"name"`
-	Icon               string        `json:"icon"`
-	Website            string        `json:"website"`
-	Twitter            string        `json:"twitter"`
-	Keybase            string        `json:"keybase"`
-	Email              string        `json:"email"`
-	Description        string        `json:"description"`
-	Escrow             string        `json:"escrow"`
-	EscrowChange24     string        `json:"escrowChange24"`
-	EscrowPercent      float64       `json:"escrowPercent"`
-	Balance            string        `json:"balance"`
-	TotalShares        string        `json:"totalShares"`
-	Signs              int64         `json:"signs"`
-	Proposals          int64         `json:"proposals"`
-	Nonce              int64         `json:"nonce"`
-	Score              int64         `json:"score"`
-	Delegators         int64         `json:"delegators"`
-	Nodes              []string      `json:"nodes"`
-	Uptime             string        `json:"uptime"`
-	Active             bool          `json:"active"`
-	Commission         float64       `json:"commission"`
-	Bound              *Bound        `json:"bound"`
-	Rates              []Rate        `json:"rates"`
-	Bounds             []Bound       `json:"bounds"`
-	EscrowSharesStatus *EscrowStatus `json:"escrowSharesStatus,omitempty"`
-	EscrowAmountStatus *EscrowStatus `json:"escrowAmountStatus,omitempty"`
-	Status             bool          `json:"status"`
+	Rank               int                 `json:"rank"`
+	EntityId           string              `json:"entityId"`
+	EntityAddress      string              `json:"entityAddress"`
+	NodeId             string              `json:"nodeId"`
+	NodeAddress        string              `json:"nodeAddress"`
+	Name               string              `json:"name"`
+	Icon               string              `json:"icon"`
+	Website            string              `json:"website"`
+	Twitter            string              `json:"twitter"`
+	Keybase            string              `json:"keybase"`
+	Email              string              `json:"email"`
+	Description        string              `json:"description"`
+	Escrow             string              `json:"escrow"`
+	EscrowChange24     string              `json:"escrowChange24"`
+	EscrowPercent      float64             `json:"escrowPercent"`
+	Balance            string              `json:"balance"`
+	TotalShares        string              `json:"totalShares"`
+	Signs              int64               `json:"signs"`
+	Proposals          int64               `json:"proposals"`
+	Nonce              int64               `json:"nonce"`
+	Score              int64               `json:"score"`
+	Delegators         int64               `json:"delegators"`
+	Nodes              []string            `json:"nodes"`
+	Uptime             string              `json:"uptime"`
+	Active             bool                `json:"active"`
+	Commission         float64             `json:"commission"`
+	Bound              *Bound              `json:"bound"`
+	Rates              []Rate              `json:"rates"`
+	Bounds             []Bound             `json:"bounds"`
+	EscrowSharesStatus *EscrowStatus       `json:"escrowSharesStatus,omitempty"`
+	EscrowAmountStatus *EscrowStatus       `json:"escrowAmountStatus,omitempty"`
+	Runtimes           []*ValidatorRuntime `json:"runtimes"`
+	Status             bool                `json:"status"`
 }
 
 type ValidatorInfoRequest struct {
@@ -585,4 +586,10 @@ type ValidatorListResponse struct {
 	Active     int64           `json:"active"`
 	Inactive   int64           `json:"inactive"`
 	Delegators int64           `json:"delegators"`
+}
+
+type ValidatorRuntime struct {
+	Name   string `json:"name"`
+	Id     string `json:"id"`
+	Online bool   `json:"online"`
 }

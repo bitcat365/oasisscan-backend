@@ -13,13 +13,13 @@ import (
 )
 
 type RuntimeTransactionBody struct {
-	To     sdkTypes.Address   `json:"to,omitempty"`
-	Amount sdkTypes.BaseUnits `json:"amount,omitempty"`
-	From   sdkTypes.Address   `json:"from,omitempty"`
-	Shares sdkTypes.Quantity  `json:"shares,omitempty"`
-	Pk     interface{}        `json:"pk,omitempty"`
-	Data   interface{}        `json:"data,omitempty"`
-	Nonce  interface{}        `json:"nonce,omitempty"`
+	To     sdkTypes.Address   `cbor:"to,omitempty"`
+	Amount sdkTypes.BaseUnits `cbor:"amount,omitempty"`
+	From   sdkTypes.Address   `cbor:"from,omitempty"`
+	Shares sdkTypes.Quantity  `cbor:"shares,omitempty"`
+	Pk     interface{}        `cbor:"pk,omitempty"`
+	Data   interface{}        `cbor:"data,omitempty"`
+	Nonce  interface{}        `cbor:"nonce,omitempty"`
 }
 
 type RuntimeEvent struct {

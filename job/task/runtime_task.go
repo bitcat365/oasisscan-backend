@@ -8,7 +8,6 @@ import (
 	"fmt"
 	eth_types "github.com/ethereum/go-ethereum/core/types"
 	common_namespace "github.com/oasisprotocol/oasis-core/go/common"
-	"github.com/oasisprotocol/oasis-core/go/common/cbor"
 	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
 	"github.com/oasisprotocol/oasis-core/go/common/node"
 	registry "github.com/oasisprotocol/oasis-core/go/registry/api"
@@ -303,7 +302,7 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 						}
 					} else {
 						var body common.RuntimeTransactionBody
-						err = cbor.Unmarshal(tx.Call.Body, &body)
+						err = common.CborUnmarshalOmit(tx.Call.Body, &body)
 						if err != nil {
 							logc.Errorf(ctx, "runtime id:%s ,current round:%d, consensus body unmarshal error, %v", runtimeId, scanRound, err)
 							return

@@ -278,3 +278,16 @@ CREATE TABLE IF NOT EXISTS proposal
     created_at    TIMESTAMP NOT NULL DEFAULT now(),
     updated_at    TIMESTAMP NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS vote
+(
+    id           SERIAL PRIMARY KEY,
+    proposal_id  INTEGER   NOT NULL,
+    vote_address VARCHAR   NOT NULL,
+    option       VARCHAR   NOT NULL,
+    amount       BIGINT    NOT NULL,
+    percent      FLOAT     NOT NULL,
+    created_at   TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMP NOT NULL DEFAULT now()
+);
+CREATE UNIQUE INDEX IF NOT EXISTS vote_uniq ON vote (proposal_id, vote_address);

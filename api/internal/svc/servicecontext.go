@@ -41,6 +41,7 @@ type ServiceContext struct {
 	StakingEventModel       model.StakingEventModel
 	EscrowStatsModel        model.EscrowStatsModel
 	ProposalModel           model.ProposalModel
+	VoteModel               model.VoteModel
 	CoingeckoClient         coingecko.CoingeckoClient
 	LocalCache              *LocalCache
 }
@@ -75,6 +76,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		StakingEventModel:       model.NewStakingEventModel(pgConn),
 		EscrowStatsModel:        model.NewEscrowStatsModel(pgConn),
 		ProposalModel:           model.NewProposalModel(pgConn),
+		VoteModel:               model.NewVoteModel(pgConn),
 		CoingeckoClient:         coingecko.NewCoingeckoClient(),
 		LocalCache:              NewLocalCache(),
 	}

@@ -304,6 +304,18 @@ type GovernanceProposalWithVotesResponse struct {
 	Votes   []*ProposalVote   `json:"votes"`
 }
 
+type GovernanceVotesRequest struct {
+	PoposalId        int64 `form:"proposal_id,optional"`
+	ValidatorAddress int64 `form:"validator_address,optional"`
+	Page             int64 `form:"page,default=1"`
+	Size             int64 `form:"size,default=5"`
+}
+
+type GovernanceVotesResponse struct {
+	List []*ProposalVote `json:"list"`
+	Page
+}
+
 type HealthRequest struct {
 }
 

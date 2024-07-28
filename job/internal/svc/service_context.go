@@ -45,6 +45,7 @@ type ServiceContext struct {
 	RuntimeNodeModel        model.RuntimeNodeModel
 	RuntimeStatsModel       model.RuntimeStatsModel
 	ProposalModel           model.ProposalModel
+	VoteModel               model.VoteModel
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -80,5 +81,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		RuntimeNodeModel:        model.NewRuntimeNodeModel(pgConn),
 		RuntimeStatsModel:       model.NewRuntimeStatsModel(pgConn),
 		ProposalModel:           model.NewProposalModel(pgConn),
+		VoteModel:               model.NewVoteModel(pgConn),
 	}
 }

@@ -517,6 +517,16 @@ type (
 		Amount  string  `json:"amount"`
 		Percent float64 `json:"percent"`
 	}
+	GovernanceVotesRequest {
+		PoposalId        int64 `form:"proposal_id,optional"`
+		ValidatorAddress int64 `form:"validator_address,optional"`
+		Page             int64 `form:"page,default=1"`
+		Size             int64 `form:"size,default=5"`
+	}
+	GovernanceVotesResponse {
+		List []*ProposalVote `json:"list"`
+		Page
+	}
 )
 
 @server (
@@ -652,5 +662,8 @@ service oasisscan-api {
 
 	@handler GovernanceProposalWithVotesHandler
 	get /governance/proposalwithvotes (GovernanceProposalWithVotesRequest) returns (GovernanceProposalWithVotesResponse)
+
+	@handler GovernanceVotesHandler
+	get /governance/votes (GovernanceVotesRequest) returns (GovernanceVotesResponse)
 }
 

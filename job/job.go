@@ -163,6 +163,14 @@ func main() {
 	if err != nil {
 		logx.Errorf("cron job add func error, %v\n", err)
 	}
+	_, err = cr.AddFunc("@every 10m", func() {
+		ctx := context.Background()
+		logc.Infof(ctx, "VoteSync start...")
+		task.VoteSync(ctx, svcCtx)
+	})
+	if err != nil {
+		logx.Errorf("cron job add func error, %v\n", err)
+	}
 
 	cr.Start()
 

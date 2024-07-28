@@ -78,14 +78,14 @@ func NodeScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 			consensusAddress := crypto.AddressHash(consensusIDBytes)
 
 			//save node
-			node, err := svcCtx.NodeModel.FindOneByEntityIdNodeIdConsensusAddress(ctx, entityId.String(), nodeId.String(), consensusAddress.String())
+			mNode, err := svcCtx.NodeModel.FindOneByEntityIdNodeIdConsensusAddress(ctx, entityId.String(), nodeId.String(), consensusAddress.String())
 			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 				logc.Errorf(ctx, "Node FindOneByEntityIdNodeIdConsensusAddress error, %v", err)
 				return
 			}
 
-			if node == nil {
-				node = &model.Node{
+			if mNode == nil {
+				mNode = &model.Node{
 					EntityId:         entityId.String(),
 					NodeId:           nodeId.String(),
 					ConsensusAddress: consensusAddress.String(),
@@ -93,7 +93,7 @@ func NodeScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 					CreatedAt:        time.Now(),
 					UpdatedAt:        time.Now(),
 				}
-				_, err = svcCtx.NodeModel.Insert(ctx, node)
+				_, err = svcCtx.NodeModel.Insert(ctx, mNode)
 				if err != nil {
 					logc.Errorf(ctx, "node insert error, %v", err)
 					return
@@ -133,7 +133,9 @@ func NodeScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 					return
 				}
 			} else {
-				validator.NodeId = nodeId.String()
+				if strings.Contains(node.Roles.String(), "validator") {
+					validator.NodeId = nodeId.String()
+				}
 				validator.NodeAddress = nodeAddress.String()
 				validator.ConsensusAddress = consensusAddress.String()
 				validator.UpdatedAt = time.Now()

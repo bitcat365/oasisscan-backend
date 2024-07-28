@@ -14,6 +14,7 @@ import (
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
 	"oasisscan-backend/common"
+	"strings"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -176,37 +177,49 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 	validatorInfo.EscrowAmountStatus = escrowAmountStatus
 
 	//paratimes
-	var pubKey signature.PublicKey
-	err = pubKey.UnmarshalText([]byte(validatorInfo.NodeId))
-	if err != nil {
-		logc.Errorf(l.ctx, "base64 decode error: %s, %v", validatorInfo.NodeId, err)
-		return nil, err
+	validatorNodes, err := l.svcCtx.NodeModel.FindByEntityId(l.ctx, validatorInfo.EntityId)
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+		logc.Errorf(l.ctx, "node FindByEntityId error, %v", err)
+		return nil, errort.NewDefaultError()
 	}
-	idQuery := registry.IDQuery{Height: currentHeight, ID: pubKey}
-	node, err := l.svcCtx.Registry.GetNode(l.ctx, &idQuery)
-	if err != nil {
-		logc.Errorf(l.ctx, "GetNode error, %v", err)
-	} else {
+
+	runtimeModels, err := l.svcCtx.RuntimeModel.FindAll(l.ctx)
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+		logc.Errorf(l.ctx, "runtime RuntimeModel FindAll error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
+	validatorRuntimes := make([]*types.ValidatorRuntime, 0)
+	for _, runtimeModel := range runtimeModels {
+		validatorRuntimes = append(validatorRuntimes, &types.ValidatorRuntime{
+			Name:   runtimeModel.Name,
+			Id:     runtimeModel.RuntimeId,
+			Online: false,
+		})
+	}
+	for _, validatorNode := range validatorNodes {
+		var pubKey signature.PublicKey
+		err = pubKey.UnmarshalText([]byte(validatorNode.NodeId))
+		if err != nil {
+			logc.Errorf(l.ctx, "base64 decode error: %s, %v", validatorInfo.NodeId, err)
+			return nil, err
+		}
+		idQuery := registry.IDQuery{Height: currentHeight, ID: pubKey}
+		node, _ := l.svcCtx.Registry.GetNode(l.ctx, &idQuery)
+		if node == nil {
+			continue
+		}
+		if !strings.Contains(node.Roles.String(), "compute") {
+			continue
+		}
 		runtimeMap := make(map[string]bool, 0)
 		for _, runtime := range node.Runtimes {
 			runtimeMap[runtime.ID.Hex()] = true
 		}
-		runtimes, err := l.svcCtx.RuntimeModel.FindAllByStatus(l.ctx, 0)
-		if err != nil {
-			logc.Errorf(l.ctx, "runtime RuntimeModel FindAll error, %v", err)
-			return nil, errort.NewDefaultError()
+		for _, validatorRuntime := range validatorRuntimes {
+			validatorRuntime.Online = runtimeMap[validatorRuntime.Id]
 		}
-		validatorRuntimes := make([]*types.ValidatorRuntime, 0)
-		for _, runtime := range runtimes {
-			online := runtimeMap[runtime.RuntimeId]
-			validatorRuntimes = append(validatorRuntimes, &types.ValidatorRuntime{
-				Name:   runtime.Name,
-				Id:     runtime.RuntimeId,
-				Online: online,
-			})
-		}
-		validatorInfo.Runtimes = validatorRuntimes
 	}
+	validatorInfo.Runtimes = validatorRuntimes
 
 	resp = &types.ValidatorInfoResponse{
 		ValidatorInfo: *validatorInfo,

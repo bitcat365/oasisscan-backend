@@ -305,10 +305,10 @@ type GovernanceProposalWithVotesResponse struct {
 }
 
 type GovernanceVotesRequest struct {
-	PoposalId        int64 `form:"proposal_id,optional"`
-	ValidatorAddress int64 `form:"validator_address,optional"`
-	Page             int64 `form:"page,default=1"`
-	Size             int64 `form:"size,default=5"`
+	ProposalId       int64  `form:"proposalId,optional"`
+	ValidatorAddress string `form:"validator,optional"`
+	Page             int64  `form:"page,default=1"`
+	Size             int64  `form:"size,default=5"`
 }
 
 type GovernanceVotesResponse struct {
@@ -366,12 +366,14 @@ type ProposalOption struct {
 }
 
 type ProposalVote struct {
-	Name    string  `json:"name"`
-	Icon    string  `json:"icon"`
-	Address string  `json:"address"`
-	Vote    string  `json:"vote"`
-	Amount  string  `json:"amount"`
-	Percent float64 `json:"percent"`
+	ProposalId int64   `json:"proposalId"`
+	Title      string  `json:"title"`
+	Name       string  `json:"name"`
+	Icon       string  `json:"icon"`
+	Address    string  `json:"address"`
+	Vote       string  `json:"vote"`
+	Amount     string  `json:"amount"`
+	Percent    float64 `json:"percent"`
 }
 
 type Rate struct {

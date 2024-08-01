@@ -22,6 +22,7 @@ type (
 		SessionResetSequence(ctx context.Context, session sqlx.Session) error
 		CountByValidator(ctx context.Context, validatorAddress string) (int64, error)
 		FindByValidator(ctx context.Context, validatorAddress string, pageable common.Pageable) ([]*Delegator, error)
+		CountDistinctDelegator(ctx context.Context) (int64, error)
 	}
 
 	customDelegatorModel struct {
@@ -85,5 +86,17 @@ func (m *customDelegatorModel) FindByValidator(ctx context.Context, validatorAdd
 		return nil, ErrNotFound
 	default:
 		return nil, err
+	}
+}
+
+func (m *customDelegatorModel) CountDistinctDelegator(ctx context.Context) (int64, error) {
+	query := fmt.Sprintf("select count(distinct delegator) from %s", m.table)
+	var resp int64
+	err := m.conn.QueryRowCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return 0, err
 	}
 }

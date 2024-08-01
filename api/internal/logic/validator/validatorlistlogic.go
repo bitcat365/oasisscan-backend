@@ -42,6 +42,7 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 		sortType = "asc"
 	}
 
+	var active, inactive int64 = 0, 0
 	validators, err := l.svcCtx.ValidatorModel.FindAll(l.ctx, orderBy, sortType)
 	if err != nil {
 		logc.Errorf(l.ctx, "validator findAll error, %v", err)
@@ -55,6 +56,12 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 			return nil, errort.NewDefaultError()
 		}
 		validatorList = append(validatorList, *r)
+
+		if r.Active {
+			active++
+		} else {
+			inactive++
+		}
 	}
 
 	if req.OrderBy == "delegators" {
@@ -69,8 +76,17 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 		}
 	}
 
+	delegatorCount, err := l.svcCtx.DelegatorModel.CountDistinctDelegator(l.ctx)
+	if err != nil {
+		logc.Errorf(l.ctx, "delegator CountDistinctDelegator error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
+
 	resp = &types.ValidatorListResponse{
-		List: validatorList,
+		List:       validatorList,
+		Active:     active,
+		Inactive:   inactive,
+		Delegators: delegatorCount,
 	}
 	return resp, nil
 }

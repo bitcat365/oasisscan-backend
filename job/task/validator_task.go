@@ -305,6 +305,13 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 	for i, validator := range validators {
 		entityId := validator.EntityId
 
+		//init
+		validator.Nodes = 0
+		validator.Signs = 0
+		validator.Proposals = 0
+		validator.SignsUptime = 0
+		validator.Escrow24H = 0
+
 		//rank by escrow
 		validator.Rank = int64(i + 1)
 

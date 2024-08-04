@@ -18,6 +18,7 @@ type (
 		FindAll(ctx context.Context, orderBy, sort string) ([]*Validator, error)
 		FindOneByEntityAddress(ctx context.Context, address string) (*Validator, error)
 		FindOneByNodeAddress(ctx context.Context, nodeAddress string) (*Validator, error)
+		SumEscrow(ctx context.Context) (int64, error)
 	}
 
 	customValidatorModel struct {
@@ -85,5 +86,17 @@ func (m *customValidatorModel) FindOneByNodeAddress(ctx context.Context, nodeAdd
 		return nil, ErrNotFound
 	default:
 		return nil, err
+	}
+}
+
+func (m *customValidatorModel) SumEscrow(ctx context.Context) (int64, error) {
+	var resp int64
+	query := fmt.Sprintf("select sum(escrow) from %s", m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return 0, err
 	}
 }

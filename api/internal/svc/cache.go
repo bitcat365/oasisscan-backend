@@ -11,6 +11,7 @@ type LocalCache struct {
 	RuntimeStatsCache          *collection.Cache
 	ProposalWithVotesCache     *collection.Cache
 	AccountRewardFindDaysCache *collection.Cache
+	ValidatorListCache         *collection.Cache
 }
 
 func NewLocalCache() *LocalCache {
@@ -30,10 +31,15 @@ func NewLocalCache() *LocalCache {
 	if err != nil {
 		logx.Errorf("localCache error: %v\n", err)
 	}
+	validatorListCache, err := collection.NewCache(time.Minute*1, collection.WithName("validator-list"))
+	if err != nil {
+		logx.Errorf("localCache error: %v\n", err)
+	}
 	return &LocalCache{
 		MarketCache:                marketCache,
 		RuntimeStatsCache:          runtimeStatsCache,
 		ProposalWithVotesCache:     proposalWithVotesCache,
 		AccountRewardFindDaysCache: accountRewardFindDaysCache,
+		ValidatorListCache:         validatorListCache,
 	}
 }

@@ -2,13 +2,15 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/logc"
+	"math/big"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
-	"sort"
-
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
+	"sort"
+	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -28,65 +30,85 @@ func NewValidatorListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 }
 
 func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (resp *types.ValidatorListResponse, err error) {
-	var orderBy, sortType string
-	switch req.OrderBy {
-	case "escrowChange24":
-		orderBy = "escrow_24h"
-	case "commission":
-		orderBy = "commission"
-	default:
-		orderBy = "escrow"
-		sortType = "desc"
-	}
-	if sortType == "asc" {
-		sortType = "asc"
-	}
+	v, err := l.svcCtx.LocalCache.MarketCache.Take("list", func() (interface{}, error) {
+		var orderBy, sortType string
+		switch req.OrderBy {
+		case "escrowChange24":
+			orderBy = "escrow_24h"
+		case "commission":
+			orderBy = "commission"
+		default:
+			orderBy = "escrow"
+			sortType = "desc"
+		}
+		if sortType == "asc" {
+			sortType = "asc"
+		}
 
-	var active, inactive int64 = 0, 0
-	validators, err := l.svcCtx.ValidatorModel.FindAll(l.ctx, orderBy, sortType)
-	if err != nil {
-		logc.Errorf(l.ctx, "validator findAll error, %v", err)
-		return nil, errort.NewDefaultError()
-	}
-	validatorList := make([]types.ValidatorInfo, 0)
-	for _, validator := range validators {
-		r := response.ValidatorResponseFormat(validator)
+		totalEscrow, err := l.svcCtx.ValidatorModel.SumEscrow(l.ctx)
 		if err != nil {
-			logc.Errorf(l.ctx, "validator response format error, %v", err)
+			logc.Errorf(l.ctx, "validator SumEscrow error, %v", err)
 			return nil, errort.NewDefaultError()
 		}
-		validatorList = append(validatorList, *r)
+		totalEscrowFloat := new(big.Float).SetInt64(totalEscrow)
 
-		if r.Active {
-			active++
-		} else {
-			inactive++
+		var active, inactive int64 = 0, 0
+		validators, err := l.svcCtx.ValidatorModel.FindAll(l.ctx, orderBy, sortType)
+		if err != nil {
+			logc.Errorf(l.ctx, "validator findAll error, %v", err)
+			return nil, errort.NewDefaultError()
 		}
-	}
+		validatorList := make([]types.ValidatorInfo, 0)
+		for _, validator := range validators {
+			r := response.ValidatorResponseFormat(validator)
+			if err != nil {
+				logc.Errorf(l.ctx, "validator response format error, %v", err)
+				return nil, errort.NewDefaultError()
+			}
 
-	if req.OrderBy == "delegators" {
-		if sortType == "asc" {
-			sort.SliceStable(validatorList, func(i, j int) bool {
-				return validatorList[i].Delegators < validatorList[j].Delegators
-			})
-		} else {
-			sort.SliceStable(validatorList, func(i, j int) bool {
-				return validatorList[i].Delegators > validatorList[j].Delegators
-			})
+			p, _ := new(big.Float).Quo(new(big.Float).SetInt64(validator.Escrow), totalEscrowFloat).Float64()
+			escrowPercent, err := strconv.ParseFloat(fmt.Sprintf("%.4f", p), 64)
+			if err != nil {
+				logc.Errorf(l.ctx, "percent compute error, %v", err)
+				return nil, errort.NewDefaultError()
+			}
+			r.EscrowPercent = escrowPercent
+
+			validatorList = append(validatorList, *r)
+
+			if r.Active {
+				active++
+			} else {
+				inactive++
+			}
 		}
-	}
 
-	delegatorCount, err := l.svcCtx.DelegatorModel.CountDistinctDelegator(l.ctx)
-	if err != nil {
-		logc.Errorf(l.ctx, "delegator CountDistinctDelegator error, %v", err)
-		return nil, errort.NewDefaultError()
-	}
+		if req.OrderBy == "delegators" {
+			if sortType == "asc" {
+				sort.SliceStable(validatorList, func(i, j int) bool {
+					return validatorList[i].Delegators < validatorList[j].Delegators
+				})
+			} else {
+				sort.SliceStable(validatorList, func(i, j int) bool {
+					return validatorList[i].Delegators > validatorList[j].Delegators
+				})
+			}
+		}
 
-	resp = &types.ValidatorListResponse{
-		List:       validatorList,
-		Active:     active,
-		Inactive:   inactive,
-		Delegators: delegatorCount,
-	}
-	return resp, nil
+		delegatorCount, err := l.svcCtx.DelegatorModel.CountDistinctDelegator(l.ctx)
+		if err != nil {
+			logc.Errorf(l.ctx, "delegator CountDistinctDelegator error, %v", err)
+			return nil, errort.NewDefaultError()
+		}
+
+		resp = &types.ValidatorListResponse{
+			List:       validatorList,
+			Active:     active,
+			Inactive:   inactive,
+			Delegators: delegatorCount,
+		}
+		return resp, nil
+	})
+	resp = v.(*types.ValidatorListResponse)
+	return
 }

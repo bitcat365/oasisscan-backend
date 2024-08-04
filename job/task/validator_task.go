@@ -349,7 +349,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		}
 		validator.Balance = account.General.Balance.ToBigInt().Int64()
 
-		consensusList, err := svcCtx.ValidatorModel.FindListByConsensusAddress(ctx, validator.ConsensusAddress)
+		consensusList, err := svcCtx.NodeModel.FindByEntityId(ctx, validator.EntityId)
 		if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 			logc.Errorf(ctx, "validator FindListByConsensusAddress error, %v", err)
 			return

@@ -383,7 +383,7 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 
 // RuntimeStats See https://github.com/oasisprotocol/oasis-core/blob/master/go/oasis-node/cmd/control/runtime_stats.go
 func RuntimeStats(ctx context.Context, svcCtx *svc.ServiceContext) {
-	runtimes, err := svcCtx.RuntimeModel.FindAllByStatus(ctx, 0)
+	runtimes, err := svcCtx.RuntimeModel.FindAll(ctx)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(ctx, "runtime FindAllByStatus error, %v", err)
 		return

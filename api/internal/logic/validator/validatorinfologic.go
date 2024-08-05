@@ -196,6 +196,7 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 			Online: false,
 		})
 	}
+	runtimeMap := make(map[string]bool, 0)
 	for _, validatorNode := range validatorNodes {
 		var pubKey signature.PublicKey
 		err = pubKey.UnmarshalText([]byte(validatorNode.NodeId))
@@ -211,13 +212,12 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 		if !strings.Contains(node.Roles.String(), "compute") {
 			continue
 		}
-		runtimeMap := make(map[string]bool, 0)
 		for _, runtime := range node.Runtimes {
 			runtimeMap[runtime.ID.Hex()] = true
 		}
-		for _, validatorRuntime := range validatorRuntimes {
-			validatorRuntime.Online = runtimeMap[validatorRuntime.Id]
-		}
+	}
+	for _, validatorRuntime := range validatorRuntimes {
+		validatorRuntime.Online = runtimeMap[validatorRuntime.Id]
 	}
 	validatorInfo.Runtimes = validatorRuntimes
 

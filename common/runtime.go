@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/oasisprotocol/oasis-core/go/common/cbor"
 	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
 	"github.com/oasisprotocol/oasis-core/go/common/quantity"
 	sdkClient "github.com/oasisprotocol/oasis-sdk/client-sdk/go/client"
@@ -121,7 +120,7 @@ func OpenUtxNoVerify(utx *sdkTypes.UnverifiedTransaction) (*sdkTypes.Transaction
 		}
 	} else {
 		var tx sdkTypes.Transaction
-		if err := cbor.Unmarshal(utx.Body, &tx); err != nil {
+		if err := CborUnmarshalOmit(utx.Body, &tx); err != nil {
 			return nil, fmt.Errorf("tx cbor unmarshal: %w", err)
 		}
 		if err := tx.ValidateBasic(); err != nil {

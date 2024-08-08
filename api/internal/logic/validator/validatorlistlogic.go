@@ -39,7 +39,7 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 		case "commission":
 			orderBy = "commission"
 		}
-		if req.OrderBy == "asc" {
+		if req.Sort == "asc" {
 			sortType = "asc"
 		}
 

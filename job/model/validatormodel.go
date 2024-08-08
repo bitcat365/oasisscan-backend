@@ -48,7 +48,7 @@ func (m *customValidatorModel) FindListByConsensusAddress(ctx context.Context, c
 }
 
 func (m *customValidatorModel) FindAll(ctx context.Context, orderBy, sort string) ([]*Validator, error) {
-	query := fmt.Sprintf("select %s from %s order by %s %s", validatorRows, m.table, orderBy, sort)
+	query := fmt.Sprintf("select %s from %s order by nodes desc,%s %s", validatorRows, m.table, orderBy, sort)
 	var resp []*Validator
 	err := m.conn.QueryRowsCtx(ctx, &resp, query)
 	switch err {

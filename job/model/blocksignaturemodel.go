@@ -17,7 +17,7 @@ type (
 	BlockSignatureModel interface {
 		blockSignatureModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
-		CountSigns(ctx context.Context, signAddresses []string, from int64) (int64, error)
+		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime int64, endTime int64) (int64, error)
 		FindBlocks(ctx context.Context, pageable common.Pageable) ([]*BlockSignature, error)
 	}
 
@@ -39,7 +39,7 @@ func (m *customBlockSignatureModel) SessionInsert(ctx context.Context, session s
 	return ret, err
 }
 
-func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresses []string, from int64) (int64, error) {
+func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresses []string, from int64, startTime int64, endTime int64) (int64, error) {
 	query := fmt.Sprintf("select count(*) from %s where validator_address in (", m.table)
 	vars := make([]interface{}, 0)
 	for i, signAddress := range signAddresses {
@@ -48,9 +48,21 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 	}
 	query = query[:len(query)-1] + ")"
 
+	paramIndex := len(signAddresses)
 	if from > 0 {
-		query += fmt.Sprintf(" and height > $%d and height <= $%d", len(signAddresses)+1, len(signAddresses)+2)
+		query += fmt.Sprintf(" and height > $%d and height <= $%d", paramIndex+1, paramIndex+2)
 		vars = append(vars, from, from+common.UptimeHeight)
+		paramIndex = paramIndex + 2
+	}
+	if startTime > 0 {
+		query += fmt.Sprintf(" and timestamp > $%d", paramIndex+1)
+		vars = append(vars, startTime)
+		paramIndex = paramIndex + 1
+	}
+	if endTime > 0 {
+		query += fmt.Sprintf(" and timestamp <= $%d", paramIndex+1)
+		vars = append(vars, endTime)
+		paramIndex = paramIndex + 1
 	}
 	var resp int64
 	err := m.conn.QueryRowCtx(ctx, &resp, query, vars...)

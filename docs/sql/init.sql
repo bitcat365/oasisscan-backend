@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS block_signature
     CONSTRAINT unique_height_validator_address UNIQUE (height, validator_address)
 );
 CREATE INDEX IF NOT EXISTS block_signature_validator_address_idx ON block_signature (validator_address);
+CREATE INDEX IF NOT EXISTS block_signature_timestamp_idx ON block_signature (timestamp);
 
 CREATE TABLE IF NOT EXISTS delegator
 (

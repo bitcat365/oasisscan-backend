@@ -367,7 +367,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			}
 			validator.Proposals = proposalsCount
 			//signs
-			signsCount, err := svcCtx.BlockSignatureModel.CountSigns(ctx, consAddresses, 0)
+			signsCount, err := svcCtx.BlockSignatureModel.CountSigns(ctx, consAddresses, 0, 0, 0)
 			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 				logc.Errorf(ctx, "CountSigns error, %v", err)
 				return
@@ -375,7 +375,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			validator.Signs = signsCount
 			validator.Score = signsCount*common.SignScore + proposalsCount*common.ProposalScore
 
-			statsCount, err := svcCtx.BlockSignatureModel.CountSigns(ctx, consAddresses, nodeHeight-common.UptimeHeight)
+			statsCount, err := svcCtx.BlockSignatureModel.CountSigns(ctx, consAddresses, nodeHeight-common.UptimeHeight, 0, 0)
 			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 				logc.Errorf(ctx, "Validator CountSigns error, %v", err)
 				return

@@ -609,8 +609,6 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			}
 		}
 
-		rewardEpoch++
-
 		//update system property
 		if rewardEpochProperty != nil {
 			rewardEpochProperty.Value = strconv.FormatInt(rewardEpoch, 10)
@@ -623,6 +621,7 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		}
 
 		logc.Infof(ctx, "delegation reward sync done, epoch:%d, current epoch:%d", rewardEpoch, currentEpoch)
+		rewardEpoch++
 	}
 }
 

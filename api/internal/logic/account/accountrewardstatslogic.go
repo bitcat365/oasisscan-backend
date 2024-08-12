@@ -53,8 +53,9 @@ func (l *AccountRewardStatsLogic) AccountRewardStats(req *types.AccountRewardSta
 	var timeResp []int64
 	timeMap := make(map[int64]bool)
 	for i := len(days) - 1; i > 0; i-- {
-		timeResp = append(timeResp, days[i].Day.Unix())
-		timeMap[days[i].Day.Unix()] = true
+		day := days[i].Day.AddDate(0, 0, 1)
+		timeResp = append(timeResp, day.Unix())
+		timeMap[day.Unix()] = true
 	}
 
 	for _, m := range rewardModels {

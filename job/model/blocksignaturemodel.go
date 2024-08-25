@@ -119,7 +119,7 @@ func (m *customBlockSignatureModel) RefreshBlockCountDaysView(ctx context.Contex
 
 func (m *customBlockSignatureModel) FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error) {
 	var resp []*BlockCountDay
-	query := fmt.Sprintf("select day from block_count_days order by day desc limit 11")
+	query := fmt.Sprintf("select day,count from block_count_days order by day desc limit 11")
 	err := m.conn.QueryRowsCtx(ctx, &resp, query)
 	switch err {
 	case nil:

@@ -83,6 +83,10 @@ func (l *ValidatorSignStatsLogic) ValidatorSignStats(req *types.ValidatorSignSta
 
 		return resp, nil
 	})
+	if err != nil {
+		logc.Errorf(l.ctx, "cache error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
 	resp = v.(*types.ValidatorSignStatsResponse)
 	return
 }

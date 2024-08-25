@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS block_signature
 );
 CREATE INDEX IF NOT EXISTS block_signature_validator_address_idx ON block_signature (validator_address);
 CREATE INDEX IF NOT EXISTS block_signature_timestamp_idx ON block_signature (timestamp);
+CREATE MATERIALIZED VIEW block_count_days AS
+select DISTINCT DATE_TRUNC('day', timestamp)  AS day,count(distinct height) from block_signature where timestamp>=now()-interval '11 days' group by day;
 
 CREATE TABLE IF NOT EXISTS delegator
 (

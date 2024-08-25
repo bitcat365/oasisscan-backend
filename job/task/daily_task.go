@@ -20,4 +20,11 @@ func DailyJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 		return
 	}
 	logc.Infof(ctx, "refresh RewardDaysView done.")
+
+	err = svcCtx.BlockSignatureModel.RefreshBlockCountDaysView(ctx)
+	if err != nil {
+		logc.Errorf(ctx, "RefreshBlockCountDaysView error, %v", err)
+		return
+	}
+	logc.Infof(ctx, "refresh BlockCountDaysView done.")
 }

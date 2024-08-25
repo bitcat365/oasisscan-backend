@@ -7,6 +7,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
+	"time"
 )
 
 var _ BlockSignatureModel = (*customBlockSignatureModel)(nil)
@@ -19,10 +20,18 @@ type (
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
 		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime int64, endTime int64) (int64, error)
 		FindBlocks(ctx context.Context, pageable common.Pageable) ([]*BlockSignature, error)
+		CountDistinctBlocksByTimestamp(ctx context.Context, start uint64, end uint64) ([]uint64, error)
+		RefreshBlockCountDaysView(ctx context.Context) error
+		FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error)
 	}
 
 	customBlockSignatureModel struct {
 		*defaultBlockSignatureModel
+	}
+
+	BlockCountDay struct {
+		Day   time.Time `db:"day"`
+		Count int64     `db:"count"`
 	}
 )
 
@@ -85,6 +94,36 @@ func (m *customBlockSignatureModel) FindBlocks(ctx context.Context, pageable com
 		return resp, nil
 	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *customBlockSignatureModel) CountDistinctBlocksByTimestamp(ctx context.Context, start uint64, end uint64) ([]uint64, error) {
+	var resp []uint64
+	query := fmt.Sprintf("select count(distinct height) from %s where timestamp>=$1 and timestamp<=$2 order by height desc; ", m.table)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, start, end)
+	switch err {
+	case nil:
+		return resp, nil
+	default:
+		return nil, err
+	}
+}
+
+func (m *customBlockSignatureModel) RefreshBlockCountDaysView(ctx context.Context) error {
+	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW block_count_days")
+	_, err := m.conn.ExecCtx(ctx, query)
+	return err
+}
+
+func (m *customBlockSignatureModel) FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error) {
+	var resp []*BlockCountDay
+	query := fmt.Sprintf("select day from block_count_days order by day desc limit 11")
+	err := m.conn.QueryRowsCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
 	default:
 		return nil, err
 	}

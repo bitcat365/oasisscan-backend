@@ -128,6 +128,18 @@ type (
 	ValidatorEscrowStatsResponse {
 		List []*ValidatorEscrowStatsInfo `json:"list"`
 	}
+	ValidatorSignStatsRequest {
+		Address string `form:"address"`
+	}
+	ValidatorSignStatsResponse {
+		Stats []*ValidatorSignStatsInfo `json:"stats"`
+		Time  []int64                   `json:"time"`
+	}
+	ValidatorSignStatsInfo {
+		DateTime uint64 `json:"dateTime"`
+		Expected uint64 `json:"expected"`
+		Actual   uint64 `json:"actual"`
+	}
 )
 
 /** account **/
@@ -562,6 +574,9 @@ service oasisscan-api {
 
 	@handler ValidatorEscrowStatsHandler
 	get /validator/escrowstats (ValidatorEscrowStatsRequest) returns (ValidatorEscrowStatsResponse)
+
+	@handler ValidatorSignStatsHandler
+	get /validator/signstats (ValidatorSignStatsRequest) returns (ValidatorSignStatsResponse)
 }
 
 @server (

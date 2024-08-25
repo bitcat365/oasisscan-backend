@@ -607,3 +607,18 @@ type ValidatorRuntime struct {
 	Id     string `json:"id"`
 	Online bool   `json:"online"`
 }
+
+type ValidatorSignStatsInfo struct {
+	DateTime uint64 `json:"dateTime"`
+	Expected uint64 `json:"expected"`
+	Actual   uint64 `json:"actual"`
+}
+
+type ValidatorSignStatsRequest struct {
+	Address string `form:"address"`
+}
+
+type ValidatorSignStatsResponse struct {
+	Stats []*ValidatorSignStatsInfo `json:"stats"`
+	Time  []int64                   `json:"time"`
+}

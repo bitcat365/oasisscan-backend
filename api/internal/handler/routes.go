@@ -215,6 +215,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/validator/list",
 				Handler: validator.ValidatorListHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/validator/signstats",
+				Handler: validator.ValidatorSignStatsHandler(serverCtx),
+			},
 		},
 		rest.WithPrefix("/v2"),
 	)

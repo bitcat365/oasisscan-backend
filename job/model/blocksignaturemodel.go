@@ -18,9 +18,8 @@ type (
 	BlockSignatureModel interface {
 		blockSignatureModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
-		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime int64, endTime int64) (int64, error)
+		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error)
 		FindBlocks(ctx context.Context, pageable common.Pageable) ([]*BlockSignature, error)
-		CountDistinctBlocksByTimestamp(ctx context.Context, start uint64, end uint64) ([]uint64, error)
 		RefreshBlockCountDaysView(ctx context.Context) error
 		FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error)
 	}
@@ -48,7 +47,7 @@ func (m *customBlockSignatureModel) SessionInsert(ctx context.Context, session s
 	return ret, err
 }
 
-func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresses []string, from int64, startTime int64, endTime int64) (int64, error) {
+func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error) {
 	query := fmt.Sprintf("select count(*) from %s where validator_address in (", m.table)
 	vars := make([]interface{}, 0)
 	for i, signAddress := range signAddresses {
@@ -63,12 +62,12 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 		vars = append(vars, from, from+common.UptimeHeight)
 		paramIndex = paramIndex + 2
 	}
-	if startTime > 0 {
+	if startTime != nil {
 		query += fmt.Sprintf(" and timestamp > $%d", paramIndex+1)
 		vars = append(vars, startTime)
 		paramIndex = paramIndex + 1
 	}
-	if endTime > 0 {
+	if endTime != nil {
 		query += fmt.Sprintf(" and timestamp <= $%d", paramIndex+1)
 		vars = append(vars, endTime)
 		paramIndex = paramIndex + 1
@@ -94,18 +93,6 @@ func (m *customBlockSignatureModel) FindBlocks(ctx context.Context, pageable com
 		return resp, nil
 	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
-	default:
-		return nil, err
-	}
-}
-
-func (m *customBlockSignatureModel) CountDistinctBlocksByTimestamp(ctx context.Context, start uint64, end uint64) ([]uint64, error) {
-	var resp []uint64
-	query := fmt.Sprintf("select count(distinct height) from %s where timestamp>=$1 and timestamp<=$2 order by height desc; ", m.table)
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, start, end)
-	switch err {
-	case nil:
-		return resp, nil
 	default:
 		return nil, err
 	}

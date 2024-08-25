@@ -67,7 +67,7 @@ func (l *ValidatorSignStatsLogic) ValidatorSignStats(req *types.ValidatorSignSta
 
 			timeResp = append(timeResp, endDay.Unix())
 
-			signs, err := l.svcCtx.BlockSignatureModel.CountSigns(l.ctx, signAddresses, 0, startDay.Unix(), endDay.Unix())
+			signs, err := l.svcCtx.BlockSignatureModel.CountSigns(l.ctx, signAddresses, 0, &startDay, &endDay)
 			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 				logc.Errorf(l.ctx, "CountSigns error, %v", err)
 				return nil, errort.NewDefaultError()

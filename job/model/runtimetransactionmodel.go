@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
+	"strings"
 )
 
 var _ RuntimeTransactionModel = (*customRuntimeTransactionModel)(nil)
@@ -15,8 +16,8 @@ type (
 	// and implement the added methods in customRuntimeTransactionModel.
 	RuntimeTransactionModel interface {
 		runtimeTransactionModel
-		FindAll(ctx context.Context, runtimeId string, pageable common.Pageable) ([]*RuntimeTransaction, error)
-		CountAll(ctx context.Context, runtimeId string) (int64, error)
+		FindAll(ctx context.Context, runtimeId string, round int64, pageable common.Pageable) ([]*RuntimeTransaction, error)
+		CountAll(ctx context.Context, runtimeId string, round int64) (int64, error)
 		FindOneByTxHash(ctx context.Context, runtimeId string) (*RuntimeTransaction, error)
 	}
 
@@ -32,10 +33,31 @@ func NewRuntimeTransactionModel(conn sqlx.SqlConn) RuntimeTransactionModel {
 	}
 }
 
-func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId string, pageable common.Pageable) ([]*RuntimeTransaction, error) {
-	query := fmt.Sprintf("select %s from %s where runtime_id=$1 order by id desc limit %d offset %d", runtimeTransactionRows, m.table, pageable.Limit, pageable.Offset)
+func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId string, round int64, pageable common.Pageable) ([]*RuntimeTransaction, error) {
 	var resp []*RuntimeTransaction
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, runtimeId)
+	query := fmt.Sprintf("select %s from %s where ", runtimeTransactionRows, m.table)
+	var conditions []string
+	conditions = append(conditions, "1=1")
+	var args []interface{}
+	paramIndex := 1
+
+	if runtimeId != "" {
+		conditions = append(conditions, fmt.Sprintf("runtime_id = $%d", paramIndex))
+		args = append(args, runtimeId)
+		paramIndex++
+	}
+	if round > 0 {
+		conditions = append(conditions, fmt.Sprintf("round = $%d", paramIndex))
+		args = append(args, round)
+		paramIndex++
+	}
+
+	if len(conditions) > 0 {
+		query += strings.Join(conditions, " AND ")
+	}
+	query += fmt.Sprintf(" order by id desc limit %d offset %d", pageable.Limit, pageable.Offset)
+
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
 	switch err {
 	case nil:
 		return resp, nil
@@ -46,15 +68,33 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 	}
 }
 
-func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId string) (int64, error) {
-	query := fmt.Sprintf("select count(*) from %s where runtime_id=$1", m.table)
+func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId string, round int64) (int64, error) {
 	var resp int64
-	err := m.conn.QueryRowCtx(ctx, &resp, query, runtimeId)
+	query := fmt.Sprintf("select count(*) from %s where ", m.table)
+	var conditions []string
+	conditions = append(conditions, "1=1")
+	var args []interface{}
+	paramIndex := 1
+
+	if runtimeId != "" {
+		conditions = append(conditions, fmt.Sprintf("runtime_id = $%d", paramIndex))
+		args = append(args, runtimeId)
+		paramIndex++
+	}
+	if round > 0 {
+		conditions = append(conditions, fmt.Sprintf("round = $%d", paramIndex))
+		args = append(args, round)
+		paramIndex++
+	}
+
+	if len(conditions) > 0 {
+		query += strings.Join(conditions, " AND ")
+	}
+
+	err := m.conn.QueryRowCtx(ctx, &resp, query, args...)
 	switch err {
 	case nil:
 		return resp, nil
-	case sqlc.ErrNotFound:
-		return 0, ErrNotFound
 	default:
 		return 0, err
 	}

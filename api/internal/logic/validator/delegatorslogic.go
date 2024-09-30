@@ -38,17 +38,20 @@ func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
-	validator, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Validator)
+	validator, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Address)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "FindOneByEntityAddress error, %v", err)
 		return nil, errort.NewDefaultError()
+	}
+	if validator == nil {
+		return nil, nil
 	}
 	delegatorCount := validator.Delegators
 	if delegatorCount == 0 {
 		return
 	}
 
-	delegators, err := l.svcCtx.DelegatorModel.FindByValidator(l.ctx, req.Validator, pageable)
+	delegators, err := l.svcCtx.DelegatorModel.FindByValidator(l.ctx, req.Address, pageable)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "FindByValidator error, %v", err)
 		return nil, errort.NewDefaultError()

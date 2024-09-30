@@ -177,6 +177,13 @@ type ChainBlocksResponse struct {
 	Page
 }
 
+type ChainMethodsRequest struct {
+}
+
+type ChainMethodsResponse struct {
+	List []string `json:list`
+}
+
 type ChainProposedBlocksRequest struct {
 	Validator string `form:"validator,optional"`
 	Page      int64  `form:"page,default=1"`

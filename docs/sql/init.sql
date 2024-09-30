@@ -118,6 +118,8 @@ SELECT DATE_TRUNC('day', timestamp) AS day,
        COUNT(id)                    AS count
 FROM transaction
 GROUP BY DATE_TRUNC('day', timestamp);
+CREATE MATERIALIZED VIEW transaction_method AS
+select distinct method from transaction;
 
 CREATE TABLE IF NOT EXISTS validator
 (

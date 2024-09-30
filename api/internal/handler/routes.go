@@ -77,6 +77,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/chain/methods",
+				Handler: chain.ChainMethodsHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/chain/proposedblocks",
 				Handler: chain.ChainProposedBlocksHandler(serverCtx),
 			},

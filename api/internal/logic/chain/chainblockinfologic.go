@@ -34,6 +34,9 @@ func (l *ChainBlockInfoLogic) ChainBlockInfo(req *types.ChainBlockInfoRequest) (
 		logc.Errorf(l.ctx, "find block error, %v", err)
 		return nil, errort.NewDefaultError()
 	}
+	if block == nil {
+		return nil, nil
+	}
 	info := types.ChainBlockInfo{
 		Height:        block.Height,
 		Epoch:         block.Epoch,

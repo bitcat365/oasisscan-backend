@@ -25,6 +25,8 @@ type (
 		TransactionCountStats(ctx context.Context, day time.Time, limit int64) ([]*TransactionCountStats, error)
 		RefreshDailyCountsStatsView(ctx context.Context) error
 		LatestTx(ctx context.Context) (*Transaction, error)
+		RefreshTransactionMethodView(ctx context.Context) error
+		TransactionMethods(ctx context.Context) ([]string, error)
 	}
 
 	customTransactionModel struct {
@@ -168,6 +170,26 @@ func (m *customTransactionModel) LatestTx(ctx context.Context) (*Transaction, er
 	switch err {
 	case nil:
 		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *customTransactionModel) RefreshTransactionMethodView(ctx context.Context) error {
+	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW transaction_method")
+	_, err := m.conn.ExecCtx(ctx, query)
+	return err
+}
+
+func (m *customTransactionModel) TransactionMethods(ctx context.Context) ([]string, error) {
+	var resp []string
+	query := fmt.Sprintf("select method from transaction_method order by method")
+	err := m.conn.QueryRowsCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return resp, nil
 	case sqlc.ErrNotFound:
 		return nil, ErrNotFound
 	default:

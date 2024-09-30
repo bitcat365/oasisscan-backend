@@ -358,6 +358,10 @@ type (
 		Type   string `json:"type"`
 		Result string `json:"result"`
 	}
+	ChainMethodsRequest  {}
+	ChainMethodsResponse {
+		List []string `json:list`
+	}
 )
 
 /** runtime **/
@@ -643,6 +647,9 @@ service oasisscan-api {
 
 	@handler ChainSearchHandler
 	get /chain/search (ChainSearchRequest) returns (ChainSearchResponse)
+
+	@handler ChainMethodsHandler
+	get /chain/methods (ChainMethodsRequest) returns (ChainMethodsResponse)
 }
 
 @server (

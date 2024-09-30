@@ -116,7 +116,7 @@ func (m *customBlockModel) CountBlocks(ctx context.Context) (int64, error) {
 }
 
 func (m *customBlockModel) FindBlockProposer(ctx context.Context, height int64) (*BlockProposer, error) {
-	query := fmt.Sprintf("select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.consensus_address where b.height=$1 limit 1")
+	query := fmt.Sprintf("select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where b.height=$1 limit 1")
 	var resp BlockProposer
 	err := m.conn.QueryRowCtx(ctx, &resp, query, height)
 	switch err {

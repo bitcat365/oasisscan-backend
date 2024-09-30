@@ -267,9 +267,9 @@ type DelegatorsInfo struct {
 }
 
 type DelegatorsRequest struct {
-	Validator string `form:"validator"`
-	Page      int64  `form:"page,default=1"`
-	Size      int64  `form:"size,default=5"`
+	Address string `form:"address"`
+	Page    int64  `form:"page,default=1"`
+	Size    int64  `form:"size,default=5"`
 }
 
 type DelegatorsResponse struct {

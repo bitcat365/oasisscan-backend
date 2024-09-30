@@ -553,6 +553,7 @@ type (
 )
 
 @server (
+	prefix: /v2
 	group: common
 )
 service oasisscan-api {
@@ -567,6 +568,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: validator
 )
 service oasisscan-api {
@@ -590,6 +592,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: account
 )
 service oasisscan-api {
@@ -619,6 +622,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: chain
 )
 service oasisscan-api {
@@ -642,6 +646,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: runtime
 )
 service oasisscan-api {
@@ -665,6 +670,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: market
 )
 service oasisscan-api {
@@ -676,6 +682,7 @@ service oasisscan-api {
 }
 
 @server (
+	prefix: /v2
 	group: governance
 )
 service oasisscan-api {

@@ -344,6 +344,18 @@ type MarketInfoResponse struct {
 	VolumeChangePct24h    float64 `json:"volumeChangePct24h"`
 }
 
+type NetworkStatusRequest struct {
+}
+
+type NetworkStatusResponse struct {
+	CurHeight       int64  `json:"curHeight"`
+	CurEpoch        int64  `json:"curEpoch"`
+	TotalTxs        int64  `json:"totalTxs"`
+	TotalEscrow     string `json:"totalEscrow"`
+	ActiveValidator int64  `json:"activeValidator"`
+	TotalDelegator  int64  `json:"totalDelegator"`
+}
+
 type NetworkTrendRequest struct {
 }
 

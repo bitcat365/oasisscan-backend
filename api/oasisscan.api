@@ -17,6 +17,15 @@ type (
 		Tx     []*Chart `json:"tx"`
 		Escrow []*Chart `json:"escrow"`
 	}
+	NetworkStatusRequest  {}
+	NetworkStatusResponse {
+		CurHeight       int64  `json:"curHeight"`
+		CurEpoch        int64  `json:"curEpoch"`
+		TotalTxs        int64  `json:"totalTxs"`
+		TotalEscrow     string `json:"totalEscrow"`
+		ActiveValidator int64  `json:"activeValidator"`
+		TotalDelegator  int64  `json:"totalDelegator"`
+	}
 )
 
 /** validator **/
@@ -544,8 +553,7 @@ type (
 )
 
 @server (
-	prefix: /v2
-	group:  common
+	group: common
 )
 service oasisscan-api {
 	@handler HealthHandler
@@ -553,11 +561,13 @@ service oasisscan-api {
 
 	@handler NetworkTrendHandler
 	get /trend (NetworkTrendRequest) returns (NetworkTrendResponse)
+
+	@handler NetworkStatusHandler
+	get /network/status (NetworkStatusRequest) returns (NetworkStatusResponse)
 }
 
 @server (
-	prefix: /v2
-	group:  validator
+	group: validator
 )
 service oasisscan-api {
 	@handler ValidatorListHandler
@@ -580,8 +590,7 @@ service oasisscan-api {
 }
 
 @server (
-	prefix: /v2
-	group:  account
+	group: account
 )
 service oasisscan-api {
 	@handler AccountRewardHandler
@@ -610,8 +619,7 @@ service oasisscan-api {
 }
 
 @server (
-	prefix: /v2
-	group:  chain
+	group: chain
 )
 service oasisscan-api {
 	@handler ChainTransactionInfoHandler
@@ -634,8 +642,7 @@ service oasisscan-api {
 }
 
 @server (
-	prefix: /v2
-	group:  runtime
+	group: runtime
 )
 service oasisscan-api {
 	@handler RuntimeListHandler
@@ -658,8 +665,7 @@ service oasisscan-api {
 }
 
 @server (
-	prefix: /v2
-	group:  market
+	group: market
 )
 service oasisscan-api {
 	@handler MarketChartHandler
@@ -670,8 +676,7 @@ service oasisscan-api {
 }
 
 @server (
-	prefix: /v2
-	group:  governance
+	group: governance
 )
 service oasisscan-api {
 	@handler GovernanceProposalListHandler

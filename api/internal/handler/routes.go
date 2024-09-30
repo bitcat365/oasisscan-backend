@@ -60,7 +60,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: account.AccountStakingEventsInfoHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -96,7 +95,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: chain.ChainTransactionsHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -108,11 +106,15 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/network/status",
+				Handler: common.NetworkStatusHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/trend",
 				Handler: common.NetworkTrendHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -133,7 +135,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: governance.GovernanceVotesHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -149,7 +150,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: market.MarketInfoHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -185,7 +185,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: runtime.RuntimeTransactionListHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 
 	server.AddRoutes(
@@ -221,6 +220,5 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: validator.ValidatorSignStatsHandler(serverCtx),
 			},
 		},
-		rest.WithPrefix("/v2"),
 	)
 }

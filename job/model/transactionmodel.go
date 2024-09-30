@@ -24,6 +24,7 @@ type (
 		CountTxs(ctx context.Context, height int64, address string, method string) (int64, error)
 		TransactionCountStats(ctx context.Context, day time.Time, limit int64) ([]*TransactionCountStats, error)
 		RefreshDailyCountsStatsView(ctx context.Context) error
+		LatestTx(ctx context.Context) (*Transaction, error)
 	}
 
 	customTransactionModel struct {
@@ -158,4 +159,18 @@ func (m *customTransactionModel) RefreshDailyCountsStatsView(ctx context.Context
 	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW daily_transaction_counts")
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
+}
+
+func (m *customTransactionModel) LatestTx(ctx context.Context) (*Transaction, error) {
+	var resp Transaction
+	query := fmt.Sprintf("select %s from %s order by id desc limit 1", transactionRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
 }

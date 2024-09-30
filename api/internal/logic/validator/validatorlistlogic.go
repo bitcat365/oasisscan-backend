@@ -31,7 +31,7 @@ func NewValidatorListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Val
 
 func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (resp *types.ValidatorListResponse, err error) {
 	cacheKey := fmt.Sprintf("%s_%s", req.OrderBy, req.Sort)
-	v, err := l.svcCtx.LocalCache.MarketCache.Take(cacheKey, func() (interface{}, error) {
+	v, err := l.svcCtx.LocalCache.ValidatorListCache.Take(cacheKey, func() (interface{}, error) {
 		orderBy, sortType := "escrow", "desc"
 		switch req.OrderBy {
 		case "escrowChange24":

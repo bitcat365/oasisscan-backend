@@ -27,7 +27,7 @@ func NewValidatorSignStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 }
 
 func (l *ValidatorSignStatsLogic) ValidatorSignStats(req *types.ValidatorSignStatsRequest) (resp *types.ValidatorSignStatsResponse, err error) {
-	v, err := l.svcCtx.LocalCache.MarketCache.Take(req.Address, func() (interface{}, error) {
+	v, err := l.svcCtx.LocalCache.ValidatorSignsStatsCache.Take(req.Address, func() (interface{}, error) {
 		stats := make([]*types.ValidatorSignStatsInfo, 0)
 		resp = &types.ValidatorSignStatsResponse{
 			Stats: stats,

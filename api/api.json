@@ -556,6 +556,56 @@
         ]
       }
     },
+    "/v2/governance/votes": {
+      "get": {
+        "operationId": "GovernanceVotesHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/GovernanceVotesResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "proposalId",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "validator",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "5"
+          }
+        ],
+        "tags": [
+          "governance"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
     "/v2/health": {
       "get": {
         "operationId": "HealthHandler",
@@ -979,6 +1029,33 @@
             "required": true,
             "type": "string",
             "default": "desc"
+          }
+        ],
+        "tags": [
+          "validator"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/v2/validator/signstats": {
+      "get": {
+        "operationId": "ValidatorSignStatsHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ValidatorSignStatsResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": true,
+            "type": "string"
           }
         ],
         "tags": [
@@ -1463,7 +1540,7 @@
         "burn": {
           "type": "object"
         },
-        "Escrow": {
+        "escrow": {
           "type": "object"
         },
         "allowanceChange": {
@@ -2186,6 +2263,64 @@
         "votes"
       ]
     },
+    "GovernanceVotesRequest": {
+      "type": "object",
+      "properties": {
+        "proposalId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "validator": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "5"
+        }
+      },
+      "title": "GovernanceVotesRequest",
+      "required": [
+        "page",
+        "size"
+      ]
+    },
+    "GovernanceVotesResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProposalVote"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "maxPage": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "GovernanceVotesResponse",
+      "required": [
+        "list"
+      ]
+    },
     "HealthRequest": {
       "type": "object",
       "title": "HealthRequest"
@@ -2352,6 +2487,13 @@
     "ProposalVote": {
       "type": "object",
       "properties": {
+        "proposalId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "title": {
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
@@ -2374,6 +2516,8 @@
       },
       "title": "ProposalVote",
       "required": [
+        "proposalId",
+        "title",
         "name",
         "icon",
         "address",
@@ -2760,6 +2904,9 @@
     "RuntimeTransactionEvmTx": {
       "type": "object",
       "properties": {
+        "hash": {
+          "type": "string"
+        },
         "from": {
           "type": "string"
         },
@@ -2787,6 +2934,7 @@
       },
       "title": "RuntimeTransactionEvmTx",
       "required": [
+        "hash",
         "from",
         "to",
         "nonce",
@@ -3176,6 +3324,12 @@
         "escrowAmountStatus": {
           "$ref": "#/definitions/EscrowStatus"
         },
+        "runtimes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValidatorRuntime"
+          }
+        },
         "status": {
           "type": "boolean",
           "format": "boolean"
@@ -3212,6 +3366,7 @@
         "bound",
         "rates",
         "bounds",
+        "runtimes",
         "status"
       ]
     },
@@ -3341,6 +3496,12 @@
         "escrowAmountStatus": {
           "$ref": "#/definitions/EscrowStatus"
         },
+        "runtimes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValidatorRuntime"
+          }
+        },
         "status": {
           "type": "boolean",
           "format": "boolean"
@@ -3394,6 +3555,85 @@
         "active",
         "inactive",
         "delegators"
+      ]
+    },
+    "ValidatorRuntime": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "online": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      },
+      "title": "ValidatorRuntime",
+      "required": [
+        "name",
+        "id",
+        "online"
+      ]
+    },
+    "ValidatorSignStatsInfo": {
+      "type": "object",
+      "properties": {
+        "dateTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "expected": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "actual": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "ValidatorSignStatsInfo",
+      "required": [
+        "dateTime",
+        "expected",
+        "actual"
+      ]
+    },
+    "ValidatorSignStatsRequest": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        }
+      },
+      "title": "ValidatorSignStatsRequest",
+      "required": [
+        "address"
+      ]
+    },
+    "ValidatorSignStatsResponse": {
+      "type": "object",
+      "properties": {
+        "stats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ValidatorSignStatsInfo"
+          }
+        },
+        "time": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "title": "ValidatorSignStatsResponse",
+      "required": [
+        "stats",
+        "time"
       ]
     }
   },

@@ -52,19 +52,19 @@ func (l *ChainTransactionInfoLogic) ChainTransactionInfo(req *types.ChainTransac
 	}
 
 	amount := fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(big.NewInt(tx.Amount), common.Decimals))
-	var validatorAddress staking.Address
-	err = validatorAddress.UnmarshalText([]byte(tx.ToAddr))
-	if err != nil {
-		logc.Errorf(l.ctx, "address error, %v", err)
-		return nil, errort.NewDefaultError()
-	}
-	accountQuery := staking.OwnerQuery{Height: tx.Height - 1, Owner: validatorAddress}
-	validatorAccount, err := l.svcCtx.Staking.Account(l.ctx, &accountQuery)
-	if err != nil {
-		logc.Errorf(l.ctx, "staking account error, %v", err)
-		return nil, errort.NewDefaultError()
-	}
 	if tx.Method == "staking.ReclaimEscrow" {
+		var validatorAddress staking.Address
+		err = validatorAddress.UnmarshalText([]byte(tx.ToAddr))
+		if err != nil {
+			logc.Errorf(l.ctx, "address error, %v", err)
+			return nil, errort.NewDefaultError()
+		}
+		accountQuery := staking.OwnerQuery{Height: tx.Height - 1, Owner: validatorAddress}
+		validatorAccount, err := l.svcCtx.Staking.Account(l.ctx, &accountQuery)
+		if err != nil {
+			logc.Errorf(l.ctx, "staking account error, %v", err)
+			return nil, errort.NewDefaultError()
+		}
 		sharePool := staking.SharePool{
 			Balance:     validatorAccount.Escrow.Active.Balance,
 			TotalShares: validatorAccount.Escrow.Active.TotalShares,

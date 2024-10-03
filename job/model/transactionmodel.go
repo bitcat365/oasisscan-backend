@@ -112,7 +112,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 
 func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, address string, method string) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(*) from %s where 1=1", m.table)
+	query := fmt.Sprintf("select count(*) from %s where ", m.table)
 	var conditions []string
 	conditions = append(conditions, "1=1")
 	var args []interface{}

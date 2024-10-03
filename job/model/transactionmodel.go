@@ -27,6 +27,8 @@ type (
 		LatestTx(ctx context.Context) (*Transaction, error)
 		RefreshTransactionMethodView(ctx context.Context) error
 		TransactionMethods(ctx context.Context) ([]string, error)
+		FindEscrowEvents(ctx context.Context, address string, pageable common.Pageable) ([]*Transaction, error)
+		CountEscrowEvents(ctx context.Context, address string) (int64, error)
 	}
 
 	customTransactionModel struct {
@@ -89,10 +91,13 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		paramIndex++
 	}
 
-	if len(conditions) > 0 {
+	if len(conditions) > 1 {
 		query += strings.Join(conditions, " AND ")
+		//Here, add a constant to the sort field to avoid using a sort index.
+		query += fmt.Sprintf(" order by height+0 desc limit %d offset %d", pageable.Limit, pageable.Offset)
+	} else {
+		query += fmt.Sprintf(" order by height desc limit %d offset %d", pageable.Limit, pageable.Offset)
 	}
-	query += fmt.Sprintf(" order by timestamp desc limit %d offset %d", pageable.Limit, pageable.Offset)
 
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
 	switch err {
@@ -107,7 +112,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 
 func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, address string, method string) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(*) from %s where ", m.table)
+	query := fmt.Sprintf("select count(*) from %s where 1=1", m.table)
 	var conditions []string
 	conditions = append(conditions, "1=1")
 	var args []interface{}
@@ -128,7 +133,7 @@ func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, add
 		paramIndex++
 	}
 
-	if len(conditions) > 0 {
+	if len(conditions) > 1 {
 		query += strings.Join(conditions, " AND ")
 	}
 
@@ -194,5 +199,33 @@ func (m *customTransactionModel) TransactionMethods(ctx context.Context) ([]stri
 		return nil, ErrNotFound
 	default:
 		return nil, err
+	}
+}
+
+func (m *customTransactionModel) FindEscrowEvents(ctx context.Context, address string, pageable common.Pageable) ([]*Transaction, error) {
+	var resp []*Transaction
+	query := fmt.Sprintf("select %s from %s where to_addr = $1 and method in('staking.AddEscrow','staking.ReclaimEscrow') and status=true order by timestamp desc limit %d offset %d", transactionRows, m.table, pageable.Limit, pageable.Offset)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, address)
+	switch err {
+	case nil:
+		return resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *customTransactionModel) CountEscrowEvents(ctx context.Context, address string) (int64, error) {
+	var resp int64
+	query := fmt.Sprintf("select count(*) from %s where to_addr = $1 and method in('staking.AddEscrow','staking.ReclaimEscrow') and status=true order by timestamp desc", m.table)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, address)
+	switch err {
+	case nil:
+		return resp, nil
+	case sqlc.ErrNotFound:
+		return 0, ErrNotFound
+	default:
+		return 0, err
 	}
 }

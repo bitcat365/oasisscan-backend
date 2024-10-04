@@ -80,16 +80,6 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 		})
 	}
 
-	for _, singsBlock := range signsBlocks {
-		b := false
-		if singsBlock.ValidatorAddress == consensusAddress {
-			b = true
-		}
-		signs = append(signs, &types.ValidatorBlocksStatsInfo{
-			Height: singsBlock.Height,
-			Block:  b,
-		})
-	}
 	resp = &types.ValidatorBlocksStatsResponse{
 		Proposals: proposals,
 		Signs:     signs,

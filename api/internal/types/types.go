@@ -185,9 +185,9 @@ type ChainMethodsResponse struct {
 }
 
 type ChainProposedBlocksRequest struct {
-	Validator string `form:"validator,optional"`
-	Page      int64  `form:"page,default=1"`
-	Size      int64  `form:"size,default=5"`
+	Address string `form:"address,optional"`
+	Page    int64  `form:"page,default=1"`
+	Size    int64  `form:"size,default=5"`
 }
 
 type ChainProposedBlocksResponse struct {
@@ -550,6 +550,17 @@ type ValidatorBlocksStatsRequest struct {
 type ValidatorBlocksStatsResponse struct {
 	Signs     []*ValidatorBlocksStatsInfo `json:"signs"`
 	Proposals []*ValidatorBlocksStatsInfo `json:"proposals"`
+}
+
+type ValidatorEscrowEventRequest struct {
+	Address string `form:"address"`
+	Page    int64  `form:"page,default=1"`
+	Size    int64  `form:"size,default=10"`
+}
+
+type ValidatorEscrowEventResponse struct {
+	List []*ChainTransactionListInfo `json:"list"`
+	Page
 }
 
 type ValidatorEscrowStatsInfo struct {

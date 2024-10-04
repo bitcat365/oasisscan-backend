@@ -212,6 +212,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/validator/escrowevent",
+				Handler: validator.ValidatorEscrowEventHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/validator/escrowstats",
 				Handler: validator.ValidatorEscrowStatsHandler(serverCtx),
 			},

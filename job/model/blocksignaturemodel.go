@@ -19,9 +19,10 @@ type (
 		blockSignatureModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
 		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error)
-		FindBlocks(ctx context.Context, pageable common.Pageable) ([]*BlockSignature, error)
+		FindBlocksByHeight(ctx context.Context, validatorAddress string, startHeight int64) ([]*BlockSignature, error)
 		RefreshBlockCountDaysView(ctx context.Context) error
 		FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error)
+		FindLatestOne(ctx context.Context) (*BlockSignature, error)
 	}
 
 	customBlockSignatureModel struct {
@@ -84,10 +85,10 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 	}
 }
 
-func (m *customBlockSignatureModel) FindBlocks(ctx context.Context, pageable common.Pageable) ([]*BlockSignature, error) {
+func (m *customBlockSignatureModel) FindBlocksByHeight(ctx context.Context, validatorAddress string, startHeight int64) ([]*BlockSignature, error) {
 	var resp []*BlockSignature
-	query := fmt.Sprintf("select * from %s order by height desc limit %d offset %d ", m.table, pageable.Limit, pageable.Offset)
-	err := m.conn.QueryRowsCtx(ctx, &resp, query)
+	query := fmt.Sprintf("select %s from %s where validator_address=$1 and height>$2 order by height desc", blockSignatureRows, m.table)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, validatorAddress, startHeight)
 	switch err {
 	case nil:
 		return resp, nil
@@ -111,6 +112,20 @@ func (m *customBlockSignatureModel) FindBlockCountDays(ctx context.Context) ([]*
 	switch err {
 	case nil:
 		return resp, nil
+	default:
+		return nil, err
+	}
+}
+
+func (m *customBlockSignatureModel) FindLatestOne(ctx context.Context) (*BlockSignature, error) {
+	var resp BlockSignature
+	query := fmt.Sprintf("select %s from %s order by id desc limit 1", blockSignatureRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
 	default:
 		return nil, err
 	}

@@ -30,7 +30,7 @@ func NewChainProposedBlocksLogic(ctx context.Context, svcCtx *svc.ServiceContext
 }
 
 func (l *ChainProposedBlocksLogic) ChainProposedBlocks(req *types.ChainProposedBlocksRequest) (resp *types.ChainProposedBlocksResponse, err error) {
-	totalSize, err := l.svcCtx.BlockModel.CountBlocksByValidator(l.ctx, req.Validator)
+	totalSize, err := l.svcCtx.BlockModel.CountBlocksByValidator(l.ctx, req.Address)
 	if err != nil {
 		logc.Errorf(l.ctx, "CountBlocksByValidator error: %v", err)
 		return nil, errort.NewDefaultError()
@@ -41,7 +41,7 @@ func (l *ChainProposedBlocksLogic) ChainProposedBlocks(req *types.ChainProposedB
 			Limit:  req.Size,
 			Offset: (req.Page - 1) * req.Size,
 		}
-		blocks, err := l.svcCtx.BlockModel.FindBlocksByValidator(l.ctx, req.Validator, pageable)
+		blocks, err := l.svcCtx.BlockModel.FindBlocksByValidator(l.ctx, req.Address, pageable)
 		if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 			logc.Errorf(l.ctx, "FindBlocksByValidator error, %v", err)
 			return nil, errort.NewDefaultError()

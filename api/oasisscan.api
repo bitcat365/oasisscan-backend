@@ -149,6 +149,15 @@ type (
 		Expected uint64 `json:"expected"`
 		Actual   uint64 `json:"actual"`
 	}
+	ValidatorEscrowEventRequest {
+		Address string `form:"address"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=10"`
+	}
+	ValidatorEscrowEventResponse {
+		List []*ChainTransactionListInfo `json:"list"`
+		Page
+	}
 )
 
 /** account **/
@@ -342,9 +351,9 @@ type (
 		ChainBlockInfo
 	}
 	ChainProposedBlocksRequest {
-		Validator string `form:"validator,optional"`
-		Page      int64  `form:"page,default=1"`
-		Size      int64  `form:"size,default=5"`
+		Address string `form:"address,optional"`
+		Page    int64  `form:"page,default=1"`
+		Size    int64  `form:"size,default=5"`
 	}
 	ChainProposedBlocksResponse {
 		List []*ChainBlockInfo `json:"list"`
@@ -593,6 +602,9 @@ service oasisscan-api {
 
 	@handler ValidatorSignStatsHandler
 	get /validator/signstats (ValidatorSignStatsRequest) returns (ValidatorSignStatsResponse)
+
+	@handler ValidatorEscrowEventHandler
+	get /validator/escrowevent (ValidatorEscrowEventRequest) returns (ValidatorEscrowEventResponse)
 }
 
 @server (

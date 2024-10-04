@@ -54,11 +54,32 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 			Block:  b,
 		})
 	}
-	signsBlocks, err := l.svcCtx.BlockSignatureModel.FindBlocks(l.ctx, pageable)
+
+	latestSignBlock, err := l.svcCtx.BlockSignatureModel.FindLatestOne(l.ctx)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
-		logc.Errorf(l.ctx, "BlockSignatureModel FindBlocks error, %v", err)
+		logc.Errorf(l.ctx, "BlockSignatureModel FindLatestOne error, %v", err)
 		return nil, errort.NewDefaultError()
 	}
+	latestHeight := latestSignBlock.Height
+
+	signsBlocks, err := l.svcCtx.BlockSignatureModel.FindBlocksByHeight(l.ctx, consensusAddress, latestHeight-100)
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+		logc.Errorf(l.ctx, "BlockSignatureModel FindBlocksByHeight error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
+
+	signSet := make(map[int64]bool, 0)
+	for _, block := range signsBlocks {
+		signSet[block.Height] = true
+	}
+
+	for i := latestHeight; i > latestHeight-100; i-- {
+		signs = append(signs, &types.ValidatorBlocksStatsInfo{
+			Height: i,
+			Block:  signSet[i],
+		})
+	}
+
 	for _, singsBlock := range signsBlocks {
 		b := false
 		if singsBlock.ValidatorAddress == consensusAddress {

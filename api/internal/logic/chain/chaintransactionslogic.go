@@ -148,7 +148,7 @@ func FormatTx(tx *model.Transaction, ctx context.Context, svcCtx *svc.ServiceCon
 		From:      tx.SignAddr,
 		To:        tx.ToAddr,
 	}
-	return txResponse, errort.NewDefaultError()
+	return txResponse, nil
 }
 
 func accountInfo(ctx context.Context, svcCtx *svc.ServiceContext, tx *model.Transaction) (*staking.Account, error) {

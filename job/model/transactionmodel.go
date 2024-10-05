@@ -91,8 +91,8 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		paramIndex++
 	}
 
+	query += strings.Join(conditions, " AND ")
 	if len(conditions) > 1 {
-		query += strings.Join(conditions, " AND ")
 		//Here, add a constant to the sort field to avoid using a sort index.
 		query += fmt.Sprintf(" order by height+0 desc limit %d offset %d", pageable.Limit, pageable.Offset)
 	} else {
@@ -133,9 +133,7 @@ func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, add
 		paramIndex++
 	}
 
-	if len(conditions) > 1 {
-		query += strings.Join(conditions, " AND ")
-	}
+	query += strings.Join(conditions, " AND ")
 
 	err := m.conn.QueryRowCtx(ctx, &resp, query, args...)
 	switch err {

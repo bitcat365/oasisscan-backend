@@ -3,10 +3,10 @@ package validator
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/errort"
+	"oasisscan-backend/api/internal/logic/chain"
 	"oasisscan-backend/common"
 
 	"oasisscan-backend/api/internal/svc"
@@ -39,8 +39,29 @@ func (l *ValidatorEscrowEventLogic) ValidatorEscrowEvent(req *types.ValidatorEsc
 		logc.Errorf(l.ctx, "FindEscrowEvents error, %v", err)
 		return nil, errort.NewDefaultError()
 	}
+	list := make([]*types.ChainTransactionListInfo, 0)
 	for _, tx := range txs {
-		fmt.Println(tx.TxHash)
+		txResponse, err := chain.FormatTx(tx, l.ctx, l.svcCtx)
+		if err != nil {
+			logc.Errorf(l.ctx, "FormatTx error, %v", err)
+			return nil, errort.NewDefaultError()
+		}
+		list = append(list, txResponse)
+	}
+	totalSize, err := l.svcCtx.TransactionModel.CountEscrowEvents(l.ctx, req.Address)
+	if err != nil {
+		logc.Errorf(l.ctx, "transaction CountEscrowEvents error: %v", err)
+		return nil, errort.NewDefaultError()
+	}
+	page := types.Page{
+		Page:      req.Page,
+		Size:      req.Size,
+		MaxPage:   common.MaxPage(req.Size, totalSize),
+		TotalSize: totalSize,
+	}
+	resp = &types.ValidatorEscrowEventResponse{
+		List: list,
+		Page: page,
 	}
 	return
 }

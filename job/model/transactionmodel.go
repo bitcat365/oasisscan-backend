@@ -91,6 +91,11 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		paramIndex++
 	}
 
+	//latest 10000 blocks tx
+	if len(conditions) == 1 {
+		conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
+	}
+
 	query += strings.Join(conditions, " AND ")
 	if len(conditions) > 1 {
 		//Here, add a constant to the sort field to avoid using a sort index.
@@ -131,6 +136,11 @@ func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, add
 		conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
 		args = append(args, method)
 		paramIndex++
+	}
+
+	//latest 10000 blocks tx
+	if len(conditions) == 1 {
+		conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
 	}
 
 	query += strings.Join(conditions, " AND ")

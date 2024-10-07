@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/v2/account/debonding": {
+    "/account/debonding": {
       "get": {
         "operationId": "AccountDebondingHandler",
         "responses": {
@@ -59,7 +59,7 @@
         ]
       }
     },
-    "/v2/account/delegations": {
+    "/account/delegations": {
       "get": {
         "operationId": "AccountDelegationsHandler",
         "responses": {
@@ -110,7 +110,7 @@
         ]
       }
     },
-    "/v2/account/info/{address}": {
+    "/account/info/{address}": {
       "get": {
         "operationId": "AccountInfoHandler",
         "responses": {
@@ -134,7 +134,7 @@
         ]
       }
     },
-    "/v2/account/reward/export": {
+    "/account/reward/export": {
       "get": {
         "operationId": "AccountRewardExportHandler",
         "responses": {
@@ -161,7 +161,7 @@
         ]
       }
     },
-    "/v2/account/reward/list": {
+    "/account/reward/list": {
       "get": {
         "operationId": "AccountRewardHandler",
         "responses": {
@@ -204,7 +204,7 @@
         ]
       }
     },
-    "/v2/account/reward/stats": {
+    "/account/reward/stats": {
       "get": {
         "operationId": "AccountRewardStatsHandler",
         "responses": {
@@ -231,7 +231,7 @@
         ]
       }
     },
-    "/v2/account/staking/events": {
+    "/account/staking/events": {
       "get": {
         "operationId": "AccountStakingEventsHandler",
         "responses": {
@@ -274,7 +274,7 @@
         ]
       }
     },
-    "/v2/account/staking/events/info": {
+    "/account/staking/events/info": {
       "get": {
         "operationId": "AccountStakingEventsInfoHandler",
         "responses": {
@@ -301,7 +301,7 @@
         ]
       }
     },
-    "/v2/chain/block/{height}": {
+    "/chain/block/{height}": {
       "get": {
         "operationId": "ChainBlockInfoHandler",
         "responses": {
@@ -325,7 +325,7 @@
         ]
       }
     },
-    "/v2/chain/blocks": {
+    "/chain/blocks": {
       "get": {
         "operationId": "ChainBlocksHandler",
         "responses": {
@@ -362,7 +362,23 @@
         ]
       }
     },
-    "/v2/chain/proposedblocks": {
+    "/chain/methods": {
+      "get": {
+        "operationId": "ChainMethodsHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ChainMethodsResponse"
+            }
+          }
+        },
+        "tags": [
+          "chain"
+        ]
+      }
+    },
+    "/chain/proposedblocks": {
       "get": {
         "operationId": "ChainProposedBlocksHandler",
         "responses": {
@@ -375,7 +391,7 @@
         },
         "parameters": [
           {
-            "name": "validator",
+            "name": "address",
             "in": "query",
             "required": false,
             "type": "string"
@@ -405,7 +421,7 @@
         ]
       }
     },
-    "/v2/chain/search": {
+    "/chain/search": {
       "get": {
         "operationId": "ChainSearchHandler",
         "responses": {
@@ -432,7 +448,7 @@
         ]
       }
     },
-    "/v2/chain/transaction/{hash}": {
+    "/chain/transaction/{hash}": {
       "get": {
         "operationId": "ChainTransactionInfoHandler",
         "responses": {
@@ -456,7 +472,7 @@
         ]
       }
     },
-    "/v2/chain/transactions": {
+    "/chain/transactions": {
       "get": {
         "operationId": "ChainTransactionsHandler",
         "responses": {
@@ -512,7 +528,7 @@
         ]
       }
     },
-    "/v2/governance/proposallist": {
+    "/governance/proposallist": {
       "get": {
         "operationId": "GovernanceProposalListHandler",
         "responses": {
@@ -528,7 +544,7 @@
         ]
       }
     },
-    "/v2/governance/proposalwithvotes": {
+    "/governance/proposalwithvotes": {
       "get": {
         "operationId": "GovernanceProposalWithVotesHandler",
         "responses": {
@@ -556,7 +572,7 @@
         ]
       }
     },
-    "/v2/governance/votes": {
+    "/governance/votes": {
       "get": {
         "operationId": "GovernanceVotesHandler",
         "responses": {
@@ -606,7 +622,7 @@
         ]
       }
     },
-    "/v2/health": {
+    "/health": {
       "get": {
         "operationId": "HealthHandler",
         "responses": {
@@ -622,7 +638,7 @@
         ]
       }
     },
-    "/v2/market/chart": {
+    "/market/chart": {
       "get": {
         "operationId": "MarketChartHandler",
         "responses": {
@@ -638,7 +654,7 @@
         ]
       }
     },
-    "/v2/market/info": {
+    "/market/info": {
       "get": {
         "operationId": "MarketInfoHandler",
         "responses": {
@@ -654,7 +670,23 @@
         ]
       }
     },
-    "/v2/runtime/list": {
+    "/network/status": {
+      "get": {
+        "operationId": "NetworkStatusHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/NetworkStatusResponse"
+            }
+          }
+        },
+        "tags": [
+          "common"
+        ]
+      }
+    },
+    "/runtime/list": {
       "get": {
         "operationId": "RuntimeListHandler",
         "responses": {
@@ -670,7 +702,7 @@
         ]
       }
     },
-    "/v2/runtime/round/info": {
+    "/runtime/round/info": {
       "get": {
         "operationId": "RuntimeRoundInfoHandler",
         "responses": {
@@ -704,7 +736,7 @@
         ]
       }
     },
-    "/v2/runtime/round/list": {
+    "/runtime/round/list": {
       "get": {
         "operationId": "RuntimeRoundListHandler",
         "responses": {
@@ -747,7 +779,7 @@
         ]
       }
     },
-    "/v2/runtime/stats": {
+    "/runtime/stats": {
       "get": {
         "operationId": "RuntimeStatsHandler",
         "responses": {
@@ -774,7 +806,7 @@
         ]
       }
     },
-    "/v2/runtime/transaction/info": {
+    "/runtime/transaction/info": {
       "get": {
         "operationId": "RuntimeTransactionInfoHandler",
         "responses": {
@@ -814,7 +846,7 @@
         ]
       }
     },
-    "/v2/runtime/transaction/list": {
+    "/runtime/transaction/list": {
       "get": {
         "operationId": "RuntimeTransactionListHandler",
         "responses": {
@@ -864,7 +896,7 @@
         ]
       }
     },
-    "/v2/trend": {
+    "/trend": {
       "get": {
         "operationId": "NetworkTrendHandler",
         "responses": {
@@ -880,7 +912,7 @@
         ]
       }
     },
-    "/v2/validator/blocksstats": {
+    "/validator/blocksstats": {
       "get": {
         "operationId": "ValidatorBlocksStatsHandler",
         "responses": {
@@ -907,7 +939,7 @@
         ]
       }
     },
-    "/v2/validator/delegators": {
+    "/validator/delegators": {
       "get": {
         "operationId": "DelegatorsHandler",
         "responses": {
@@ -920,7 +952,7 @@
         },
         "parameters": [
           {
-            "name": "validator",
+            "name": "address",
             "in": "query",
             "required": true,
             "type": "string"
@@ -950,7 +982,50 @@
         ]
       }
     },
-    "/v2/validator/escrowstats": {
+    "/validator/escrowevent": {
+      "get": {
+        "operationId": "ValidatorEscrowEventHandler",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ValidatorEscrowEventResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "address",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "validator"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/validator/escrowstats": {
       "get": {
         "operationId": "ValidatorEscrowStatsHandler",
         "responses": {
@@ -977,7 +1052,7 @@
         ]
       }
     },
-    "/v2/validator/info": {
+    "/validator/info": {
       "get": {
         "operationId": "ValidatorInfoHandler",
         "responses": {
@@ -1004,7 +1079,7 @@
         ]
       }
     },
-    "/v2/validator/list": {
+    "/validator/list": {
       "get": {
         "operationId": "ValidatorListHandler",
         "responses": {
@@ -1039,7 +1114,7 @@
         ]
       }
     },
-    "/v2/validator/signstats": {
+    "/validator/signstats": {
       "get": {
         "operationId": "ValidatorSignStatsHandler",
         "responses": {
@@ -1768,10 +1843,29 @@
         "list"
       ]
     },
+    "ChainMethodsRequest": {
+      "type": "object",
+      "title": "ChainMethodsRequest"
+    },
+    "ChainMethodsResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "ChainMethodsResponse",
+      "required": [
+        "list"
+      ]
+    },
     "ChainProposedBlocksRequest": {
       "type": "object",
       "properties": {
-        "validator": {
+        "address": {
           "type": "string"
         },
         "page": {
@@ -2094,7 +2188,7 @@
     "DelegatorsRequest": {
       "type": "object",
       "properties": {
-        "validator": {
+        "address": {
           "type": "string"
         },
         "page": {
@@ -2110,7 +2204,7 @@
       },
       "title": "DelegatorsRequest",
       "required": [
-        "validator",
+        "address",
         "page",
         "size"
       ]
@@ -2407,6 +2501,47 @@
         "marketCapChangePct24h",
         "volume",
         "volumeChangePct24h"
+      ]
+    },
+    "NetworkStatusRequest": {
+      "type": "object",
+      "title": "NetworkStatusRequest"
+    },
+    "NetworkStatusResponse": {
+      "type": "object",
+      "properties": {
+        "curHeight": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "curEpoch": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalTxs": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalEscrow": {
+          "type": "string"
+        },
+        "activeValidator": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalDelegator": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "NetworkStatusResponse",
+      "required": [
+        "curHeight",
+        "curEpoch",
+        "totalTxs",
+        "totalEscrow",
+        "activeValidator",
+        "totalDelegator"
       ]
     },
     "NetworkTrendRequest": {
@@ -3164,6 +3299,61 @@
       "required": [
         "signs",
         "proposals"
+      ]
+    },
+    "ValidatorEscrowEventRequest": {
+      "type": "object",
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        }
+      },
+      "title": "ValidatorEscrowEventRequest",
+      "required": [
+        "address",
+        "page",
+        "size"
+      ]
+    },
+    "ValidatorEscrowEventResponse": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChainTransactionListInfo"
+          }
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "maxPage": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "totalSize": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "ValidatorEscrowEventResponse",
+      "required": [
+        "list"
       ]
     },
     "ValidatorEscrowStatsInfo": {

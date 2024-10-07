@@ -181,7 +181,7 @@ type ChainMethodsRequest struct {
 }
 
 type ChainMethodsResponse struct {
-	List []string `json:list`
+	List []string `json:"list"`
 }
 
 type ChainProposedBlocksRequest struct {

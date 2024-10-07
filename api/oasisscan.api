@@ -369,7 +369,7 @@ type (
 	}
 	ChainMethodsRequest  {}
 	ChainMethodsResponse {
-		List []string `json:list`
+		List []string `json:"list"`
 	}
 )
 

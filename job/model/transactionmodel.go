@@ -226,7 +226,7 @@ func (m *customTransactionModel) FindEscrowEvents(ctx context.Context, address s
 
 func (m *customTransactionModel) CountEscrowEvents(ctx context.Context, address string) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(*) from %s where to_addr = $1 and method in('staking.AddEscrow','staking.ReclaimEscrow') and status=true order by timestamp desc", m.table)
+	query := fmt.Sprintf("select count(*) from %s where to_addr = $1 and method in('staking.AddEscrow','staking.ReclaimEscrow') and status=true", m.table)
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, address)
 	switch err {
 	case nil:

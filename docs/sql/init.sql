@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS block
 CREATE UNIQUE INDEX IF NOT EXISTS block_height_uniq ON block (height);
 CREATE INDEX IF NOT EXISTS block_timestamp_idx ON block (timestamp);
 CREATE INDEX IF NOT EXISTS block_proposer_address_idx ON block (proposer_address);
+CREATE INDEX IF NOT EXISTS block_hash_idx ON block (hash);
 
 CREATE TABLE IF NOT EXISTS block_signature
 (

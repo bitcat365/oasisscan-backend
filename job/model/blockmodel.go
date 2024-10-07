@@ -131,7 +131,7 @@ func (m *customBlockModel) FindBlockProposer(ctx context.Context, height int64) 
 
 func (m *customBlockModel) FindBlocksByValidator(ctx context.Context, validator string, pageable common.Pageable) ([]*BlockProposer, error) {
 	var resp []*BlockProposer
-	query := fmt.Sprintf("select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1 order by b.height desc limit %d offset %d", pageable.Limit, pageable.Offset)
+	query := fmt.Sprintf("select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1 and b.height>((select max(height) from block)-100000) order by b.height desc limit %d offset %d", pageable.Limit, pageable.Offset)
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, validator)
 	switch err {
 	case nil:
@@ -145,7 +145,7 @@ func (m *customBlockModel) FindBlocksByValidator(ctx context.Context, validator 
 
 func (m *customBlockModel) CountBlocksByValidator(ctx context.Context, validator string) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(b.id) from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1")
+	query := fmt.Sprintf("select count(b.id) from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1 and b.height>((select max(height) from block)-100000)")
 	err := m.conn.QueryRowCtx(ctx, &resp, query, validator)
 	switch err {
 	case nil:

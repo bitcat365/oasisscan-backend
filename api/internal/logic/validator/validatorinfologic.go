@@ -14,6 +14,7 @@ import (
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
 	"oasisscan-backend/common"
+	"strconv"
 	"strings"
 
 	"oasisscan-backend/api/internal/svc"
@@ -54,6 +55,20 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 	}
 	currentHeight := chainStatus.LatestHeight
 	currentEpoch := chainStatus.LatestEpoch
+
+	totalEscrow, err := l.svcCtx.ValidatorModel.SumEscrow(l.ctx)
+	if err != nil {
+		logc.Errorf(l.ctx, "validator SumEscrow error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
+	totalEscrowFloat := new(big.Float).SetInt64(totalEscrow)
+	p, _ := new(big.Float).Quo(new(big.Float).SetInt64(m.Escrow), totalEscrowFloat).Float64()
+	escrowPercent, err := strconv.ParseFloat(fmt.Sprintf("%.4f", p), 64)
+	if err != nil {
+		logc.Errorf(l.ctx, "percent compute error, %v", err)
+		return nil, errort.NewDefaultError()
+	}
+	validatorInfo.EscrowPercent = escrowPercent
 
 	var validatorAddress staking.Address
 	err = validatorAddress.UnmarshalText([]byte(m.EntityAddress))

@@ -54,7 +54,7 @@ func (l *GovernanceProposalListLogic) GovernanceProposalList(req *types.Governan
 			State:     m.State,
 			Deposit:   fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(proposal.Deposit.ToBigInt(), common.Decimals)),
 			CreatedAt: m.CreatedEpoch,
-			ClosesAt:  m.ClosedEpoch,
+			ClosedAt:  m.ClosedEpoch,
 		})
 	}
 	resp = &types.GovernanceProposalListResponse{

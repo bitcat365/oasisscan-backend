@@ -284,14 +284,16 @@ type EscrowStatus struct {
 }
 
 type GovernanceProposalInfo struct {
-	Id        int64  `json:"id"`
-	Title     string `json:"title"`
-	Type      string `json:"type"`
-	Submitter string `json:"submitter"`
-	State     string `json:"state"`
-	Deposit   string `json:"deposit"`
-	CreatedAt int64  `json:"created_at"`
-	ClosesAt  int64  `json:"closes_at"`
+	Id          int64  `json:"id"`
+	Title       string `json:"title"`
+	Type        string `json:"type"`
+	Submitter   string `json:"submitter"`
+	State       string `json:"state"`
+	Deposit     string `json:"deposit"`
+	CreatedAt   int64  `json:"created_at"`
+	ClosedAt    int64  `json:"closed_at"`
+	CreatedTime int64  `json:"created_time"`
+	ClosedTime  int64  `json:"closed_time"`
 }
 
 type GovernanceProposalListRequest struct {

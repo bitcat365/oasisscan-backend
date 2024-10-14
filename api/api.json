@@ -4,8 +4,7 @@
     "title": "",
     "version": ""
   },
-  "host": "127.0.0.1",
-  "basePath": "/api",
+  "host": "api.oasisscan.com/v2/mainnet",
   "schemes": [
     "https"
   ],
@@ -2286,7 +2285,15 @@
           "type": "integer",
           "format": "int64"
         },
-        "closes_at": {
+        "closed_at": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "created_time": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "closed_time": {
           "type": "integer",
           "format": "int64"
         }
@@ -2300,7 +2307,9 @@
         "state",
         "deposit",
         "created_at",
-        "closes_at"
+        "closed_at",
+        "created_time",
+        "closed_time"
       ]
     },
     "GovernanceProposalListRequest": {

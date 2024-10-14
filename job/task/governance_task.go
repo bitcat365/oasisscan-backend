@@ -38,6 +38,15 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			return
 		}
 		if m != nil {
+			//update state
+			if proposal.State.String() != m.State {
+				m.State = proposal.State.String()
+			}
+			err = svcCtx.ProposalModel.Update(ctx, m)
+			if err != nil {
+				logc.Errorf(ctx, "Proposal [%d] update error, %v", proposal.ID, err)
+				return
+			}
 			continue
 		}
 

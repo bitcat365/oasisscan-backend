@@ -11,6 +11,7 @@ import (
 	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
 	"github.com/oasisprotocol/oasis-core/go/common/cbor"
 	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
+	"github.com/oasisprotocol/oasis-core/go/common/quantity"
 	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -588,6 +589,21 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					if err != nil {
 						logc.Errorf(ctx, "computes the reward error, %v", err)
 						return
+					}
+
+					//remove reward caused by add or reclaim shares
+					changeShares := new(big.Int).Sub(delegation.Shares.ToBigInt(), big.NewInt(lastEpochRewardModel.DelegationShares))
+					if changeShares.CmpAbs(big.NewInt(0)) > 0 {
+						errorReward, err := validatorAccount.Escrow.Active.StakeForShares(quantity.NewFromUint64(changeShares.Uint64()))
+						if err != nil {
+							logc.Errorf(ctx, "computes the error reward error: %s, %v", delegatorAddress.String(), err)
+							return
+						}
+						reward = new(big.Int).Sub(reward, new(big.Int).Abs(errorReward.ToBigInt()))
+					}
+
+					if reward.Cmp(big.NewInt(0)) < 0 {
+						reward = big.NewInt(0)
 					}
 				}
 

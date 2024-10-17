@@ -260,7 +260,7 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 
 			txList, err := runtimeClient.GetTransactionsWithResults(ctx, uint64(scanRound))
 			if err != nil {
-				logc.Errorf(ctx, "runtime GetTransactionsWithResults error, %v", err)
+				logc.Errorf(ctx, "runtime GetTransactionsWithResults error, %s, %d, %v", runtimeId, scanRound, err)
 				return
 			}
 

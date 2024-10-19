@@ -1,4 +1,4 @@
-The following are some changes from previous API versions(Maybe not comprehensive, please refer to the actual API(<https://api.oasisscan.com/v2/swagger/>)):
+The following are some changes from previous API versions (this may not be comprehensive; please refer to the actual API(<https://api.oasisscan.com/v2/swagger/>)):
 
 | v1                                      | v2                                    | description |
 | :-------------------------------------- | :------------------------------------ | :---------- |

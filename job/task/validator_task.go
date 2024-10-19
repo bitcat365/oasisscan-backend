@@ -679,6 +679,15 @@ func EscrowStatsSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				continue
 			}
 
+			m, err = svcCtx.EscrowStatsModel.FindOneByEntityAddressDate(ctx, validator.EntityAddress, scanDay)
+			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+				logc.Errorf(ctx, "EscrowStatsModel FindOneByEntityAddressDate error, %v", err)
+				return
+			}
+			if m != nil {
+				continue
+			}
+
 			var validatorAddress staking.Address
 			err = validatorAddress.UnmarshalText([]byte(validator.EntityAddress))
 			if err != nil {

@@ -19,6 +19,7 @@ type (
 		FindLatestOne(ctx context.Context) (*EscrowStats, error)
 		FindLatestRows(ctx context.Context, address string, limit int64) ([]*EscrowStats, error)
 		TotalStats(ctx context.Context, day time.Time, limit int64) ([]*EscrowTotalStats, error)
+		FindOneByEntityAddressDate(ctx context.Context, entityAddress string, day time.Time) (*EscrowStats, error)
 	}
 
 	customEscrowStatsModel struct {
@@ -78,6 +79,20 @@ func (m *customEscrowStatsModel) TotalStats(ctx context.Context, day time.Time, 
 	case nil:
 		return resp, nil
 	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+func (m *customEscrowStatsModel) FindOneByEntityAddressDate(ctx context.Context, entityAddress string, day time.Time) (*EscrowStats, error) {
+	var resp EscrowStats
+	query := fmt.Sprintf("select %s from %s where entity_address = $1 and date = $2 limit 1", escrowStatsRows, m.table)
+	err := m.conn.QueryRowCtx(ctx, &resp, query, entityAddress, day)
+	switch err {
+	case nil:
+		return &resp, nil
+	case sqlx.ErrNotFound:
 		return nil, ErrNotFound
 	default:
 		return nil, err

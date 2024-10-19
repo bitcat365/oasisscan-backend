@@ -117,7 +117,7 @@ func main() {
 		logx.Errorf("cron job add func error, %v\n", err)
 	}
 
-	_, err = cr.AddFunc("@every 1m", func() {
+	_, err = cr.AddFunc("@every 5m", func() {
 		ctx := context.Background()
 		logc.Infof(ctx, "EscrowStatsSync start...")
 		task.EscrowStatsSync(ctx, svcCtx)

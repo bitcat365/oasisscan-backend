@@ -2,6 +2,7 @@
   "swagger": "2.0",
   "info": {
     "title": "",
+    "description": "This api document example is the Mainnet document, and the Testnet base URL is api.oasisscan.com/v2/testnet",
     "version": ""
   },
   "host": "api.oasisscan.com/v2/mainnet",

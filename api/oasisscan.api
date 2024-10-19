@@ -1,3 +1,7 @@
+info(
+	desc: "This api document example is the mainnet document, and the test network base URL is api.oasisscan.com/v2/mainnet"
+)
+
 /** common **/
 type (
 	HealthRequest  {}

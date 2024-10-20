@@ -93,7 +93,7 @@ func GetNestedStringValue(data interface{}, keys ...string) (string, error) {
 func GetEpochDurationTime(startTime time.Time, epochDuration int64, hour bool) time.Time {
 	t := startTime.Add(time.Duration(epochDuration) * time.Hour)
 	if hour {
-		time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, startTime.Location())
+		t = time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, startTime.Location())
 	}
 	return t
 }

@@ -44,7 +44,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		var closedTime time.Time
 		createdHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.CreatedAt)
 		if err != nil {
-			createdTime = common.GetEpochDurationTime(time.Now(), int64(currentEpoch)-int64(proposal.CreatedAt), true)
+			createdTime = common.GetEpochDurationTime(time.Now(), int64(proposal.CreatedAt)-int64(currentEpoch), true)
 		} else {
 			createdBlock, err := svcCtx.Consensus.GetBlock(ctx, createdHeight)
 			if err != nil {
@@ -58,7 +58,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		if m.ClosedEpoch <= int64(currentEpoch) {
 			closedHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.ClosesAt)
 			if err != nil {
-				closedTime = common.GetEpochDurationTime(time.Now(), int64(currentEpoch)-int64(proposal.ClosesAt), true)
+				closedTime = common.GetEpochDurationTime(time.Now(), int64(proposal.ClosesAt)-int64(currentEpoch), true)
 			} else {
 				closedBlock, err := svcCtx.Consensus.GetBlock(ctx, closedHeight)
 				if err != nil {

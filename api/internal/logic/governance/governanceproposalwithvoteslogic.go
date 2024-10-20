@@ -19,7 +19,6 @@ import (
 	"oasisscan-backend/common"
 	"sort"
 	"strconv"
-	"time"
 )
 
 type GovernanceProposalWithVotesLogic struct {
@@ -57,36 +56,6 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 			return nil, errort.NewDefaultError()
 		}
 
-		createdHeight, err := l.svcCtx.Beacon.GetEpochBlock(l.ctx, beacon.EpochTime(m.CreatedEpoch))
-		if err != nil {
-			logc.Errorf(l.ctx, "createHeight getEpochBlock error, %v", err)
-			return nil, errort.NewDefaultError()
-		}
-		createdBlock, err := l.svcCtx.Consensus.GetBlock(l.ctx, createdHeight)
-		if err != nil {
-			logc.Errorf(l.ctx, "createdHeight getBlock error, %v", err)
-			return nil, errort.NewDefaultError()
-		}
-		epochDuration := m.ClosedEpoch - m.CreatedEpoch
-		var closedTime time.Time
-		currentEpoch := chainStatus.LatestEpoch
-		if m.ClosedEpoch <= int64(currentEpoch) {
-			closedHeight, err := l.svcCtx.Beacon.GetEpochBlock(l.ctx, beacon.EpochTime(m.ClosedEpoch))
-			if err != nil {
-				logc.Errorf(l.ctx, "closedHeight getEpochBlock error, %v", err)
-				return nil, errort.NewDefaultError()
-			}
-			closedBlock, err := l.svcCtx.Consensus.GetBlock(l.ctx, closedHeight)
-			if err != nil {
-				logc.Errorf(l.ctx, "closedBlock getBlock error, %v", err)
-				return nil, errort.NewDefaultError()
-			}
-			closedTime = closedBlock.Time
-		} else {
-			closedTime = createdBlock.Time.Add(time.Duration(epochDuration) * time.Hour)
-			closedTime = time.Date(closedTime.Year(), closedTime.Month(), closedTime.Day(), closedTime.Hour(), 0, 0, 0, createdBlock.Time.Location())
-		}
-
 		proposalResp := &types.GovernanceProposalInfo{
 			Id:          m.ProposalId,
 			Title:       m.Title,
@@ -96,8 +65,8 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 			Deposit:     fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(proposal.Deposit.ToBigInt(), common.Decimals)),
 			CreatedAt:   m.CreatedEpoch,
 			ClosedAt:    m.ClosedEpoch,
-			CreatedTime: createdBlock.Time.Unix(),
-			ClosedTime:  closedTime.Unix(),
+			CreatedTime: m.CreatedTime.Unix(),
+			ClosedTime:  m.ClosedTime.Unix(),
 		}
 
 		currentHeight := chainStatus.LatestHeight

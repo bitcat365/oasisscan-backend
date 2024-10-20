@@ -47,6 +47,8 @@ type (
 		Raw          string    `db:"raw"`
 		CreatedAt    time.Time `db:"created_at"`
 		UpdatedAt    time.Time `db:"updated_at"`
+		CreatedTime  time.Time `db:"created_time"`
+		ClosedTime   time.Time `db:"closed_time"`
 	}
 )
 
@@ -92,14 +94,14 @@ func (m *defaultProposalModel) FindOneByProposalId(ctx context.Context, proposal
 }
 
 func (m *defaultProposalModel) Insert(ctx context.Context, data *Proposal) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8)", m.table, proposalRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.ProposalId, data.Title, data.Type, data.Submitter, data.State, data.CreatedEpoch, data.ClosedEpoch, data.Raw)
+	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", m.table, proposalRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.ProposalId, data.Title, data.Type, data.Submitter, data.State, data.CreatedEpoch, data.ClosedEpoch, data.Raw, data.CreatedTime, data.ClosedTime)
 	return ret, err
 }
 
 func (m *defaultProposalModel) Update(ctx context.Context, newData *Proposal) error {
 	query := fmt.Sprintf("update %s set %s where id = $1", m.table, proposalRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.Id, newData.ProposalId, newData.Title, newData.Type, newData.Submitter, newData.State, newData.CreatedEpoch, newData.ClosedEpoch, newData.Raw)
+	_, err := m.conn.ExecCtx(ctx, query, newData.Id, newData.ProposalId, newData.Title, newData.Type, newData.Submitter, newData.State, newData.CreatedEpoch, newData.ClosedEpoch, newData.Raw, newData.CreatedTime, newData.ClosedTime)
 	return err
 }
 

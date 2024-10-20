@@ -33,7 +33,10 @@ CREATE TABLE IF NOT EXISTS block_signature
 CREATE INDEX IF NOT EXISTS block_signature_validator_address_idx ON block_signature (validator_address);
 CREATE INDEX IF NOT EXISTS block_signature_timestamp_idx ON block_signature (timestamp);
 CREATE MATERIALIZED VIEW block_count_days AS
-select DISTINCT DATE_TRUNC('day', timestamp)  AS day,count(distinct height) from block_signature where timestamp>=now()-interval '11 days' group by day;
+select DISTINCT DATE_TRUNC('day', timestamp) AS day, count(distinct height)
+from block_signature
+where timestamp >= now() - interval '11 days'
+group by day;
 
 CREATE TABLE IF NOT EXISTS delegator
 (
@@ -120,7 +123,8 @@ SELECT DATE_TRUNC('day', timestamp) AS day,
 FROM transaction
 GROUP BY DATE_TRUNC('day', timestamp);
 CREATE MATERIALIZED VIEW transaction_method AS
-select distinct method from transaction;
+select distinct method
+from transaction;
 
 CREATE TABLE IF NOT EXISTS validator
 (
@@ -282,7 +286,9 @@ CREATE TABLE IF NOT EXISTS proposal
     closed_epoch  INTEGER   NOT NULL,
     raw           JSON      NOT NULL,
     created_at    TIMESTAMP NOT NULL DEFAULT now(),
-    updated_at    TIMESTAMP NOT NULL DEFAULT now()
+    updated_at    TIMESTAMP NOT NULL DEFAULT now(),
+    created_time  TIMESTAMP NOT NULL DEFAULT now(),
+    closed_time   TIMESTAMP NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS vote

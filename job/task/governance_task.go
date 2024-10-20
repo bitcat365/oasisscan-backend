@@ -16,6 +16,7 @@ import (
 	"oasisscan-backend/job/internal/svc"
 	"oasisscan-backend/job/model"
 	"strconv"
+	"time"
 )
 
 func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
@@ -37,11 +38,45 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			logc.Errorf(ctx, "FindOneByProposalId error, %v", err)
 			return
 		}
+		var createdTime time.Time
+		var closedTime time.Time
+		createdHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.CreatedAt)
+		if err != nil {
+			logc.Errorf(ctx, "createHeight getEpochBlock error, %v", err)
+			return
+		}
+		createdBlock, err := svcCtx.Consensus.GetBlock(ctx, createdHeight)
+		if err != nil {
+			logc.Errorf(ctx, "createdHeight getBlock error, %v", err)
+			return
+		}
+		createdTime = createdBlock.Time
+		epochDuration := int64(proposal.ClosesAt) - int64(proposal.CreatedAt)
+		currentEpoch := chainStatus.LatestEpoch
+		if m.ClosedEpoch <= int64(currentEpoch) {
+			closedHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.ClosesAt)
+			if err != nil {
+				logc.Errorf(ctx, "closedHeight getEpochBlock error, %v", err)
+				return
+			}
+			closedBlock, err := svcCtx.Consensus.GetBlock(ctx, closedHeight)
+			if err != nil {
+				logc.Errorf(ctx, "closedBlock getBlock error, %v", err)
+				return
+			}
+			closedTime = closedBlock.Time
+		} else {
+			closedTime = createdBlock.Time.Add(time.Duration(epochDuration) * time.Hour)
+			closedTime = time.Date(closedTime.Year(), closedTime.Month(), closedTime.Day(), closedTime.Hour(), 0, 0, 0, createdBlock.Time.Location())
+		}
+
 		if m != nil {
-			//update state
+			//update state and closed time
 			if proposal.State.String() != m.State {
 				m.State = proposal.State.String()
 			}
+			m.CreatedTime = createdTime
+			m.ClosedTime = closedTime
 			err = svcCtx.ProposalModel.Update(ctx, m)
 			if err != nil {
 				logc.Errorf(ctx, "Proposal [%d] update error, %v", proposal.ID, err)
@@ -87,6 +122,8 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			CreatedEpoch: int64(proposal.CreatedAt),
 			ClosedEpoch:  int64(proposal.ClosesAt),
 			Raw:          string(rawJson),
+			CreatedTime:  createdTime,
+			ClosedTime:   closedTime,
 		}
 		_, err = svcCtx.ProposalModel.Insert(ctx, m)
 		if err != nil {

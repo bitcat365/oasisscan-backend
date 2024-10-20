@@ -47,14 +47,16 @@ func (l *GovernanceProposalListLogic) GovernanceProposalList(req *types.Governan
 			return nil, errort.NewDefaultError()
 		}
 		list = append(list, &types.GovernanceProposalInfo{
-			Id:        m.ProposalId,
-			Title:     m.Title,
-			Type:      m.Type,
-			Submitter: m.Submitter,
-			State:     m.State,
-			Deposit:   fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(proposal.Deposit.ToBigInt(), common.Decimals)),
-			CreatedAt: m.CreatedEpoch,
-			ClosedAt:  m.ClosedEpoch,
+			Id:          m.ProposalId,
+			Title:       m.Title,
+			Type:        m.Type,
+			Submitter:   m.Submitter,
+			State:       m.State,
+			Deposit:     fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(proposal.Deposit.ToBigInt(), common.Decimals)),
+			CreatedAt:   m.CreatedEpoch,
+			ClosedAt:    m.ClosedEpoch,
+			CreatedTime: m.CreatedTime.Unix(),
+			ClosedTime:  m.ClosedTime.Unix(),
 		})
 	}
 	resp = &types.GovernanceProposalListResponse{

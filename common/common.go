@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 )
 
 func HttpRequest(apiUrl string, method string, params map[string]interface{}) ([]byte, error) {
@@ -87,4 +88,12 @@ func GetNestedStringValue(data interface{}, keys ...string) (string, error) {
 		return value, nil
 	}
 	return "", fmt.Errorf("key %s contains non-string value", keys[len(keys)-1])
+}
+
+func GetEpochDurationTime(startTime time.Time, epochDuration int64, hour bool) time.Time {
+	t := startTime.Add(time.Duration(epochDuration) * time.Hour)
+	if hour {
+		time.Date(t.Year(), t.Month(), t.Day(), t.Hour(), 0, 0, 0, startTime.Location())
+	}
+	return t
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"math/big"
+	"oasisscan-backend/common"
 	"oasisscan-backend/job/internal/svc"
 	"oasisscan-backend/job/model"
 	"strconv"
@@ -26,6 +27,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		return
 	}
 	currentHeight := chainStatus.LatestHeight
+	currentEpoch := chainStatus.LatestEpoch
 	proposals, err := svcCtx.Governance.Proposals(ctx, currentHeight)
 	if err != nil {
 		logc.Errorf(ctx, "Proposals error, %v", err)
@@ -42,32 +44,31 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		var closedTime time.Time
 		createdHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.CreatedAt)
 		if err != nil {
-			logc.Errorf(ctx, "createHeight getEpochBlock error, %v", err)
-			return
+			createdTime = common.GetEpochDurationTime(time.Now(), int64(currentEpoch)-int64(proposal.CreatedAt), true)
+		} else {
+			createdBlock, err := svcCtx.Consensus.GetBlock(ctx, createdHeight)
+			if err != nil {
+				logc.Errorf(ctx, "createdHeight getBlock error, %v", err)
+				return
+			}
+			createdTime = createdBlock.Time
 		}
-		createdBlock, err := svcCtx.Consensus.GetBlock(ctx, createdHeight)
-		if err != nil {
-			logc.Errorf(ctx, "createdHeight getBlock error, %v", err)
-			return
-		}
-		createdTime = createdBlock.Time
+
 		epochDuration := int64(proposal.ClosesAt) - int64(proposal.CreatedAt)
-		currentEpoch := chainStatus.LatestEpoch
 		if m.ClosedEpoch <= int64(currentEpoch) {
 			closedHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.ClosesAt)
 			if err != nil {
-				logc.Errorf(ctx, "closedHeight getEpochBlock error, %v", err)
-				return
+				closedTime = common.GetEpochDurationTime(time.Now(), int64(currentEpoch)-int64(proposal.ClosesAt), true)
+			} else {
+				closedBlock, err := svcCtx.Consensus.GetBlock(ctx, closedHeight)
+				if err != nil {
+					logc.Errorf(ctx, "closedBlock getBlock error, %v", err)
+					return
+				}
+				closedTime = closedBlock.Time
 			}
-			closedBlock, err := svcCtx.Consensus.GetBlock(ctx, closedHeight)
-			if err != nil {
-				logc.Errorf(ctx, "closedBlock getBlock error, %v", err)
-				return
-			}
-			closedTime = closedBlock.Time
 		} else {
-			closedTime = createdBlock.Time.Add(time.Duration(epochDuration) * time.Hour)
-			closedTime = time.Date(closedTime.Year(), closedTime.Month(), closedTime.Day(), closedTime.Hour(), 0, 0, 0, createdBlock.Time.Location())
+			closedTime = common.GetEpochDurationTime(createdTime, epochDuration, true)
 		}
 
 		if m != nil {

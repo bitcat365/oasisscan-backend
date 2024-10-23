@@ -1539,7 +1539,10 @@
       "type": "object",
       "properties": {
         "stats": {
-          "$ref": "#/definitions/mapstringAccountRewardStatsInfo"
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/AccountRewardStatsInfo"
+          }
         },
         "time": {
           "type": "array",

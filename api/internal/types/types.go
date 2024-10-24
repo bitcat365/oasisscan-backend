@@ -2,8 +2,8 @@
 package types
 
 type AccountAllowance struct {
-	Address string `path:"address"`
-	Amount  string `path:"amount"`
+	Address string `json:"address"`
+	Amount  string `json:"amount"`
 }
 
 type AccountDebondingInfo struct {
@@ -601,16 +601,16 @@ type ValidatorInfo struct {
 	Nonce              int64               `json:"nonce"`
 	Score              int64               `json:"score"`
 	Delegators         int64               `json:"delegators"`
-	Nodes              []string            `json:"nodes"`
+	Nodes              []string            `json:"nodes,omitempty"`
 	Uptime             string              `json:"uptime"`
 	Active             bool                `json:"active"`
 	Commission         float64             `json:"commission"`
-	Bound              *Bound              `json:"bound"`
-	Rates              []Rate              `json:"rates"`
-	Bounds             []Bound             `json:"bounds"`
+	Bound              *Bound              `json:"bound,omitempty"`
+	Rates              []Rate              `json:"rates,omitempty"`
+	Bounds             []Bound             `json:"bounds,omitempty"`
 	EscrowSharesStatus *EscrowStatus       `json:"escrowSharesStatus,omitempty"`
 	EscrowAmountStatus *EscrowStatus       `json:"escrowAmountStatus,omitempty"`
-	Runtimes           []*ValidatorRuntime `json:"runtimes"`
+	Runtimes           []*ValidatorRuntime `json:"runtimes,omitempty"`
 	Status             bool                `json:"status"`
 }
 

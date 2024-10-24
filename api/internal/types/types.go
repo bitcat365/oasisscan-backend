@@ -605,7 +605,6 @@ type ValidatorInfo struct {
 	Uptime             string              `json:"uptime"`
 	Active             bool                `json:"active"`
 	Commission         float64             `json:"commission"`
-	Bound              *Bound              `json:"bound,omitempty"`
 	Rates              []Rate              `json:"rates,omitempty"`
 	Bounds             []Bound             `json:"bounds,omitempty"`
 	EscrowSharesStatus *EscrowStatus       `json:"escrowSharesStatus,omitempty"`

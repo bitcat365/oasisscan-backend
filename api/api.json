@@ -3574,14 +3574,9 @@
         "nonce",
         "score",
         "delegators",
-        "nodes",
         "uptime",
         "active",
         "commission",
-        "bound",
-        "rates",
-        "bounds",
-        "runtimes",
         "status"
       ]
     },

@@ -1145,7 +1145,19 @@
   "definitions": {
     "AccountAllowance": {
       "type": "object",
-      "title": "AccountAllowance"
+      "properties": {
+        "address": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        }
+      },
+      "title": "AccountAllowance",
+      "required": [
+        "address",
+        "amount"
+      ]
     },
     "AccountDebondingInfo": {
       "type": "object",

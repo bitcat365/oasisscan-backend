@@ -1,5 +1,5 @@
 info(
-	desc: "This api document example is the mainnet document, and the test network base URL is api.oasisscan.com/v2/mainnet"
+	desc: "This api document example is the Mainnet document, and the Testnet base URL is api.oasisscan.com/v2/testnet"
 )
 
 /** common **/
@@ -216,8 +216,8 @@ type (
 		Allowances []*AccountAllowance `json:"allowances"`
 	}
 	AccountAllowance {
-		Address string `path:"address"`
-		Amount  string `path:"amount"`
+		Address string `json:"address"`
+		Amount  string `json:"amount"`
 	}
 	AccountDelegationsRequest {
 		Address string `form:"address"`

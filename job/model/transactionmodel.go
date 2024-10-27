@@ -84,7 +84,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 	if address != "" {
 		//Here, add a constant to the sort field to avoid using a sort index.
 		orderFiled = "height+0"
-		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or to_addr=$%d)", paramIndex, paramIndex+1))
+		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
 		args = append(args, address, address)
 		paramIndex += 2
 	}

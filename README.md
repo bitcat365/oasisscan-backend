@@ -1,20 +1,20 @@
 # oasisscan-api
 
 
-This is the [oasisscan](https://www.oasisscan.com/) api. Previously, this api was written in Java. Due to compatibility issues, this project has been refactored into Go to better match the  [oasis-core](https://github.com/zeromicro/zero-doc/blob/main/doc/shorturl.md).
+This is the [oasisscan](https://www.oasisscan.com/) API. Previously, this API was written in Java. Due to compatibility issues, this project has been refactored into Go to better match the  [oasis-core](https://github.com/zeromicro/zero-doc/blob/main/doc/shorturl.md).
 
 This project is developed based on [go-zero](https://github.com/zeromicro/go-zero). 
 
-Data storage uses postgresql, and no longer uses mysql and elasticsearch.
+Data storage uses PostgreSQL, and no longer uses MySQL and Elasticsearch.
 
 ## Deployment
 
-1. Install postgresql
+1. Install PostgreSQL
 
 
 2. Initialize SQL script
 
-   Execute the contents of docs/sql/init.sql in postgresql
+   Execute the contents of docs/sql/init.sql in PostgreSQL
 
 
 3. Configuration Files

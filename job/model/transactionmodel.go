@@ -86,6 +86,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
+	orderField := "height"
 
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
@@ -93,6 +94,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		paramIndex++
 	}
 	if address != "" {
+		orderField = "height+0"
 		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
 		args = append(args, address, address)
 		paramIndex += 2
@@ -144,7 +146,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		runtimeQuery += strings.Join(runtimeConditions, " AND ")
 		query = query + " " + runtimeQuery
 	}
-	query += fmt.Sprintf(`) AS combined_txs ORDER BY height DESC limit %d offset %d`, pageable.Limit, pageable.Offset)
+	query += fmt.Sprintf(`) AS combined_txs ORDER BY %s DESC limit %d offset %d`, orderField, pageable.Limit, pageable.Offset)
 
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
 	switch err {

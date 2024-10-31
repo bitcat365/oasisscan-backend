@@ -63,6 +63,8 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 				logc.Errorf(l.ctx, "validator response format error, %v", err)
 				return nil, errort.NewDefaultError()
 			}
+			r.Bounds = make([]types.Bound, 0)
+			r.Rates = make([]types.Rate, 0)
 
 			p, _ := new(big.Float).Quo(new(big.Float).SetInt64(validator.Escrow), totalEscrowFloat).Float64()
 			escrowPercent, err := strconv.ParseFloat(fmt.Sprintf("%.4f", p), 64)

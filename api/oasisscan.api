@@ -62,8 +62,8 @@ type (
 		Active             bool                `json:"active"`
 		Commission         float64             `json:"commission"`
 		Bound              *Bound              `json:"bound,omitempty"`
-		Rates              []Rate              `json:"rates,omitempty"`
-		Bounds             []Bound             `json:"bounds,omitempty"`
+		Rates              []Rate              `json:"rates"`
+		Bounds             []Bound             `json:"bounds"`
 		EscrowSharesStatus *EscrowStatus       `json:"escrowSharesStatus,omitempty"`
 		EscrowAmountStatus *EscrowStatus       `json:"escrowAmountStatus,omitempty"`
 		Runtimes           []*ValidatorRuntime `json:"runtimes,omitempty"`

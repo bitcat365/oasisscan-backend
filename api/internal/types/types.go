@@ -226,6 +226,7 @@ type ChainTransactionInfoResponse struct {
 }
 
 type ChainTransactionListInfo struct {
+	TxType    string `json:"txType"`
 	TxHash    string `json:"txHash"`
 	Height    int64  `json:"height"`
 	Method    string `json:"method"`
@@ -244,6 +245,7 @@ type ChainTransactionsRequest struct {
 	Height  int64  `form:"height,optional"`
 	Address string `form:"address,optional"`
 	Method  string `form:"method,optional"`
+	Runtime bool   `form:"runtime,default=false"`
 	Page    int64  `form:"page,default=1"`
 	Size    int64  `form:"size,default=10"`
 }
@@ -605,6 +607,7 @@ type ValidatorInfo struct {
 	Uptime             string              `json:"uptime"`
 	Active             bool                `json:"active"`
 	Commission         float64             `json:"commission"`
+	Bound              *Bound              `json:"bound,omitempty"`
 	Rates              []Rate              `json:"rates,omitempty"`
 	Bounds             []Bound             `json:"bounds,omitempty"`
 	EscrowSharesStatus *EscrowStatus       `json:"escrowSharesStatus,omitempty"`

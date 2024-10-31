@@ -42,14 +42,14 @@ func (l *ChainTransactionsLogic) ChainTransactions(req *types.ChainTransactionsR
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
 	}
-	txs, err := l.svcCtx.TransactionModel.FindTxs(l.ctx, req.Height, req.Address, req.Method, pageable)
+	txs, err := l.svcCtx.TransactionModel.FindTxs(l.ctx, req.Height, req.Address, req.Method, req.Runtime, pageable)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "find txs error, %v", err)
 		return nil, errort.NewDefaultError()
 	}
 	list := make([]*types.ChainTransactionListInfo, 0)
 	for _, tx := range txs {
-		txResponse, err := FormatTx(tx, l.ctx, l.svcCtx)
+		txResponse, err := FormatTx(&tx.Transaction, tx.TxType, l.ctx, l.svcCtx)
 		if err != nil {
 			logc.Errorf(l.ctx, "FormatTx error, %v", err)
 			return nil, errort.NewDefaultError()
@@ -57,7 +57,7 @@ func (l *ChainTransactionsLogic) ChainTransactions(req *types.ChainTransactionsR
 		list = append(list, txResponse)
 	}
 
-	totalSize, err := l.svcCtx.TransactionModel.CountTxs(l.ctx, req.Height, req.Address, req.Method)
+	totalSize, err := l.svcCtx.TransactionModel.CountTxs(l.ctx, req.Height, req.Address, req.Method, req.Runtime)
 	if err != nil {
 		logc.Errorf(l.ctx, "transaction CountTxs error: %v", err)
 		return nil, errort.NewDefaultError()
@@ -75,7 +75,7 @@ func (l *ChainTransactionsLogic) ChainTransactions(req *types.ChainTransactionsR
 	return
 }
 
-func FormatTx(tx *model.Transaction, ctx context.Context, svcCtx *svc.ServiceContext) (*types.ChainTransactionListInfo, error) {
+func FormatTx(tx *model.Transaction, txType string, ctx context.Context, svcCtx *svc.ServiceContext) (*types.ChainTransactionListInfo, error) {
 	var raw transaction.Transaction
 	err := json.Unmarshal([]byte(tx.Raw), &raw)
 	if err != nil {
@@ -135,6 +135,7 @@ func FormatTx(tx *model.Transaction, ctx context.Context, svcCtx *svc.ServiceCon
 		add = !t.Negative
 	}
 	txResponse := &types.ChainTransactionListInfo{
+		TxType:    txType,
 		TxHash:    tx.TxHash,
 		Height:    tx.Height,
 		Method:    tx.Method,

@@ -20,8 +20,8 @@ type (
 		transactionModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *Transaction) (sql.Result, error)
 		FindOneByTxHash(ctx context.Context, txHash string) (*Transaction, error)
-		FindTxs(ctx context.Context, height int64, address string, method string, pageable common.Pageable) ([]*Transaction, error)
-		CountTxs(ctx context.Context, height int64, address string, method string) (int64, error)
+		FindTxs(ctx context.Context, height int64, address string, method string, runtime bool, pageable common.Pageable) ([]*TransactionWithType, error)
+		CountTxs(ctx context.Context, height int64, address string, method string, runtime bool) (int64, error)
 		TransactionCountStats(ctx context.Context, day time.Time, limit int64) ([]*TransactionCountStats, error)
 		RefreshDailyCountsStatsView(ctx context.Context) error
 		LatestTx(ctx context.Context) (*Transaction, error)
@@ -38,6 +38,11 @@ type (
 	TransactionCountStats struct {
 		Day   time.Time `db:"day"`
 		Count int64     `db:"count"`
+	}
+
+	TransactionWithType struct {
+		TxType string `db:"tx_type"`
+		Transaction
 	}
 )
 
@@ -68,22 +73,26 @@ func (m *customTransactionModel) FindOneByTxHash(ctx context.Context, txHash str
 	}
 }
 
-func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, address string, method string, pageable common.Pageable) ([]*Transaction, error) {
-	var resp []*Transaction
-	query := fmt.Sprintf("select %s from %s where ", transactionRows, m.table)
+func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, address string, method string, runtime bool, pageable common.Pageable) ([]*TransactionWithType, error) {
+	var resp []*TransactionWithType
+	query := fmt.Sprintf(`
+        SELECT * FROM (
+            SELECT 
+                'consensus' as tx_type,
+                %s
+            FROM %s 
+            WHERE `, transactionRows, m.table)
 	var conditions []string
 	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
-	orderFiled := "height"
+
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
 		args = append(args, height)
 		paramIndex++
 	}
 	if address != "" {
-		//Here, add a constant to the sort field to avoid using a sort index.
-		orderFiled = "height+0"
 		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
 		args = append(args, address, address)
 		paramIndex += 2
@@ -100,7 +109,42 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 	}
 
 	query += strings.Join(conditions, " AND ")
-	query += fmt.Sprintf(" order by %s desc limit %d offset %d", orderFiled, pageable.Limit, pageable.Offset)
+	if runtime {
+		runtimeQuery := fmt.Sprintf(`
+            UNION ALL
+            SELECT 
+                'runtime' as tx_type,
+				id,
+                tx_hash,
+                method,
+                result as status,
+                0 as nonce,
+                round as height,
+                timestamp,
+                consensus_from as sign_addr,
+                consensus_to as to_addr,
+                0 as fee,
+                0 as amount,
+                0 as shares,
+                '{}' as error,
+                events,
+                raw,
+                timestamp as created_at,
+                timestamp as updated_at
+            FROM runtime_transaction
+            WHERE `)
+
+		runtimeConditions := []string{"1=1"}
+		if address != "" {
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d)", paramIndex, paramIndex+1))
+			args = append(args, address, address)
+			paramIndex += 2
+		}
+
+		runtimeQuery += strings.Join(runtimeConditions, " AND ")
+		query = query + " " + runtimeQuery
+	}
+	query += fmt.Sprintf(`) AS combined_txs ORDER BY height DESC limit %d offset %d`, pageable.Limit, pageable.Offset)
 
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
 	switch err {
@@ -113,13 +157,16 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 	}
 }
 
-func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, address string, method string) (int64, error) {
+func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, address string, method string, runtime bool) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(*) from %s where ", m.table)
+	query := fmt.Sprintf(`
+        SELECT COUNT(*) FROM (
+            SELECT tx_hash FROM %s WHERE `, m.table)
 	var conditions []string
 	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
+
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
 		args = append(args, height)
@@ -142,6 +189,24 @@ func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, add
 	}
 
 	query += strings.Join(conditions, " AND ")
+
+	if runtime {
+		//runtime query
+		query += ` UNION ALL 
+        SELECT tx_hash FROM runtime_transaction WHERE `
+
+		runtimeConditions := []string{"1=1"}
+		if address != "" {
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d)", paramIndex-2, paramIndex-1))
+		}
+		if method != "" {
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("method = $%d", paramIndex-1))
+		}
+
+		query += strings.Join(runtimeConditions, " AND ")
+	}
+
+	query += ") t"
 
 	err := m.conn.QueryRowCtx(ctx, &resp, query, args...)
 	switch err {

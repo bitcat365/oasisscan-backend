@@ -41,7 +41,7 @@ func (l *ValidatorEscrowEventLogic) ValidatorEscrowEvent(req *types.ValidatorEsc
 	}
 	list := make([]*types.ChainTransactionListInfo, 0)
 	for _, tx := range txs {
-		txResponse, err := chain.FormatTx(tx, l.ctx, l.svcCtx)
+		txResponse, err := chain.FormatTx(tx, "consensus", l.ctx, l.svcCtx)
 		if err != nil {
 			logc.Errorf(l.ctx, "FormatTx error, %v", err)
 			return nil, errort.NewDefaultError()

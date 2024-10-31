@@ -309,10 +309,12 @@ type (
 		Height  int64  `form:"height,optional"`
 		Address string `form:"address,optional"`
 		Method  string `form:"method,optional"`
+		Runtime bool   `form:"runtime,default=false"`
 		Page    int64  `form:"page,default=1"`
 		Size    int64  `form:"size,default=10"`
 	}
 	ChainTransactionListInfo {
+		TxType    string `json:"txType"`
 		TxHash    string `json:"txHash"`
 		Height    int64  `json:"height"`
 		Method    string `json:"method"`

@@ -504,6 +504,14 @@
             "type": "string"
           },
           {
+            "name": "runtime",
+            "in": "query",
+            "required": true,
+            "type": "boolean",
+            "format": "boolean",
+            "default": "false"
+          },
+          {
             "name": "page",
             "in": "query",
             "required": true,
@@ -2035,6 +2043,9 @@
     "ChainTransactionListInfo": {
       "type": "object",
       "properties": {
+        "txType": {
+          "type": "string"
+        },
         "txHash": {
           "type": "string"
         },
@@ -2079,6 +2090,7 @@
       },
       "title": "ChainTransactionListInfo",
       "required": [
+        "txType",
         "txHash",
         "height",
         "method",
@@ -2106,6 +2118,11 @@
         "method": {
           "type": "string"
         },
+        "runtime": {
+          "type": "boolean",
+          "format": "boolean",
+          "default": "false"
+        },
         "page": {
           "type": "integer",
           "format": "int64",
@@ -2119,6 +2136,7 @@
       },
       "title": "ChainTransactionsRequest",
       "required": [
+        "runtime",
         "page",
         "size"
       ]

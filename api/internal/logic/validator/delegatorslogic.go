@@ -34,9 +34,21 @@ func NewDelegatorsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Delega
 }
 
 func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.DelegatorsResponse, err error) {
+	list := make([]*types.DelegatorsInfo, 0)
 	pageable := common.Pageable{
 		Limit:  req.Size,
 		Offset: (req.Page - 1) * req.Size,
+	}
+	var delegatorCount int64 = 0
+	page := types.Page{
+		Page:      req.Page,
+		Size:      req.Size,
+		MaxPage:   common.MaxPage(req.Size, delegatorCount),
+		TotalSize: delegatorCount,
+	}
+	resp = &types.DelegatorsResponse{
+		List: list,
+		Page: page,
 	}
 	validator, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Address)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
@@ -44,11 +56,11 @@ func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.
 		return nil, errort.NewDefaultError()
 	}
 	if validator == nil {
-		return nil, nil
+		return resp, nil
 	}
-	delegatorCount := validator.Delegators
+	delegatorCount = validator.Delegators
 	if delegatorCount == 0 {
-		return
+		return resp, nil
 	}
 
 	delegators, err := l.svcCtx.DelegatorModel.FindByValidator(l.ctx, req.Address, pageable)
@@ -56,7 +68,6 @@ func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.
 		logc.Errorf(l.ctx, "FindByValidator error, %v", err)
 		return nil, errort.NewDefaultError()
 	}
-	list := make([]*types.DelegatorsInfo, 0)
 	for _, delegator := range delegators {
 		sharePool := staking.SharePool{
 			Balance:     *quantity.NewFromUint64(uint64(validator.Escrow)),
@@ -81,7 +92,7 @@ func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.
 			Self:    delegator.Delegator == validator.EntityAddress,
 		})
 	}
-	page := types.Page{
+	page = types.Page{
 		Page:      req.Page,
 		Size:      req.Size,
 		MaxPage:   common.MaxPage(req.Size, delegatorCount),
@@ -91,5 +102,5 @@ func (l *DelegatorsLogic) Delegators(req *types.DelegatorsRequest) (resp *types.
 		List: list,
 		Page: page,
 	}
-	return
+	return resp, nil
 }

@@ -33,8 +33,10 @@ func NewAccountRewardStatsLogic(ctx context.Context, svcCtx *svc.ServiceContext)
 
 func (l *AccountRewardStatsLogic) AccountRewardStats(req *types.AccountRewardStatsRequest) (resp *types.AccountRewardStatsResponse, err error) {
 	statsMap := make(map[string]*types.AccountRewardStatsInfo, 0)
+	timeResp := make([]int64, 0)
 	resp = &types.AccountRewardStatsResponse{
 		Stats: statsMap,
+		Time:  timeResp,
 	}
 	accountAddress := req.Account
 	rewardModels, err := l.svcCtx.RewardModel.FindByDelegatorGroupByDay(l.ctx, accountAddress)
@@ -50,7 +52,6 @@ func (l *AccountRewardStatsLogic) AccountRewardStats(req *types.AccountRewardSta
 		logc.Errorf(l.ctx, "%v", err)
 		return nil, errort.NewDefaultError()
 	}
-	var timeResp []int64
 	timeMap := make(map[int64]bool)
 	for i := len(days) - 1; i > 0; i-- {
 		day := days[i].Day.AddDate(0, 0, 1)

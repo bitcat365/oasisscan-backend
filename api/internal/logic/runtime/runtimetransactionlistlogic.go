@@ -50,7 +50,7 @@ func (l *RuntimeTransactionListLogic) RuntimeTransactionList(req *types.RuntimeT
 			t = "evm"
 		}
 		info := types.RuntimeTransactionListInfo{
-			RuntimeId: runtimeId,
+			RuntimeId: m.RuntimeId,
 			TxHash:    m.TxHash,
 			Round:     m.Round,
 			Result:    m.Result,

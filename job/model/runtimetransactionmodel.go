@@ -53,7 +53,7 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 	}
 	if address != "" {
 		conditions = append(conditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d or evm_from = $%d or evm_to = $%d)", paramIndex, paramIndex+1, paramIndex+2, paramIndex+3))
-		args = append(args, round)
+		args = append(args, address, address, address, address)
 		paramIndex += 4
 	}
 
@@ -93,7 +93,7 @@ func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId 
 	}
 	if address != "" {
 		conditions = append(conditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d or evm_from = $%d or evm_to = $%d)", paramIndex, paramIndex+1, paramIndex+2, paramIndex+3))
-		args = append(args, round)
+		args = append(args, address, address, address, address)
 		paramIndex += 4
 	}
 

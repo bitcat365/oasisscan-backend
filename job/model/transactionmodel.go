@@ -43,6 +43,8 @@ type (
 	TransactionWithType struct {
 		TxType string `db:"tx_type"`
 		Transaction
+		RuntimeId   string `db:"runtime_id"`
+		RuntimeName string `db:"runtime_name"`
 	}
 )
 
@@ -79,14 +81,16 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
         SELECT * FROM (
             SELECT 
                 'consensus' as tx_type,
-                %s
+                %s,
+                '' as runtime_id,
+				'' as runtime_name
             FROM %s 
             WHERE `, transactionRows, m.table)
 	var conditions []string
 	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
-	orderField := "height"
+	orderField := "timestamp"
 
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
@@ -94,7 +98,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		paramIndex++
 	}
 	if address != "" {
-		orderField = "height+0"
+		orderField = "timestamp + INTERVAL '0 day'"
 		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
 		args = append(args, address, address)
 		paramIndex += 2
@@ -116,29 +120,31 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
             UNION ALL
             SELECT 
                 'runtime' as tx_type,
-				id,
-                tx_hash,
-                method,
-                result as status,
+				rt.id,
+                rt.tx_hash,
+                rt.method,
+                rt.result as status,
                 0 as nonce,
-                round as height,
-                timestamp,
-                consensus_from as sign_addr,
-                consensus_to as to_addr,
+                rt.round as height,
+                rt.timestamp,
+                rt.consensus_from as sign_addr,
+                rt.consensus_to as to_addr,
                 0 as fee,
                 0 as amount,
                 0 as shares,
                 '{}' as error,
-                events,
-                raw,
-                timestamp as created_at,
-                timestamp as updated_at
-            FROM runtime_transaction
+                rt.events,
+                rt.raw,
+                rt.created_at,
+                rt.updated_at,
+				rt.runtime_id,
+				r.name as runtime_name
+            FROM runtime_transaction rt left join runtime r on rt.runtime_id=r.runtime_id
             WHERE `)
 
 		runtimeConditions := []string{"1=1"}
 		if address != "" {
-			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d)", paramIndex, paramIndex+1))
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(rt.consensus_from = $%d or rt.consensus_to = $%d)", paramIndex, paramIndex+1))
 			args = append(args, address, address)
 			paramIndex += 2
 		}

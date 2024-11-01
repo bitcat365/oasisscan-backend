@@ -869,7 +869,13 @@
           {
             "name": "id",
             "in": "query",
-            "required": true,
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "address",
+            "in": "query",
+            "required": false,
             "type": "string"
           },
           {
@@ -2086,23 +2092,28 @@
         },
         "to": {
           "type": "string"
+        },
+        "runtimeId": {
+          "type": "string"
+        },
+        "runtimeName": {
+          "type": "string"
+        },
+        "round": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "result": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "type": {
+          "type": "string"
         }
       },
       "title": "ChainTransactionListInfo",
       "required": [
-        "txType",
-        "txHash",
-        "height",
-        "method",
-        "fee",
-        "amount",
-        "shares",
-        "add",
-        "timestamp",
-        "time",
-        "status",
-        "from",
-        "to"
+        "txType"
       ]
     },
     "ChainTransactionsRequest": {
@@ -3239,6 +3250,9 @@
         "id": {
           "type": "string"
         },
+        "address": {
+          "type": "string"
+        },
         "round": {
           "type": "integer",
           "format": "int64"
@@ -3256,7 +3270,6 @@
       },
       "title": "RuntimeTransactionListRequest",
       "required": [
-        "id",
         "page",
         "size"
       ]
@@ -3595,6 +3608,8 @@
         "uptime",
         "active",
         "commission",
+        "rates",
+        "bounds",
         "status"
       ]
     },

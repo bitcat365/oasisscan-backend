@@ -226,19 +226,24 @@ type ChainTransactionInfoResponse struct {
 }
 
 type ChainTransactionListInfo struct {
-	TxType    string `json:"txType"`
-	TxHash    string `json:"txHash"`
-	Height    int64  `json:"height"`
-	Method    string `json:"method"`
-	Fee       string `json:"fee"`
-	Amount    string `json:"amount"`
-	Shares    string `json:"shares"`
-	Add       bool   `json:"add"`
-	Timestamp uint64 `json:"timestamp"`
-	Time      uint64 `json:"time"`
-	Status    bool   `json:"status"`
-	From      string `json:"from"`
-	To        string `json:"to"`
+	TxType      string `json:"txType"`
+	TxHash      string `json:"txHash,omitempty"`
+	Height      int64  `json:"height,omitempty"`
+	Method      string `json:"method,omitempty"`
+	Fee         string `json:"fee,omitempty"`
+	Amount      string `json:"amount,omitempty"`
+	Shares      string `json:"shares,omitempty"`
+	Add         bool   `json:"add,omitempty"`
+	Timestamp   uint64 `json:"timestamp,omitempty"`
+	Time        uint64 `json:"time,omitempty"`
+	Status      bool   `json:"status,omitempty"`
+	From        string `json:"from,omitempty"`
+	To          string `json:"to,omitempty"`
+	RuntimeId   string `json:"runtimeId,omitempty"`
+	RuntimeName string `json:"runtimeName,omitempty"`
+	Round       int64  `json:"round,omitempty"`
+	Result      bool   `json:"result,omitempty"`
+	Type        string `json:"type,omitempty"`
 }
 
 type ChainTransactionsRequest struct {
@@ -531,10 +536,11 @@ type RuntimeTransactionListInfo struct {
 }
 
 type RuntimeTransactionListRequest struct {
-	Id    string `form:"id"`
-	Round int64  `form:"round,optional"`
-	Page  int64  `form:"page,default=1"`
-	Size  int64  `form:"size,default=10"`
+	Id      string `form:"id,optional"`
+	Address string `form:"address,optional"`
+	Round   int64  `form:"round,optional"`
+	Page    int64  `form:"page,default=1"`
+	Size    int64  `form:"size,default=10"`
 }
 
 type RuntimeTransactionListResponse struct {

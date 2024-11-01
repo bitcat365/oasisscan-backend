@@ -16,8 +16,8 @@ type (
 	// and implement the added methods in customRuntimeTransactionModel.
 	RuntimeTransactionModel interface {
 		runtimeTransactionModel
-		FindAll(ctx context.Context, runtimeId string, round int64, pageable common.Pageable) ([]*RuntimeTransaction, error)
-		CountAll(ctx context.Context, runtimeId string, round int64) (int64, error)
+		FindAll(ctx context.Context, runtimeId string, round int64, address string, pageable common.Pageable) ([]*RuntimeTransaction, error)
+		CountAll(ctx context.Context, runtimeId string, round int64, address string) (int64, error)
 		FindOneByTxHash(ctx context.Context, runtimeId string) (*RuntimeTransaction, error)
 	}
 
@@ -33,7 +33,7 @@ func NewRuntimeTransactionModel(conn sqlx.SqlConn) RuntimeTransactionModel {
 	}
 }
 
-func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId string, round int64, pageable common.Pageable) ([]*RuntimeTransaction, error) {
+func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId string, round int64, address string, pageable common.Pageable) ([]*RuntimeTransaction, error) {
 	var resp []*RuntimeTransaction
 	query := fmt.Sprintf("select %s from %s where ", runtimeTransactionRows, m.table)
 	var conditions []string
@@ -50,6 +50,11 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 		conditions = append(conditions, fmt.Sprintf("round = $%d", paramIndex))
 		args = append(args, round)
 		paramIndex++
+	}
+	if address != "" {
+		conditions = append(conditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d or evm_from = $%d or evm_to = $%d)", paramIndex, paramIndex+1, paramIndex+2, paramIndex+3))
+		args = append(args, round)
+		paramIndex += 4
 	}
 
 	if len(conditions) > 0 {
@@ -68,7 +73,7 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 	}
 }
 
-func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId string, round int64) (int64, error) {
+func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId string, round int64, address string) (int64, error) {
 	var resp int64
 	query := fmt.Sprintf("select count(*) from %s where ", m.table)
 	var conditions []string
@@ -85,6 +90,11 @@ func (m *customRuntimeTransactionModel) CountAll(ctx context.Context, runtimeId 
 		conditions = append(conditions, fmt.Sprintf("round = $%d", paramIndex))
 		args = append(args, round)
 		paramIndex++
+	}
+	if address != "" {
+		conditions = append(conditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d or evm_from = $%d or evm_to = $%d)", paramIndex, paramIndex+1, paramIndex+2, paramIndex+3))
+		args = append(args, round)
+		paramIndex += 4
 	}
 
 	if len(conditions) > 0 {

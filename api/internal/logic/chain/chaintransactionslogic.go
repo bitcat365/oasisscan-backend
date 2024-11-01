@@ -15,6 +15,7 @@ import (
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/common"
 	"oasisscan-backend/job/model"
+	"strings"
 	"time"
 
 	"oasisscan-backend/api/internal/svc"
@@ -49,10 +50,19 @@ func (l *ChainTransactionsLogic) ChainTransactions(req *types.ChainTransactionsR
 	}
 	list := make([]*types.ChainTransactionListInfo, 0)
 	for _, tx := range txs {
-		txResponse, err := FormatTx(&tx.Transaction, tx.TxType, l.ctx, l.svcCtx)
-		if err != nil {
-			logc.Errorf(l.ctx, "FormatTx error, %v", err)
-			return nil, errort.NewDefaultError()
+		var txResponse *types.ChainTransactionListInfo
+		if tx.TxType == "consensus" {
+			txResponse, err = FormatTx(&tx.Transaction, tx.TxType, l.ctx, l.svcCtx)
+			if err != nil {
+				logc.Errorf(l.ctx, "FormatTx error, %v", err)
+				return nil, errort.NewDefaultError()
+			}
+		} else {
+			txResponse, err = formatRuntimeTx(tx)
+			if err != nil {
+				logc.Errorf(l.ctx, "formatRuntimeTx error, %v", err)
+				return nil, errort.NewDefaultError()
+			}
 		}
 		list = append(list, txResponse)
 	}
@@ -73,6 +83,24 @@ func (l *ChainTransactionsLogic) ChainTransactions(req *types.ChainTransactionsR
 		Page: page,
 	}
 	return
+}
+
+func formatRuntimeTx(tx *model.TransactionWithType) (*types.ChainTransactionListInfo, error) {
+	t := "consensus"
+	if strings.Contains(tx.Method, "evm") {
+		t = "evm"
+	}
+	txResponse := &types.ChainTransactionListInfo{
+		TxType:      tx.TxType,
+		RuntimeId:   tx.RuntimeId,
+		RuntimeName: tx.RuntimeName,
+		TxHash:      tx.TxHash,
+		Round:       tx.Height,
+		Result:      tx.Status,
+		Timestamp:   uint64(tx.Timestamp.Unix()),
+		Type:        t,
+	}
+	return txResponse, nil
 }
 
 func FormatTx(tx *model.Transaction, txType string, ctx context.Context, svcCtx *svc.ServiceContext) (*types.ChainTransactionListInfo, error) {

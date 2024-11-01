@@ -38,7 +38,7 @@ func (l *RuntimeTransactionListLogic) RuntimeTransactionList(req *types.RuntimeT
 	if pageable.Offset > common.MaxSizeLimit {
 		return nil, errort.NewCodeError(errort.RequestParameterErrCode, fmt.Sprintf("%s: (size * page) must be less than %d", errort.RequestParameterErrMsg, common.MaxSizeLimit))
 	}
-	txModels, err := l.svcCtx.RuntimeTransactionModel.FindAll(l.ctx, runtimeId, req.Round, pageable)
+	txModels, err := l.svcCtx.RuntimeTransactionModel.FindAll(l.ctx, runtimeId, req.Round, req.Address, pageable)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "find runtime transactions error, %v", err)
 		return nil, errort.NewDefaultError()
@@ -60,7 +60,7 @@ func (l *RuntimeTransactionListLogic) RuntimeTransactionList(req *types.RuntimeT
 		txList = append(txList, info)
 	}
 
-	totalSize, err := l.svcCtx.RuntimeTransactionModel.CountAll(l.ctx, runtimeId, req.Round)
+	totalSize, err := l.svcCtx.RuntimeTransactionModel.CountAll(l.ctx, runtimeId, req.Round, req.Address)
 	if err != nil {
 		logc.Errorf(l.ctx, "runtime transaction CountAll error: %v", err)
 		return nil, errort.NewDefaultError()

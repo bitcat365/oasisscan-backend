@@ -216,6 +216,7 @@ CREATE INDEX IF NOT EXISTS runtime_transaction_consensus_to_idx ON runtime_trans
 CREATE INDEX IF NOT EXISTS runtime_transaction_evm_from_idx ON runtime_transaction (evm_from);
 CREATE INDEX IF NOT EXISTS runtime_transaction_evm_to_idx ON runtime_transaction (evm_to);
 CREATE INDEX IF NOT EXISTS runtime_transaction_method_idx ON runtime_transaction (method);
+CREATE INDEX IF NOT EXISTS runtime_transaction_timestamp_idx ON runtime_transaction (timestamp);
 
 CREATE TABLE IF NOT EXISTS staking_event
 (

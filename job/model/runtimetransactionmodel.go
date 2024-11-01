@@ -40,6 +40,7 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
+	orderField := "timestamp"
 
 	if runtimeId != "" {
 		conditions = append(conditions, fmt.Sprintf("runtime_id = $%d", paramIndex))
@@ -52,6 +53,7 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 		paramIndex++
 	}
 	if address != "" {
+		orderField = "timestamp + INTERVAL '0 day'"
 		conditions = append(conditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d or evm_from = $%d or evm_to = $%d)", paramIndex, paramIndex+1, paramIndex+2, paramIndex+3))
 		args = append(args, address, address, address, address)
 		paramIndex += 4
@@ -60,7 +62,7 @@ func (m *customRuntimeTransactionModel) FindAll(ctx context.Context, runtimeId s
 	if len(conditions) > 0 {
 		query += strings.Join(conditions, " AND ")
 	}
-	query += fmt.Sprintf(" order by id desc limit %d offset %d", pageable.Limit, pageable.Offset)
+	query += fmt.Sprintf(" order by %s desc limit %d offset %d", orderField, pageable.Limit, pageable.Offset)
 
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
 	switch err {

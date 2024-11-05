@@ -37,7 +37,7 @@ func NewLocalCache() *LocalCache {
 	if err != nil {
 		logx.Errorf("localCache error: %v\n", err)
 	}
-	validatorSignsStatsCache, err := collection.NewCache(time.Minute*10, collection.WithName("validator-signs"))
+	validatorSignsStatsCache, err := collection.NewCache(time.Hour*1, collection.WithName("validator-signs"))
 	if err != nil {
 		logx.Errorf("localCache error: %v\n", err)
 	}

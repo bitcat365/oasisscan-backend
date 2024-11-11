@@ -91,6 +91,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 			return
 		}
 
+		startTime := time.Now()
 		//sql transact
 		err = svcCtx.PostgreDB.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 			var meta cometbft.BlockMeta
@@ -155,6 +156,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 			logc.Errorf(ctx, "block save db error, %v", err)
 			return
 		}
+		logc.Infof(ctx, "transact duration [%v]", time.Since(startTime))
 
 		logc.Infof(ctx, "block scan height: %d, current height: %d", scanHeight, currentHeight)
 		scanHeight++

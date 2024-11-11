@@ -19,6 +19,7 @@ type (
 	TransactionModel interface {
 		transactionModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *Transaction) (sql.Result, error)
+		BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*Transaction) (sql.Result, error)
 		FindOneByTxHash(ctx context.Context, txHash string) (*Transaction, error)
 		FindTxs(ctx context.Context, height int64, address string, method string, runtime bool, pageable common.Pageable) ([]*TransactionWithType, error)
 		CountTxs(ctx context.Context, height int64, address string, method string, runtime bool) (int64, error)
@@ -58,6 +59,35 @@ func NewTransactionModel(conn sqlx.SqlConn) TransactionModel {
 func (m *customTransactionModel) SessionInsert(ctx context.Context, session sqlx.Session, data *Transaction) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)", m.table, transactionRowsExpectAutoSet)
 	ret, err := session.ExecCtx(ctx, query, data.TxHash, data.Method, data.Status, data.Nonce, data.Height, data.Timestamp, data.SignAddr, data.ToAddr, data.Fee, data.Amount, data.Shares, data.Error, data.Events, data.Raw, data.CreatedAt, data.UpdatedAt)
+	return ret, err
+}
+
+func (m *customTransactionModel) BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*Transaction) (sql.Result, error) {
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	valueStrings := make([]string, 0, len(data))
+	valueArgs := make([]interface{}, 0, len(data)*16)
+	for i := 0; i < len(data); i++ {
+		start := i*16 + 1
+		placeholder := fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
+			start, start+1, start+2, start+3, start+4, start+5, start+6, start+7,
+			start+8, start+9, start+10, start+11, start+12, start+13, start+14, start+15)
+		valueStrings = append(valueStrings, placeholder)
+
+		tx := data[i]
+		valueArgs = append(valueArgs, tx.TxHash, tx.Method, tx.Status, tx.Nonce, tx.Height,
+			tx.Timestamp, tx.SignAddr, tx.ToAddr, tx.Fee, tx.Amount, tx.Shares,
+			tx.Error, tx.Events, tx.Raw, tx.CreatedAt, tx.UpdatedAt)
+	}
+
+	query := fmt.Sprintf("insert into %s (%s) values %s",
+		m.table,
+		transactionRowsExpectAutoSet,
+		strings.Join(valueStrings, ","))
+
+	ret, err := session.ExecCtx(ctx, query, valueArgs...)
 	return ret, err
 }
 

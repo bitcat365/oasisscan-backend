@@ -101,24 +101,6 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 			}
 
 			//block signature
-			//for _, s := range meta.LastCommit.Signatures {
-			//	if s.ValidatorAddress.String() == "" {
-			//		continue
-			//	}
-			//	signatureModel := model.BlockSignature{
-			//		Height:           block.Height,
-			//		BlockIdFlag:      int64(s.BlockIDFlag),
-			//		ValidatorAddress: s.ValidatorAddress.String(),
-			//		Timestamp:        s.Timestamp,
-			//		Signature:        hex.EncodeToString(s.Signature),
-			//		CreatedAt:        time.Now(),
-			//		UpdatedAt:        time.Now(),
-			//	}
-			//	_, err = svcCtx.BlockSignatureModel.SessionInsert(ctx, session, &signatureModel)
-			//	if err != nil {
-			//		return fmt.Errorf("signature insert error, %v", err)
-			//	}
-			//}
 			signatures := make([]*model.BlockSignature, 0, len(meta.LastCommit.Signatures))
 			for _, s := range meta.LastCommit.Signatures {
 				if s.ValidatorAddress.String() == "" {
@@ -162,11 +144,9 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 			}
 
 			//transaction
-			for _, txsModel := range txsModels {
-				_, err := svcCtx.TransactionModel.SessionInsert(ctx, session, txsModel)
-				if err != nil {
-					return fmt.Errorf("transaction insert error, %v", err)
-				}
+			_, err = svcCtx.TransactionModel.BatchSessionInsert(ctx, session, txsModels)
+			if err != nil {
+				return fmt.Errorf("transaction insert error, %v", err)
 			}
 
 			return nil

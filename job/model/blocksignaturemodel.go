@@ -7,6 +7,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
+	"strings"
 	"time"
 )
 
@@ -18,6 +19,7 @@ type (
 	BlockSignatureModel interface {
 		blockSignatureModel
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
+		BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*BlockSignature) (sql.Result, error)
 		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error)
 		FindBlocksByHeight(ctx context.Context, validatorAddress string, startHeight int64) ([]*BlockSignature, error)
 		RefreshBlockCountDaysView(ctx context.Context) error
@@ -45,6 +47,39 @@ func NewBlockSignatureModel(conn sqlx.SqlConn) BlockSignatureModel {
 func (m *customBlockSignatureModel) SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values ($1, $2, $3, $4, $5, $6, $7)", m.table, blockSignatureRowsExpectAutoSet)
 	ret, err := session.ExecCtx(ctx, query, data.Height, data.BlockIdFlag, data.ValidatorAddress, data.Timestamp, data.Signature, data.CreatedAt, data.UpdatedAt)
+	return ret, err
+}
+
+func (m *customBlockSignatureModel) BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*BlockSignature) (sql.Result, error) {
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	valueStrings := make([]string, 0, len(data))
+	valueArgs := make([]interface{}, 0, len(data)*7)
+
+	for i := 0; i < len(data); i++ {
+		n := i * 7
+		valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+			n+1, n+2, n+3, n+4, n+5, n+6, n+7))
+
+		record := data[i]
+		valueArgs = append(valueArgs,
+			record.Height,
+			record.BlockIdFlag,
+			record.ValidatorAddress,
+			record.Timestamp,
+			record.Signature,
+			record.CreatedAt,
+			record.UpdatedAt)
+	}
+
+	query := fmt.Sprintf("insert into %s (%s) values %s",
+		m.table,
+		blockSignatureRowsExpectAutoSet,
+		strings.Join(valueStrings, ","))
+
+	ret, err := session.ExecCtx(ctx, query, valueArgs...)
 	return ret, err
 }
 

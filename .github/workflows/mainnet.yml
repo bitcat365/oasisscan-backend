@@ -29,3 +29,17 @@ jobs:
             PATH="/usr/local/go/bin/:$PATH"
             sh /mnt/backend-job/deploy_mainnet.sh
             sh /mnt/backend-api/deploy_mainnet.sh
+
+      - name: Deploy to Backup
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.BACKUP_SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /mnt/oasisscan-backend/
+            git checkout master
+            git pull origin master
+            PATH="/usr/local/go/bin/:$PATH"
+            sh /mnt/backend-job/deploy_mainnet.sh
+            sh /mnt/backend-api/deploy_mainnet.sh

@@ -37,8 +37,8 @@ func main() {
 	//cache cron job
 	cr := cron.New(cron.WithChain(cron.DelayIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 
-	//init
-	logic.SignStatsCacheJob(context.Background(), svcCtx)
+	////init
+	//logic.SignStatsCacheJob(context.Background(), svcCtx)
 
 	/** validator sign stats **/
 	_, err = cr.AddFunc("@every 10m", func() {

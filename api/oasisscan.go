@@ -33,15 +33,12 @@ func main() {
 	svcCtx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(server, svcCtx)
 
-	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
-	server.Start()
-
 	var err error
 	//cache cron job
 	cr := cron.New(cron.WithChain(cron.DelayIfStillRunning(cron.DefaultLogger), cron.Recover(cron.DefaultLogger)))
 
-	//init
-	logic.SignStatsCacheJob(context.Background(), svcCtx)
+	////init
+	//logic.SignStatsCacheJob(context.Background(), svcCtx)
 
 	/** validator sign stats **/
 	_, err = cr.AddFunc("@every 10m", func() {
@@ -54,4 +51,7 @@ func main() {
 	}
 
 	cr.Start()
+
+	fmt.Printf("Starting server at %s:%d...\n", c.Host, c.Port)
+	server.Start()
 }

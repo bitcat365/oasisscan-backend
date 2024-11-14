@@ -623,6 +623,7 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					return
 				}
 			}
+			logc.Infof(ctx, "delegation reward validator [%s] done.", validatorAddress.String())
 		}
 
 		//update system property

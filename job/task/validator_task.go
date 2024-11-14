@@ -622,6 +622,7 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					logc.Errorf(ctx, "RewardModel insert error, %v", err)
 					return
 				}
+				logc.Infof(ctx, "delegation reward [%s][%s] done.", validatorAddress.String(), delegatorAddress.String())
 			}
 			logc.Infof(ctx, "delegation reward validator [%s] done.", validatorAddress.String())
 		}

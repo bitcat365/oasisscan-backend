@@ -556,6 +556,7 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				return
 			}
 			for delegatorAddress, delegation := range delegationsTo {
+				logc.Infof(ctx, "delegation reward [%s][%s] start.", validatorAddress.String(), delegatorAddress.String())
 				rewardModel, err := svcCtx.RewardModel.FindOneByDelegatorValidatorEpoch(ctx, delegatorAddress.String(), validatorAddress.String(), rewardEpoch)
 				if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 					logc.Errorf(ctx, "FindOneByDelegatorValidatorEpoch error, %v", err)
@@ -622,7 +623,6 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					logc.Errorf(ctx, "RewardModel insert error, %v", err)
 					return
 				}
-				logc.Infof(ctx, "delegation reward [%s][%s] done.", validatorAddress.String(), delegatorAddress.String())
 			}
 			logc.Infof(ctx, "delegation reward validator [%s] done.", validatorAddress.String())
 		}

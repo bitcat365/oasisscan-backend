@@ -2,10 +2,12 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
+	"strings"
 	"time"
 )
 
@@ -22,6 +24,7 @@ type (
 		FindDays(ctx context.Context) ([]*StatsDay, error)
 		DeleteBeforeEpoch(ctx context.Context, epoch int64) error
 		RefreshRewardDaysView(ctx context.Context) error
+		BatchInsert(ctx context.Context, data []*Reward) (sql.Result, error)
 	}
 
 	customRewardModel struct {
@@ -114,4 +117,52 @@ func (m *customRewardModel) RefreshRewardDaysView(ctx context.Context) error {
 	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW reward_days")
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
+}
+
+func (m *customRewardModel) BatchInsert(ctx context.Context, data []*Reward) (sql.Result, error) {
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	maxBatchSize := 1000
+	if len(data) > maxBatchSize {
+		var lastResult sql.Result
+		for i := 0; i < len(data); i += maxBatchSize {
+			end := i + maxBatchSize
+			if end > len(data) {
+				end = len(data)
+			}
+			result, err := m.BatchInsert(ctx, data[i:end])
+			if err != nil {
+				return nil, err
+			}
+			lastResult = result
+		}
+		return lastResult, nil
+	}
+
+	valueStrings := make([]string, 0, len(data))
+	valueArgs := make([]interface{}, 0, len(data)*8)
+
+	for i, reward := range data {
+		n := i * 8
+		valueStrings = append(valueStrings, fmt.Sprintf("($%d,$%d,$%d,$%d,$%d,$%d,$%d,$%d)",
+			n+1, n+2, n+3, n+4, n+5, n+6, n+7, n+8))
+
+		valueArgs = append(valueArgs,
+			reward.Delegator,
+			reward.Validator,
+			reward.Epoch,
+			reward.DelegationAmount,
+			reward.DelegationShares,
+			reward.Reward,
+			reward.CreatedAt,
+			reward.UpdatedAt)
+	}
+
+	query := fmt.Sprintf("insert into %s (delegator,validator,epoch,delegation_amount,delegation_shares,reward,created_at,updated_at) values %s",
+		m.table, strings.Join(valueStrings, ","))
+
+	ret, err := m.conn.ExecCtx(ctx, query, valueArgs...)
+	return ret, err
 }

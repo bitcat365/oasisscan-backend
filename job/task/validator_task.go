@@ -555,6 +555,8 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				logc.Errorf(ctx, "staking api DelegationsTo error, %v", err)
 				return
 			}
+
+			rewardModels := make([]*model.Reward, 0, len(delegationsTo))
 			for delegatorAddress, delegation := range delegationsTo {
 				rewardModel, err := svcCtx.RewardModel.FindOneByDelegatorValidatorEpoch(ctx, delegatorAddress.String(), validatorAddress.String(), rewardEpoch)
 				if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
@@ -617,9 +619,18 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					CreatedAt:        block.Time,
 					UpdatedAt:        time.Now(),
 				}
-				_, err = svcCtx.RewardModel.Insert(ctx, rewardModel)
+				rewardModels = append(rewardModels, rewardModel)
+
+				//_, err = svcCtx.RewardModel.Insert(ctx, rewardModel)
+				//if err != nil {
+				//	logc.Errorf(ctx, "RewardModel insert error, %v", err)
+				//	return
+				//}
+			}
+			if len(rewardModels) > 0 {
+				_, err := svcCtx.RewardModel.BatchInsert(ctx, rewardModels)
 				if err != nil {
-					logc.Errorf(ctx, "RewardModel insert error, %v", err)
+					logc.Errorf(ctx, "RewardModel batch insert error, %v", err)
 					return
 				}
 			}

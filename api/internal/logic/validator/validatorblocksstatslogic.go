@@ -74,9 +74,13 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 	}
 
 	for i := latestHeight; i > latestHeight-100; i-- {
+		sign := false
+		if signSet[i] {
+			sign = true
+		}
 		signs = append(signs, &types.ValidatorBlocksStatsInfo{
 			Height: i,
-			Block:  signSet[i],
+			Block:  sign,
 		})
 	}
 

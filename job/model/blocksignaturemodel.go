@@ -21,7 +21,7 @@ type (
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
 		BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*BlockSignature) (sql.Result, error)
 		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error)
-		FindBlocksByHeight(ctx context.Context, validatorAddress string, startHeight int64) ([]*BlockSignature, error)
+		FindBlocksByHeight(ctx context.Context, signAddresses []string, startHeight int64) ([]*BlockSignature, error)
 		RefreshBlockCountDaysView(ctx context.Context) error
 		FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error)
 		FindLatestOne(ctx context.Context) (*BlockSignature, error)
@@ -120,10 +120,20 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 	}
 }
 
-func (m *customBlockSignatureModel) FindBlocksByHeight(ctx context.Context, validatorAddress string, startHeight int64) ([]*BlockSignature, error) {
+func (m *customBlockSignatureModel) FindBlocksByHeight(ctx context.Context, signAddresses []string, startHeight int64) ([]*BlockSignature, error) {
 	var resp []*BlockSignature
-	query := fmt.Sprintf("select %s from %s where validator_address=$1 and height>$2 order by height desc", blockSignatureRows, m.table)
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, validatorAddress, startHeight)
+	query := fmt.Sprintf("select %s from %s where validator_address in (", blockSignatureRows, m.table)
+	vars := make([]interface{}, 0)
+	for i, signAddress := range signAddresses {
+		query += fmt.Sprintf("$%d,", i+1)
+		vars = append(vars, signAddress)
+	}
+	query = query[:len(query)-1] + ")"
+	paramIndex := len(signAddresses)
+	query += fmt.Sprintf(" and height>$%d order by height desc", paramIndex+1)
+	vars = append(vars, startHeight)
+
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, vars...)
 	switch err {
 	case nil:
 		return resp, nil

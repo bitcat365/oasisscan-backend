@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
 	"oasisscan-backend/common"
@@ -30,6 +29,10 @@ func NewValidatorBlocksStatsLogic(ctx context.Context, svcCtx *svc.ServiceContex
 func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlocksStatsRequest) (resp *types.ValidatorBlocksStatsResponse, err error) {
 	proposals := make([]*types.ValidatorBlocksStatsInfo, 0)
 	signs := make([]*types.ValidatorBlocksStatsInfo, 0)
+	resp = &types.ValidatorBlocksStatsResponse{
+		Proposals: proposals,
+		Signs:     signs,
+	}
 
 	var statLimit int64 = 100
 	//proposed
@@ -40,11 +43,9 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 	blocks, err := l.svcCtx.BlockModel.FindBlocks(l.ctx, pageable)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "BlockModel FindBlocksByValidator error, %v", err)
-		return nil, errort.NewDefaultError()
+		return resp, nil
 	}
-	consensusAddress := ""
 	for _, block := range blocks {
-		consensusAddress = block.ProposerAddress
 		b := false
 		if block.EntityAddress == req.Address {
 			b = true
@@ -58,14 +59,37 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 	latestSignBlock, err := l.svcCtx.BlockSignatureModel.FindLatestOne(l.ctx)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "BlockSignatureModel FindLatestOne error, %v", err)
-		return nil, errort.NewDefaultError()
+		return resp, nil
 	}
-	latestHeight := latestSignBlock.Height
 
-	signsBlocks, err := l.svcCtx.BlockSignatureModel.FindBlocksByHeight(l.ctx, consensusAddress, latestHeight-100)
+	latestHeight := latestSignBlock.Height
+	validator, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Address)
+	if err != nil {
+		logc.Errorf(l.ctx, "ValidatorModel FindOneByEntityAddress error, %v", err)
+		return resp, nil
+	}
+	consensusAddresses := make([]string, 0)
+	if validator != nil {
+		nodes, err := l.svcCtx.NodeModel.FindByEntityId(l.ctx, validator.EntityId)
+		if err != nil {
+			logc.Errorf(l.ctx, "NodeModel FindByEntityId error, %v", err)
+			return resp, nil
+		}
+		if nodes != nil {
+			for _, node := range nodes {
+				consensusAddresses = append(consensusAddresses, node.ConsensusAddress)
+			}
+		}
+	}
+
+	if len(consensusAddresses) == 0 {
+		return resp, nil
+	}
+
+	signsBlocks, err := l.svcCtx.BlockSignatureModel.FindBlocksByHeight(l.ctx, consensusAddresses, latestHeight-100)
 	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "BlockSignatureModel FindBlocksByHeight error, %v", err)
-		return nil, errort.NewDefaultError()
+		return resp, nil
 	}
 
 	signSet := make(map[int64]bool, 0)
@@ -74,13 +98,9 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 	}
 
 	for i := latestHeight; i > latestHeight-100; i-- {
-		sign := false
-		if signSet[i] {
-			sign = true
-		}
 		signs = append(signs, &types.ValidatorBlocksStatsInfo{
 			Height: i,
-			Block:  sign,
+			Block:  signSet[i],
 		})
 	}
 
@@ -88,5 +108,5 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 		Proposals: proposals,
 		Signs:     signs,
 	}
-	return
+	return resp, nil
 }

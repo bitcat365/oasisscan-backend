@@ -172,7 +172,7 @@ func FormatTx(tx *model.Transaction, txType string, ctx context.Context, svcCtx 
 		Shares:    shares,
 		Add:       add,
 		Timestamp: uint64(tx.Timestamp.Unix()),
-		Time:      uint64(time.Now().Unix() - tx.Timestamp.Unix()),
+		Time:      uint64(time.Now().UTC().Unix() - tx.Timestamp.Unix()),
 		Status:    tx.Status,
 		From:      tx.SignAddr,
 		To:        tx.ToAddr,

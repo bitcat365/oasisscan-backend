@@ -50,8 +50,8 @@ func (l *ChainBlocksLogic) ChainBlocks(req *types.ChainBlocksRequest) (resp *typ
 			list = append(list, &types.ChainBlockInfo{
 				Height:        block.Height,
 				Epoch:         block.Epoch,
-				Timestamp:     uint64(block.Timestamp.UTC().Unix()),
-				Time:          uint64(time.Now().UTC().Unix() - block.Timestamp.UTC().Unix()),
+				Timestamp:     uint64(block.Timestamp.Unix()),
+				Time:          uint64(time.Now().Unix() - block.Timestamp.Unix()),
 				Hash:          block.Hash,
 				Txs:           block.Txs,
 				EntityAddress: block.EntityAddress,

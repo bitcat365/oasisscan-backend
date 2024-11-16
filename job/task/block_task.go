@@ -157,7 +157,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 		}
 		logc.Infof(ctx, "transact duration [%v]", time.Since(startTime))
 
-		logc.Infof(ctx, "block scan height: %d, current height: %d", scanHeight, currentHeight)
+		logc.Infof(ctx, "block scan height: %d, current height: %d, size:[%d]", scanHeight, currentHeight, len(txsModels))
 		scanHeight++
 	}
 }

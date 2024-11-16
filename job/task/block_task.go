@@ -42,6 +42,8 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 		scanHeight++
 	}
 
+	logc.Infof(ctx, "block scan start: scanHeight:[%d], currentHeight:[%d]", scanHeight, currentHeight)
+
 	for scanHeight <= currentHeight {
 		//block
 		block, err := consensusApi.GetBlock(ctx, scanHeight)

@@ -51,7 +51,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				logc.Errorf(ctx, "createdHeight getBlock error, %v", err)
 				return
 			}
-			createdTime = createdBlock.Time
+			createdTime = createdBlock.Time.UTC()
 		}
 
 		epochDuration := int64(proposal.ClosesAt) - int64(proposal.CreatedAt)
@@ -65,7 +65,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					logc.Errorf(ctx, "closedBlock getBlock error, %v", err)
 					return
 				}
-				closedTime = closedBlock.Time
+				closedTime = closedBlock.Time.UTC()
 			}
 		} else {
 			closedTime = common.GetEpochDurationTime(createdTime, epochDuration, true)

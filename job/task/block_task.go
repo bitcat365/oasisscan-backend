@@ -42,6 +42,8 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 		scanHeight++
 	}
 
+	logc.Infof(ctx, "block scan start: scanHeight:[%d], currentHeight:[%d]", scanHeight, currentHeight)
+
 	for scanHeight <= currentHeight {
 		//block
 		block, err := consensusApi.GetBlock(ctx, scanHeight)
@@ -110,7 +112,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 					Height:           block.Height,
 					BlockIdFlag:      int64(s.BlockIDFlag),
 					ValidatorAddress: s.ValidatorAddress.String(),
-					Timestamp:        s.Timestamp,
+					Timestamp:        s.Timestamp.UTC(),
 					Signature:        hex.EncodeToString(s.Signature),
 					CreatedAt:        time.Now(),
 					UpdatedAt:        time.Now(),
@@ -131,7 +133,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 				Height:          block.Height,
 				Epoch:           int64(epoch),
 				Hash:            block.Hash.Hex(),
-				Timestamp:       block.Time,
+				Timestamp:       block.Time.UTC(),
 				Meta:            string(metaJson),
 				Txs:             int64(len(txs)),
 				ProposerAddress: meta.Header.ProposerAddress.String(),
@@ -157,7 +159,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 		}
 		logc.Infof(ctx, "transact duration [%v]", time.Since(startTime))
 
-		logc.Infof(ctx, "block scan height: %d, current height: %d", scanHeight, currentHeight)
+		logc.Infof(ctx, "block scan height: %d, current height: %d, size:[%d]", scanHeight, currentHeight, len(txsModels))
 		scanHeight++
 	}
 }
@@ -181,7 +183,7 @@ func parseMethod(block *consensus.Block, signedTx *transaction.SignedTransaction
 		Status:    result.IsSuccess(),
 		Nonce:     int64(raw.Nonce),
 		Height:    block.Height,
-		Timestamp: block.Time,
+		Timestamp: block.Time.UTC(),
 		SignAddr:  staking.NewAddress(signedTx.Signature.PublicKey).String(),
 		Error:     string(errorJson),
 		Events:    string(eventsJson),

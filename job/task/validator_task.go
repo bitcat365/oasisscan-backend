@@ -620,12 +620,6 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					UpdatedAt:        time.Now(),
 				}
 				rewardModels = append(rewardModels, rewardModel)
-
-				//_, err = svcCtx.RewardModel.Insert(ctx, rewardModel)
-				//if err != nil {
-				//	logc.Errorf(ctx, "RewardModel insert error, %v", err)
-				//	return
-				//}
 			}
 			if len(rewardModels) > 0 {
 				_, err := svcCtx.RewardModel.BatchInsert(ctx, rewardModels)

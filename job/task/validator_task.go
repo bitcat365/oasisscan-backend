@@ -616,7 +616,7 @@ func DelegatorRewardSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					DelegationAmount: delegationAmount.ToBigInt().Int64(),
 					DelegationShares: delegation.Shares.ToBigInt().Int64(),
 					Reward:           reward.Int64(),
-					CreatedAt:        block.Time,
+					CreatedAt:        block.Time.UTC(),
 					UpdatedAt:        time.Now(),
 				}
 				rewardModels = append(rewardModels, rewardModel)

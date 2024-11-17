@@ -133,7 +133,7 @@ func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 				Height:          block.Height,
 				Epoch:           int64(epoch),
 				Hash:            block.Hash.Hex(),
-				Timestamp:       block.Time,
+				Timestamp:       block.Time.UTC(),
 				Meta:            string(metaJson),
 				Txs:             int64(len(txs)),
 				ProposerAddress: meta.Header.ProposerAddress.String(),

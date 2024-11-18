@@ -55,7 +55,7 @@ func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 			continue
 		}
 
-		validatorSigns, err := svcCtx.BlockSignatureModel.ValidatorSignStats(ctx, signAddresses, 11)
+		validatorSigns, err := svcCtx.BlockSignatureModel.ValidatorSignStats(ctx, signAddresses, 12)
 		if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 			logc.Errorf(ctx, "ValidatorSignStats error: %v", err)
 			continue

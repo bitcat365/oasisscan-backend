@@ -35,7 +35,7 @@ CREATE INDEX IF NOT EXISTS block_signature_timestamp_idx ON block_signature (tim
 CREATE MATERIALIZED VIEW block_count_days AS
 select DISTINCT DATE_TRUNC('day', timestamp) AS day, count(distinct height)
 from block_signature
-where timestamp >= now() - interval '11 days'
+where timestamp >= now() - interval '12 days'
 group by day;
 
 CREATE TABLE IF NOT EXISTS delegator

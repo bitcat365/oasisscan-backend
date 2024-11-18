@@ -21,6 +21,7 @@ type (
 		SessionInsert(ctx context.Context, session sqlx.Session, data *BlockSignature) (sql.Result, error)
 		BatchSessionInsert(ctx context.Context, session sqlx.Session, data []*BlockSignature) (sql.Result, error)
 		CountSigns(ctx context.Context, signAddresses []string, from int64, startTime *time.Time, endTime *time.Time) (int64, error)
+		ValidatorSignStats(ctx context.Context, signAddresses []string, days int64) ([]*BlockCountDay, error)
 		FindBlocksByHeight(ctx context.Context, signAddresses []string, startHeight int64) ([]*BlockSignature, error)
 		RefreshBlockCountDaysView(ctx context.Context) error
 		FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error)
@@ -117,6 +118,28 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 		return 0, ErrNotFound
 	default:
 		return 0, err
+	}
+}
+
+func (m *customBlockSignatureModel) ValidatorSignStats(ctx context.Context, signAddresses []string, days int64) ([]*BlockCountDay, error) {
+	query := fmt.Sprintf("select DATE_TRUNC('day', timestamp) AS day, count(distinct height) AS count from %s where validator_address in (", m.table)
+	vars := make([]interface{}, 0)
+	for i, signAddress := range signAddresses {
+		query += fmt.Sprintf("$%d,", i+1)
+		vars = append(vars, signAddress)
+	}
+	query = query[:len(query)-1] + ")"
+
+	query += fmt.Sprintf(" and timestamp >= now() - interval '%d days' group by day", days)
+	var resp []*BlockCountDay
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, vars...)
+	switch err {
+	case nil:
+		return resp, nil
+	case sqlc.ErrNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
 	}
 }
 

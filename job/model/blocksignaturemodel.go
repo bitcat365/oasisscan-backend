@@ -132,7 +132,7 @@ func (m *customBlockSignatureModel) ValidatorSignStats(ctx context.Context, sign
 
 	query += fmt.Sprintf(" and timestamp >= now() - interval '%d days' group by day", days)
 	var resp []*BlockCountDay
-	err := m.conn.QueryRowCtx(ctx, &resp, query, vars...)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, vars...)
 	switch err {
 	case nil:
 		return resp, nil

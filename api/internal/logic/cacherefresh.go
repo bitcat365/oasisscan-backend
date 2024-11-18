@@ -7,6 +7,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
+	"time"
 )
 
 func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
@@ -54,6 +55,19 @@ func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 			continue
 		}
 
+		validatorSigns, err := svcCtx.BlockSignatureModel.ValidatorSignStats(ctx, signAddresses, 11)
+		if err != nil {
+			logc.Errorf(ctx, "FindBlockCountDays error: %v", err)
+			continue
+		}
+		if validatorSigns == nil {
+			continue
+		}
+		signMap := make(map[time.Time]int64, 0)
+		for _, sign := range validatorSigns {
+			signMap[sign.Day] = sign.Count
+		}
+
 		var timeResp []int64
 		for i := len(days) - 1; i > 0; i-- {
 			startDay := days[i].Day
@@ -61,16 +75,12 @@ func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 
 			timeResp = append(timeResp, endDay.Unix())
 
-			signs, err := svcCtx.BlockSignatureModel.CountSigns(ctx, signAddresses, 0, &startDay, &endDay)
-			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
-				logc.Errorf(ctx, "CountSigns error: %v", err)
-				continue
-			}
+			signCount := signMap[startDay]
 
 			stats = append(stats, &types.ValidatorSignStatsInfo{
-				DateTime: uint64(endDay.Unix()),
+				DateTime: uint64(startDay.Unix()),
 				Expected: uint64(days[i].Count),
-				Actual:   uint64(signs),
+				Actual:   uint64(signCount),
 			})
 		}
 

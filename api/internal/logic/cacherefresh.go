@@ -57,7 +57,7 @@ func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 
 		validatorSigns, err := svcCtx.BlockSignatureModel.ValidatorSignStats(ctx, signAddresses, 11)
 		if err != nil {
-			logc.Errorf(ctx, "FindBlockCountDays error: %v", err)
+			logc.Errorf(ctx, "ValidatorSignStats error: %v", err)
 			continue
 		}
 		if validatorSigns == nil {

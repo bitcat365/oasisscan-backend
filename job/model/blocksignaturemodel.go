@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
@@ -136,6 +137,7 @@ func (m *customBlockSignatureModel) ValidatorSignStats(ctx context.Context, sign
 		vars = append(vars, days)
 		paramIndex = paramIndex + 1
 	}
+	logc.Errorf(ctx, query)
 	var resp []*BlockCountDay
 	err := m.conn.QueryRowCtx(ctx, &resp, query, vars...)
 	switch err {

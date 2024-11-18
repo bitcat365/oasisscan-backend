@@ -122,7 +122,7 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 }
 
 func (m *customBlockSignatureModel) ValidatorSignStats(ctx context.Context, signAddresses []string, days int64) ([]*BlockCountDay, error) {
-	query := fmt.Sprintf("select DATE_TRUNC('day', timestamp) AS day, count(distinct height) from %s where validator_address in (", m.table)
+	query := fmt.Sprintf("select DATE_TRUNC('day', timestamp) AS day, count(distinct height) AS count from %s where validator_address in (", m.table)
 	vars := make([]interface{}, 0)
 	for i, signAddress := range signAddresses {
 		query += fmt.Sprintf("$%d,", i+1)

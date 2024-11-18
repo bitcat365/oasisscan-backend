@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
@@ -131,13 +130,7 @@ func (m *customBlockSignatureModel) ValidatorSignStats(ctx context.Context, sign
 	}
 	query = query[:len(query)-1] + ")"
 
-	paramIndex := len(signAddresses)
-	if days > 0 {
-		query += fmt.Sprintf(" and timestamp >= now() - interval '$%d days'", paramIndex+1)
-		vars = append(vars, days)
-		paramIndex = paramIndex + 1
-	}
-	logc.Errorf(ctx, query)
+	query += fmt.Sprintf(" and timestamp >= now() - interval '%d days'", days)
 	var resp []*BlockCountDay
 	err := m.conn.QueryRowCtx(ctx, &resp, query, vars...)
 	switch err {

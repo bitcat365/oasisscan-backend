@@ -147,6 +147,7 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				return
 			}
 
+			syncMode := ""
 			if runtimeRoundModel == nil {
 				runtimeRoundModel = &model.RuntimeRound{
 					RuntimeId:    runtimeId,
@@ -167,6 +168,7 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					logc.Errorf(ctx, "runtime round insert error, %v", err)
 					return
 				}
+				syncMode = "insert"
 			} else {
 				runtimeRoundModel = &model.RuntimeRound{
 					RuntimeId:    runtimeId,
@@ -186,6 +188,7 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					logc.Errorf(ctx, "runtime round update error, %v", err)
 					return
 				}
+				syncMode = "update"
 			}
 
 			//update system property
@@ -199,7 +202,7 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				}
 			}
 
-			logc.Infof(ctx, "Runtime round sync done. %d %d [%s]", scanRound, currentRound, runtimeId)
+			logc.Infof(ctx, "Runtime round sync done. mode:[%s] %d %d [%s]", syncMode, scanRound, currentRound, runtimeId)
 			scanRound++
 		}
 	}
@@ -400,7 +403,7 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 						Events:        string(eventsJson),
 						UpdatedAt:     time.Now(),
 					}
-					_, err = svcCtx.RuntimeTransactionModel.Insert(ctx, runtimeTransactionModel)
+					err = svcCtx.RuntimeTransactionModel.Update(ctx, runtimeTransactionModel)
 					if err != nil {
 						logc.Errorf(ctx, "runtime transaction update error, %v", err)
 						return

@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/errort"
+	"sort"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -40,6 +41,9 @@ func (l *RuntimeListLogic) RuntimeList(req *types.RuntimeListRequest) (resp *typ
 			Name:      runtime.Name,
 		})
 	}
+	sort.Slice(runtimeList, func(i, j int) bool {
+		return runtimeList[i].Name > runtimeList[j].Name
+	})
 	resp = &types.RuntimeListResponse{
 		List: runtimeList,
 	}

@@ -71,9 +71,9 @@ func SignStatsCacheJob(ctx context.Context, svcCtx *svc.ServiceContext) {
 		var timeResp []int64
 		for i := len(days) - 1; i > 0; i-- {
 			startDay := days[i].Day
-			endDay := days[i].Day.AddDate(0, 0, 1)
+			//endDay := days[i].Day.AddDate(0, 0, 1)
 
-			timeResp = append(timeResp, endDay.Unix())
+			timeResp = append(timeResp, startDay.Unix())
 
 			signCount := signMap[startDay]
 

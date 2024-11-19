@@ -170,19 +170,8 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				}
 				syncMode = "insert"
 			} else {
-				runtimeRoundModel = &model.RuntimeRound{
-					RuntimeId:    runtimeId,
-					Round:        int64(header.Round),
-					Version:      int64(header.Version),
-					Timestamp:    time.Unix(int64(header.Timestamp), 0).UTC(),
-					HeaderType:   int64(header.HeaderType),
-					PreviousHash: header.PreviousHash.String(),
-					IoRoot:       header.IORoot.String(),
-					StateRoot:    header.StateRoot.String(),
-					MessagesHash: header.MessagesHash.String(),
-					InMsgsHash:   header.InMessagesHash.String(),
-					UpdatedAt:    time.Now(),
-				}
+				runtimeRoundModel.Timestamp = time.Unix(int64(header.Timestamp), 0).UTC()
+				runtimeRoundModel.UpdatedAt = time.Now()
 				err = svcCtx.RuntimeRoundModel.Update(ctx, runtimeRoundModel)
 				if err != nil {
 					logc.Errorf(ctx, "runtime round update error, %v", err)
@@ -384,25 +373,8 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 						return
 					}
 				} else {
-					runtimeTransactionModel = &model.RuntimeTransaction{
-						RuntimeId:     runtimeId,
-						Round:         scanRound,
-						TxHash:        txr.Tx.Hash().Hex(),
-						Position:      int64(i),
-						EvmHash:       ethHash,
-						ConsensusFrom: consensusFrom,
-						ConsensusTo:   consensusTo,
-						EvmFrom:       evmFrom,
-						EvmTo:         evmTo,
-						Method:        string(tx.Call.Method),
-						Result:        txr.Result.IsSuccess(),
-						Messages:      message,
-						Timestamp:     time.Unix(int64(scanRuntimeRound.Header.Timestamp), 0).UTC(),
-						Type:          txr.Tx.AuthProofs[0].Module,
-						Raw:           string(txrBodyJson),
-						Events:        string(eventsJson),
-						UpdatedAt:     time.Now(),
-					}
+					runtimeTransactionModel.Timestamp = time.Unix(int64(scanRuntimeRound.Header.Timestamp), 0).UTC()
+					runtimeTransactionModel.UpdatedAt = time.Now()
 					err = svcCtx.RuntimeTransactionModel.Update(ctx, runtimeTransactionModel)
 					if err != nil {
 						logc.Errorf(ctx, "runtime transaction update error, %v", err)

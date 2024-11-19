@@ -147,12 +147,13 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				return
 			}
 
+			syncMode := ""
 			if runtimeRoundModel == nil {
 				runtimeRoundModel = &model.RuntimeRound{
 					RuntimeId:    runtimeId,
 					Round:        int64(header.Round),
 					Version:      int64(header.Version),
-					Timestamp:    time.Unix(int64(header.Timestamp), 0),
+					Timestamp:    time.Unix(int64(header.Timestamp), 0).UTC(),
 					HeaderType:   int64(header.HeaderType),
 					PreviousHash: header.PreviousHash.String(),
 					IoRoot:       header.IORoot.String(),
@@ -164,9 +165,19 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				}
 				_, err = svcCtx.RuntimeRoundModel.Insert(ctx, runtimeRoundModel)
 				if err != nil {
-					logc.Errorf(ctx, "node insert error, %v", err)
+					logc.Errorf(ctx, "runtime round insert error, %v", err)
 					return
 				}
+				syncMode = "insert"
+			} else {
+				runtimeRoundModel.Timestamp = time.Unix(int64(header.Timestamp), 0).UTC()
+				runtimeRoundModel.UpdatedAt = time.Now()
+				err = svcCtx.RuntimeRoundModel.Update(ctx, runtimeRoundModel)
+				if err != nil {
+					logc.Errorf(ctx, "runtime round update error, %v", err)
+					return
+				}
+				syncMode = "update"
 			}
 
 			//update system property
@@ -180,7 +191,7 @@ func RuntimeRoundSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 				}
 			}
 
-			logc.Infof(ctx, "Runtime round sync done. %d %d [%s]", scanRound, currentRound, runtimeId)
+			logc.Infof(ctx, "Runtime round sync done. mode:[%s] %d %d [%s]", syncMode, scanRound, currentRound, runtimeId)
 			scanRound++
 		}
 	}
@@ -273,69 +284,69 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					return
 				}
 
+				tx, err := common.OpenUtxNoVerify(&txr.Tx)
+				if err != nil {
+					logc.Errorf(ctx, "tx decode error, %v", err)
+					return
+				}
+
+				consensusFrom, consensusTo := "", ""
+				ethHash, evmFrom, evmTo := "", "", ""
+				if len(txr.Tx.AuthProofs) == 1 && txr.Tx.AuthProofs[0].Module == "evm.ethereum.v0" {
+					ethHash = hex.EncodeToString(common.Keccak256(txr.Tx.Body))
+
+					txData := new(eth_types.Transaction)
+					if err := txData.UnmarshalBinary(txr.Tx.Body); err != nil {
+						logc.Errorf(ctx, "txData unmarshal error, %v", err)
+						return
+					}
+
+					from, err := eth_types.Sender(eth_types.NewCancunSigner(txData.ChainId()), txData)
+					if err != nil {
+						logc.Errorf(ctx, "from address error, %s, %d, %v", runtimeId, scanRound, err)
+						return
+					}
+					evmFrom = strings.ToLower(from.Hex())
+					if txData.To() != nil {
+						evmTo = strings.ToLower(txData.To().Hex())
+					}
+				} else {
+					var body common.RuntimeTransactionBody
+					err = common.CborUnmarshalOmit(tx.Call.Body, &body)
+					if err != nil {
+						logc.Errorf(ctx, "runtime id:%s ,current round:%d, consensus body unmarshal error, %v", runtimeId, scanRound, err)
+						return
+					}
+
+					for _, si := range tx.AuthInfo.SignerInfo {
+						address, err := si.AddressSpec.Address()
+						if err != nil {
+							logc.Errorf(ctx, "consensusFrom error, %v", err)
+							return
+						}
+						consensusFrom = address.ConsensusAddress().String()
+					}
+					consensusTo = body.To.ConsensusAddress().String()
+				}
+
+				txrBodyJson, err := json.Marshal(txr)
+				if err != nil {
+					logc.Errorf(ctx, "txrBodyJson error, %v", err)
+					return
+				}
+
+				eventsJson, err := json.Marshal(txr.Events)
+				if err != nil {
+					logc.Errorf(ctx, "eventsJson error, %v", err)
+					return
+				}
+
+				message := ""
+				if !txr.Result.IsSuccess() {
+					message = txr.Result.Failed.Message
+				}
+
 				if runtimeTransactionModel == nil {
-					tx, err := common.OpenUtxNoVerify(&txr.Tx)
-					if err != nil {
-						logc.Errorf(ctx, "tx decode error, %v", err)
-						return
-					}
-
-					consensusFrom, consensusTo := "", ""
-					ethHash, evmFrom, evmTo := "", "", ""
-					if len(txr.Tx.AuthProofs) == 1 && txr.Tx.AuthProofs[0].Module == "evm.ethereum.v0" {
-						ethHash = hex.EncodeToString(common.Keccak256(txr.Tx.Body))
-
-						txData := new(eth_types.Transaction)
-						if err := txData.UnmarshalBinary(txr.Tx.Body); err != nil {
-							logc.Errorf(ctx, "txData unmarshal error, %v", err)
-							return
-						}
-
-						from, err := eth_types.Sender(eth_types.NewCancunSigner(txData.ChainId()), txData)
-						if err != nil {
-							logc.Errorf(ctx, "from address error, %s, %d, %v", runtimeId, scanRound, err)
-							return
-						}
-						evmFrom = strings.ToLower(from.Hex())
-						if txData.To() != nil {
-							evmTo = strings.ToLower(txData.To().Hex())
-						}
-					} else {
-						var body common.RuntimeTransactionBody
-						err = common.CborUnmarshalOmit(tx.Call.Body, &body)
-						if err != nil {
-							logc.Errorf(ctx, "runtime id:%s ,current round:%d, consensus body unmarshal error, %v", runtimeId, scanRound, err)
-							return
-						}
-
-						for _, si := range tx.AuthInfo.SignerInfo {
-							address, err := si.AddressSpec.Address()
-							if err != nil {
-								logc.Errorf(ctx, "consensusFrom error, %v", err)
-								return
-							}
-							consensusFrom = address.ConsensusAddress().String()
-						}
-						consensusTo = body.To.ConsensusAddress().String()
-					}
-
-					txrBodyJson, err := json.Marshal(txr)
-					if err != nil {
-						logc.Errorf(ctx, "txrBodyJson error, %v", err)
-						return
-					}
-
-					eventsJson, err := json.Marshal(txr.Events)
-					if err != nil {
-						logc.Errorf(ctx, "eventsJson error, %v", err)
-						return
-					}
-
-					message := ""
-					if !txr.Result.IsSuccess() {
-						message = txr.Result.Failed.Message
-					}
-
 					runtimeTransactionModel = &model.RuntimeTransaction{
 						RuntimeId:     runtimeId,
 						Round:         scanRound,
@@ -349,7 +360,7 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 						Method:        string(tx.Call.Method),
 						Result:        txr.Result.IsSuccess(),
 						Messages:      message,
-						Timestamp:     time.Unix(int64(scanRuntimeRound.Header.Timestamp), 0),
+						Timestamp:     time.Unix(int64(scanRuntimeRound.Header.Timestamp), 0).UTC(),
 						Type:          txr.Tx.AuthProofs[0].Module,
 						Raw:           string(txrBodyJson),
 						Events:        string(eventsJson),
@@ -359,6 +370,14 @@ func RuntimeTransactionSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 					_, err = svcCtx.RuntimeTransactionModel.Insert(ctx, runtimeTransactionModel)
 					if err != nil {
 						logc.Errorf(ctx, "runtime transaction insert error, %v", err)
+						return
+					}
+				} else {
+					runtimeTransactionModel.Timestamp = time.Unix(int64(scanRuntimeRound.Header.Timestamp), 0).UTC()
+					runtimeTransactionModel.UpdatedAt = time.Now()
+					err = svcCtx.RuntimeTransactionModel.Update(ctx, runtimeTransactionModel)
+					if err != nil {
+						logc.Errorf(ctx, "runtime transaction update error, %v", err)
 						return
 					}
 				}

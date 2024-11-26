@@ -2,12 +2,12 @@ package runtime
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	eth_types "github.com/ethereum/go-ethereum/core/types"
 	"github.com/oasisprotocol/oasis-core/go/common/cbor"
-	"github.com/oasisprotocol/oasis-sdk/client-sdk/go/client"
 	sdkClient "github.com/oasisprotocol/oasis-sdk/client-sdk/go/client"
 	"github.com/oasisprotocol/oasis-sdk/client-sdk/go/modules/accounts"
 	"github.com/oasisprotocol/oasis-sdk/client-sdk/go/modules/consensusaccounts"
@@ -65,7 +65,7 @@ func (l *RuntimeTransactionInfoLogic) RuntimeTransactionInfo(req *types.RuntimeT
 
 	var consensusTx *types.RuntimeTransactionConsensusTx = nil
 	var evmTx *types.RuntimeTransactionEvmTx = nil
-	txr := new(client.TransactionWithResults)
+	txr := new(sdkClient.TransactionWithResults)
 	if err := json.Unmarshal([]byte(txModel.Raw), txr); err != nil {
 		logc.Errorf(l.ctx, "transaction json unmarshal error, %v", err)
 		return nil, errort.NewDefaultError()
@@ -107,6 +107,26 @@ func (l *RuntimeTransactionInfoLogic) RuntimeTransactionInfo(req *types.RuntimeT
 			To:     txModel.ConsensusTo,
 			Amount: amountFloat.String(),
 			Nonce:  int64(sdkTx.AuthInfo.SignerInfo[0].Nonce),
+		}
+
+		if txModel.Method == "consensus.Withdraw" {
+			for _, si := range sdkTx.AuthInfo.SignerInfo {
+				var (
+					data    []byte
+					ethAddr string
+				)
+				spec := si.AddressSpec.Signature
+				if spec.Secp256k1Eth != nil {
+					untaggedPk, _ := si.AddressSpec.Signature.Secp256k1Eth.MarshalBinaryUncompressedUntagged()
+					data = common.SliceEthAddress(common.Keccak256(untaggedPk))
+					ethAddr = hex.EncodeToString(data)
+					if !strings.HasPrefix(ethAddr, "0x") {
+						ethAddr = "0x" + ethAddr
+					}
+					consensusTx.From = ethAddr
+					break
+				}
+			}
 		}
 	}
 

@@ -6,6 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"oasisscan-backend/common"
+	"oasisscan-backend/job/internal/svc"
+	"oasisscan-backend/job/model"
+	"strconv"
+	"strings"
+	"time"
+
 	eth_types "github.com/ethereum/go-ethereum/core/types"
 	common_namespace "github.com/oasisprotocol/oasis-core/go/common"
 	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
@@ -17,12 +24,6 @@ import (
 	scheduler "github.com/oasisprotocol/oasis-core/go/scheduler/api"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"oasisscan-backend/common"
-	"oasisscan-backend/job/internal/svc"
-	"oasisscan-backend/job/model"
-	"strconv"
-	"strings"
-	"time"
 
 	runtimeSdkClient "github.com/oasisprotocol/oasis-sdk/client-sdk/go/client"
 )
@@ -677,11 +678,11 @@ func RuntimeStats(ctx context.Context, svcCtx *svc.ServiceContext) {
 						}
 
 						//update stats
-						rs, err := svcCtx.RuntimeStatsModel.SessionFindOneByRuntimeIdEntityId(ctx, session, runtimeID.String(), entity.String())
-						if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
-							return fmt.Errorf("FindOneByRuntimeIdEntityId error, %v", err)
-						}
-						rs = &model.RuntimeStats{
+						// rs, err := svcCtx.RuntimeStatsModel.SessionFindOneByRuntimeIdEntityId(ctx, session, runtimeID.String(), entity.String())
+						// if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+						// 	return fmt.Errorf("FindOneByRuntimeIdEntityId error, %v", err)
+						// }
+						rs := &model.RuntimeStats{
 							RuntimeId:      runtimeID.String(),
 							EntityId:       entity.String(),
 							RoundsElected:  0,

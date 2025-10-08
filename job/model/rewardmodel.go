@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
 	"strings"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 var _ RewardModel = (*customRewardModel)(nil)
@@ -81,7 +82,7 @@ func (m *customRewardModel) CountByDelegator(ctx context.Context, delegator stri
 
 func (m *customRewardModel) FindByDelegatorGroupByDay(ctx context.Context, delegator string) ([]*RewardDay, error) {
 	var resp []*RewardDay
-	query := fmt.Sprintf("select r.delegator,r.validator,v.name,DATE_TRUNC('day', r.created_at) AS day, sum(r.reward) as reward from reward r left join validator v on r.validator=v.entity_address where r.delegator=$1 group by r.delegator,r.validator,v.name,day order by day asc,reward desc")
+	query := "select r.delegator,r.validator,v.name,DATE_TRUNC('day', r.created_at) AS day, sum(r.reward) as reward from reward r left join validator v on r.validator=v.entity_address where r.delegator=$1 group by r.delegator,r.validator,v.name,day order by day asc,reward desc"
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, delegator)
 	switch err {
 	case nil:
@@ -95,7 +96,7 @@ func (m *customRewardModel) FindByDelegatorGroupByDay(ctx context.Context, deleg
 
 func (m *customRewardModel) FindDays(ctx context.Context) ([]*StatsDay, error) {
 	var resp []*StatsDay
-	query := fmt.Sprintf("select day from reward_days order by day desc limit 10")
+	query := "select day from reward_days order by day desc limit 10"
 	err := m.conn.QueryRowsCtx(ctx, &resp, query)
 	switch err {
 	case nil:
@@ -114,7 +115,7 @@ func (m *customRewardModel) DeleteBeforeEpoch(ctx context.Context, epoch int64) 
 }
 
 func (m *customRewardModel) RefreshRewardDaysView(ctx context.Context) error {
-	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW reward_days")
+	query := "REFRESH MATERIALIZED VIEW reward_days"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }

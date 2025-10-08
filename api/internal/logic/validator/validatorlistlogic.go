@@ -3,7 +3,6 @@ package validator
 import (
 	"context"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/logc"
 	"math/big"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
@@ -11,6 +10,8 @@ import (
 	"oasisscan-backend/api/internal/types"
 	"sort"
 	"strconv"
+
+	"github.com/zeromicro/go-zero/core/logc"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -59,10 +60,6 @@ func (l *ValidatorListLogic) ValidatorList(req *types.ValidatorListRequest) (res
 		validatorList := make([]types.ValidatorInfo, 0)
 		for _, validator := range validators {
 			r := response.ValidatorResponseFormat(validator)
-			if err != nil {
-				logc.Errorf(l.ctx, "validator response format error, %v", err)
-				return nil, errort.NewDefaultError()
-			}
 			r.Bounds = make([]types.Bound, 0)
 			r.Rates = make([]types.Rate, 0)
 

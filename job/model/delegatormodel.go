@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"oasisscan-backend/common"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"oasisscan-backend/common"
 )
 
 var _ DelegatorModel = (*customDelegatorModel)(nil)
@@ -56,7 +57,7 @@ func (m *customDelegatorModel) SessionDeleteAll(ctx context.Context, session sql
 }
 
 func (m *customDelegatorModel) SessionResetSequence(ctx context.Context, session sqlx.Session) error {
-	query := fmt.Sprintf("alter sequence delegator_id_seq restart with 1")
+	query := "alter sequence delegator_id_seq restart with 1"
 	_, err := session.ExecCtx(ctx, query)
 	return err
 }

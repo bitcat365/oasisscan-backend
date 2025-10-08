@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
 	"strings"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 var _ BlockSignatureModel = (*customBlockSignatureModel)(nil)
@@ -107,7 +108,6 @@ func (m *customBlockSignatureModel) CountSigns(ctx context.Context, signAddresse
 	if endTime != nil {
 		query += fmt.Sprintf(" and timestamp <= $%d", paramIndex+1)
 		vars = append(vars, endTime)
-		paramIndex = paramIndex + 1
 	}
 	var resp int64
 	err := m.conn.QueryRowCtx(ctx, &resp, query, vars...)
@@ -168,14 +168,14 @@ func (m *customBlockSignatureModel) FindBlocksByHeight(ctx context.Context, sign
 }
 
 func (m *customBlockSignatureModel) RefreshBlockCountDaysView(ctx context.Context) error {
-	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW block_count_days")
+	query := "REFRESH MATERIALIZED VIEW block_count_days"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }
 
 func (m *customBlockSignatureModel) FindBlockCountDays(ctx context.Context) ([]*BlockCountDay, error) {
 	var resp []*BlockCountDay
-	query := fmt.Sprintf("select day,count from block_count_days order by day desc limit 11")
+	query := "select day,count from block_count_days order by day desc limit 11"
 	err := m.conn.QueryRowsCtx(ctx, &resp, query)
 	switch err {
 	case nil:

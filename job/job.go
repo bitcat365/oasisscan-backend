@@ -63,7 +63,7 @@ func main() {
 	if err != nil {
 		logx.Errorf("cron job add func error, %v\n", err)
 	}
-	_, err = cr.AddFunc("@daily", func() {
+	_, err = cr.AddFunc("@every 1h", func() {
 		ctx := context.Background()
 		logc.Infof(ctx, "DailyJob start...")
 		task.DailyJob(ctx, svcCtx)

@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 var _ BlockModel = (*customBlockModel)(nil)
@@ -116,7 +117,7 @@ func (m *customBlockModel) CountBlocks(ctx context.Context) (int64, error) {
 }
 
 func (m *customBlockModel) FindBlockProposer(ctx context.Context, height int64) (*BlockProposer, error) {
-	query := fmt.Sprintf("select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where b.height=$1 limit 1")
+	query := "select b.*,v.entity_address,v.name from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where b.height=$1 limit 1"
 	var resp BlockProposer
 	err := m.conn.QueryRowCtx(ctx, &resp, query, height)
 	switch err {
@@ -145,7 +146,7 @@ func (m *customBlockModel) FindBlocksByValidator(ctx context.Context, validator 
 
 func (m *customBlockModel) CountBlocksByValidator(ctx context.Context, validator string) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf("select count(b.id) from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1 and b.height>((select max(height) from block)-100000)")
+	query := "select count(b.id) from block b left join node n on b.proposer_address=n.consensus_address left join validator v on n.entity_id=v.entity_id where v.entity_address=$1 and b.height>((select max(height) from block)-100000)"
 	err := m.conn.QueryRowCtx(ctx, &resp, query, validator)
 	switch err {
 	case nil:

@@ -4,11 +4,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
 	"strings"
 	"time"
+
+	"github.com/zeromicro/go-zero/core/stores/sqlc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 var _ TransactionModel = (*customTransactionModel)(nil)
@@ -146,7 +147,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 
 	query += strings.Join(conditions, " AND ")
 	if runtime {
-		runtimeQuery := fmt.Sprintf(`
+		runtimeQuery := `
             UNION ALL
             SELECT 
                 'runtime' as tx_type,
@@ -170,7 +171,7 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 				rt.runtime_id,
 				r.name as runtime_name
             FROM runtime_transaction rt left join runtime r on rt.runtime_id=r.runtime_id
-            WHERE `)
+            WHERE `
 
 		runtimeConditions := []string{"1=1"}
 		if address != "" {
@@ -272,7 +273,7 @@ func (m *customTransactionModel) TransactionCountStats(ctx context.Context, day 
 }
 
 func (m *customTransactionModel) RefreshDailyCountsStatsView(ctx context.Context) error {
-	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW daily_transaction_counts")
+	query := "REFRESH MATERIALIZED VIEW daily_transaction_counts"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }
@@ -292,14 +293,14 @@ func (m *customTransactionModel) LatestTx(ctx context.Context) (*Transaction, er
 }
 
 func (m *customTransactionModel) RefreshTransactionMethodView(ctx context.Context) error {
-	query := fmt.Sprintf("REFRESH MATERIALIZED VIEW transaction_method")
+	query := "REFRESH MATERIALIZED VIEW transaction_method"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }
 
 func (m *customTransactionModel) TransactionMethods(ctx context.Context) ([]string, error) {
 	var resp []string
-	query := fmt.Sprintf("select method from transaction_method order by method")
+	query := "select method from transaction_method order by method"
 	err := m.conn.QueryRowsCtx(ctx, &resp, query)
 	switch err {
 	case nil:

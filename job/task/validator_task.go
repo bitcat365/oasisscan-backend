@@ -248,7 +248,7 @@ func ValidatorInfoSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 			if len(keybaseResultBytes) > 0 {
 				var keybaseResultData interface{}
 				if err := json.Unmarshal(keybaseResultBytes, &keybaseResultData); err != nil {
-					logc.Errorf(ctx, "JSON unmarshal error: %s, %s, %s, %v", entityId, entityInfo.Keybase, err)
+					logc.Errorf(ctx, "JSON unmarshal error: %s, %s, %v", entityId, entityInfo.Keybase, err)
 				} else {
 					icon, err = common.GetNestedStringValue(keybaseResultData, "them", "0", "pictures", "primary", "url")
 					if err != nil {
@@ -335,7 +335,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		var pubKey signature.PublicKey
 		err = pubKey.UnmarshalText([]byte(validator.NodeId))
 		if err != nil {
-			logc.Errorf(ctx, "pubKey unmarshal error: %s", entityId, err)
+			logc.Errorf(ctx, "pubKey unmarshal error: %s, %v", entityId, err)
 			return
 		}
 		nodeStatus := nodeStatusMap[pubKey]
@@ -404,7 +404,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		accountLastDayQuery := staking.OwnerQuery{Height: currentHeight - common.OneDayHeight, Owner: *entityAddress}
 		accountLastDay, err := stakingApi.Account(ctx, &accountLastDayQuery)
 		if err != nil {
-			logc.Errorf(ctx, "stakingApi account error: %s", entityId, err)
+			logc.Errorf(ctx, "stakingApi account error: %s, %v", entityId, err)
 			return
 		}
 		lastEscrow := accountLastDay.Escrow.Active.Balance.ToBigInt().Int64()
@@ -416,7 +416,7 @@ func ValidatorConsensusSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		if validator.EntityAddress != "" {
 			delegatorCount, err := svcCtx.DelegatorModel.CountByValidator(ctx, validator.EntityAddress)
 			if err != nil {
-				logc.Errorf(ctx, "delegator CountByValidator error: %s", entityId, err)
+				logc.Errorf(ctx, "delegator CountByValidator error: %s, %v", entityId, err)
 				return
 			}
 			validator.Delegators = delegatorCount

@@ -145,7 +145,6 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 	//delegations
 	selfShares := quantity.NewQuantity()
 	selfAmount := quantity.NewQuantity()
-	otherAmount := quantity.NewQuantity()
 	delegationQuery := staking.OwnerQuery{Height: currentHeight, Owner: validatorAddress}
 	delegationsMap, err := l.svcCtx.Staking.DelegationsFor(l.ctx, &delegationQuery)
 	if err != nil {
@@ -179,7 +178,7 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 		Other: fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(otherShares.ToBigInt(), common.Decimals)),
 		Total: fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(account.Escrow.Active.TotalShares.ToBigInt(), common.Decimals)),
 	}
-	otherAmount, err = account.Escrow.Active.StakeForShares(otherShares)
+	otherAmount, err := account.Escrow.Active.StakeForShares(otherShares)
 	if err != nil {
 		logc.Errorf(l.ctx, "computes the other amount error, %v", err)
 		return nil, errort.NewDefaultError()

@@ -3,11 +3,12 @@ package validator
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
 	"oasisscan-backend/common"
+
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -75,10 +76,8 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 			logc.Errorf(l.ctx, "NodeModel FindByEntityId error, %v", err)
 			return resp, nil
 		}
-		if nodes != nil {
-			for _, node := range nodes {
-				consensusAddresses = append(consensusAddresses, node.ConsensusAddress)
-			}
+		for _, node := range nodes {
+			consensusAddresses = append(consensusAddresses, node.ConsensusAddress)
 		}
 	}
 

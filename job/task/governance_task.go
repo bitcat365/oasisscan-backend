@@ -5,6 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"oasisscan-backend/common"
+	"oasisscan-backend/job/internal/svc"
+	"oasisscan-backend/job/model"
+	"strconv"
+	"time"
+
 	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
 	"github.com/oasisprotocol/oasis-core/go/common/cbor"
 	"github.com/oasisprotocol/oasis-core/go/common/quantity"
@@ -12,12 +19,6 @@ import (
 	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"math/big"
-	"oasisscan-backend/common"
-	"oasisscan-backend/job/internal/svc"
-	"oasisscan-backend/job/model"
-	"strconv"
-	"time"
 )
 
 func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
@@ -55,7 +56,7 @@ func ProposalSync(ctx context.Context, svcCtx *svc.ServiceContext) {
 		}
 
 		epochDuration := int64(proposal.ClosesAt) - int64(proposal.CreatedAt)
-		if m.ClosedEpoch <= int64(currentEpoch) {
+		if int64(proposal.ClosesAt) <= int64(currentEpoch) {
 			closedHeight, err := svcCtx.Beacon.GetEpochBlock(ctx, proposal.ClosesAt)
 			if err != nil {
 				closedTime = common.GetEpochDurationTime(time.Now(), int64(proposal.ClosesAt)-int64(currentEpoch), true)

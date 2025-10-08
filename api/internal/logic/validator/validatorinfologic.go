@@ -4,18 +4,19 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
-	"github.com/oasisprotocol/oasis-core/go/common/quantity"
-	registry "github.com/oasisprotocol/oasis-core/go/registry/api"
-	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"math/big"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/response"
 	"oasisscan-backend/common"
 	"strconv"
 	"strings"
+
+	"github.com/oasisprotocol/oasis-core/go/common/crypto/signature"
+	"github.com/oasisprotocol/oasis-core/go/common/quantity"
+	registry "github.com/oasisprotocol/oasis-core/go/registry/api"
+	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -211,7 +212,7 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 			Online: false,
 		})
 	}
-	runtimeMap := make(map[string]bool, 0)
+	runtimeMap := make(map[string]string, 0)
 	for _, validatorNode := range validatorNodes {
 		var pubKey signature.PublicKey
 		err = pubKey.UnmarshalText([]byte(validatorNode.NodeId))
@@ -228,11 +229,15 @@ func (l *ValidatorInfoLogic) ValidatorInfo(req *types.ValidatorInfoRequest) (res
 			continue
 		}
 		for _, runtime := range node.Runtimes {
-			runtimeMap[runtime.ID.Hex()] = true
+			runtimeMap[runtime.ID.Hex()] = validatorNode.NodeId
 		}
 	}
 	for _, validatorRuntime := range validatorRuntimes {
-		validatorRuntime.Online = runtimeMap[validatorRuntime.Id]
+		if _, ok := runtimeMap[validatorRuntime.Id]; !ok {
+			continue
+		}
+		validatorRuntime.Online = true
+		validatorRuntime.NodeId = runtimeMap[validatorRuntime.Id]
 	}
 	validatorInfo.Runtimes = validatorRuntimes
 

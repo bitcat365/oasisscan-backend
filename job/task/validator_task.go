@@ -7,6 +7,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
+	"oasisscan-backend/common"
+	"oasisscan-backend/job/internal/svc"
+	"oasisscan-backend/job/model"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/cometbft/cometbft/crypto"
 	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
 	"github.com/oasisprotocol/oasis-core/go/common/cbor"
@@ -15,13 +23,6 @@ import (
 	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
 	"github.com/zeromicro/go-zero/core/logc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"math/big"
-	"oasisscan-backend/common"
-	"oasisscan-backend/job/internal/svc"
-	"oasisscan-backend/job/model"
-	"strconv"
-	"strings"
-	"time"
 )
 
 func NodeScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
@@ -113,6 +114,19 @@ func NodeScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
 				return
 			}
 
+			// only update latest node info
+			validatorNodes, err := svcCtx.NodeModel.FindByEntityId(ctx, entityId.String())
+			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
+				logc.Errorf(ctx, "node FindByEntityId error, %v", err)
+				return
+			}
+			var validatorNode *model.Node
+			if validatorNodes != nil || len(validatorNodes) > 0 {
+				validatorNode = validatorNodes[0]
+			}
+			if validatorNode.NodeId != nodeId.String() {
+				continue
+			}
 			validator, err := svcCtx.ValidatorModel.FindOneByEntityId(ctx, entityId.String())
 			if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 				logc.Errorf(ctx, "Validator FindOneByEntityId error, %v", err)

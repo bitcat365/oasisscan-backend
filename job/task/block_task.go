@@ -6,20 +6,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/oasisprotocol/oasis-core/go/common/cbor"
-	consensus "github.com/oasisprotocol/oasis-core/go/consensus/api"
-	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction"
-	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction/results"
-	cometbft "github.com/oasisprotocol/oasis-core/go/consensus/cometbft/api"
-	keymanager "github.com/oasisprotocol/oasis-core/go/keymanager/api"
-	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/common"
 	"oasisscan-backend/job/internal/svc"
 	"oasisscan-backend/job/model"
 	"strconv"
 	"time"
+
+	"github.com/oasisprotocol/oasis-core/go/common/cbor"
+	consensus "github.com/oasisprotocol/oasis-core/go/consensus/api"
+	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction"
+	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction/results"
+	cometbft "github.com/oasisprotocol/oasis-core/go/consensus/cometbft/api"
+	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 func BlockScanner(ctx context.Context, svcCtx *svc.ServiceContext) {
@@ -238,10 +238,10 @@ func parseMethod(block *consensus.Block, signedTx *transaction.SignedTransaction
 		m.ToAddr = t.From.String()
 		m.Amount = t.Amount.ToBigInt().Int64()
 	case "keymanager.UpdatePolicy":
-		var t keymanager.SignedPolicySGX
-		if err := cbor.Unmarshal(raw.Body, &t); err != nil {
-			return nil, err
-		}
+		// var t keymanager.SignedPolicySGX
+		// if err := cbor.Unmarshal(raw.Body, &t); err != nil {
+		// 	return nil, err
+		// }
 	}
 
 	return &m, nil

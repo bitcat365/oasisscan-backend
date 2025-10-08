@@ -22,13 +22,13 @@ type ServiceContext struct {
 	Config                  config.Config
 	PostgreDB               sqlx.SqlConn
 	GrpcConn                *grpc.ClientConn
-	Staking                 staking.Backend
-	Consensus               consensus.ClientBackend
-	Registry                registry.Backend
-	Beacon                  beacon.Backend
-	RootHash                roothash.Backend
-	Runtime                 runtime.RuntimeClient
-	Governance              governance.Backend
+	Staking                 *staking.Client
+	Consensus               *consensus.Client
+	Registry                *registry.Client
+	Beacon                  *beacon.Client
+	RootHash                *roothash.Client
+	Runtime                 *runtime.Client
+	Governance              *governance.Client
 	BlockModel              model.BlockModel
 	BlockSignatureModel     model.BlockSignatureModel
 	TransactionModel        model.TransactionModel
@@ -58,13 +58,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		Config:                  c,
 		PostgreDB:               pgConn,
 		GrpcConn:                grpcConn,
-		Staking:                 staking.NewStakingClient(grpcConn),
-		Consensus:               consensus.NewConsensusClient(grpcConn),
-		Registry:                registry.NewRegistryClient(grpcConn),
-		Beacon:                  beacon.NewBeaconClient(grpcConn),
-		RootHash:                roothash.NewRootHashClient(grpcConn),
-		Runtime:                 runtime.NewRuntimeClient(grpcConn),
-		Governance:              governance.NewGovernanceClient(grpcConn),
+		Staking:                 staking.NewClient(grpcConn),
+		Consensus:               consensus.NewClient(grpcConn),
+		Registry:                registry.NewClient(grpcConn),
+		Beacon:                  beacon.NewClient(grpcConn),
+		RootHash:                roothash.NewClient(grpcConn),
+		Runtime:                 runtime.NewClient(grpcConn),
+		Governance:              governance.NewClient(grpcConn),
 		BlockModel:              model.NewBlockModel(pgConn),
 		BlockSignatureModel:     model.NewBlockSignatureModel(pgConn),
 		TransactionModel:        model.NewTransactionModel(pgConn),

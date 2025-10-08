@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/types"
 	"oasisscan-backend/common"
 	"oasisscan-backend/job/model"
@@ -21,8 +22,14 @@ type Body struct {
 func Response(w http.ResponseWriter, resp interface{}, err error) {
 	var body Body
 	if err != nil {
-		body.Code = -1
-		body.Message = err.Error()
+		e, ok := err.(*errort.CodeError)
+		if ok {
+			body.Code = e.Code
+			body.Message = e.Msg
+		} else {
+			body.Code = -1
+			body.Message = err.Error()
+		}
 	} else {
 		body.Message = "OK"
 		body.Data = resp

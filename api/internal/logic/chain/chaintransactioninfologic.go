@@ -4,19 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"oasisscan-backend/api/internal/errort"
+	"oasisscan-backend/common"
+	"time"
+
 	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
 	"github.com/oasisprotocol/oasis-core/go/common/cbor"
 	"github.com/oasisprotocol/oasis-core/go/common/node"
 	"github.com/oasisprotocol/oasis-core/go/common/quantity"
 	consensus "github.com/oasisprotocol/oasis-core/go/consensus/api"
 	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction"
-	keymanager "github.com/oasisprotocol/oasis-core/go/keymanager/api"
 	roothash "github.com/oasisprotocol/oasis-core/go/roothash/api"
 	"github.com/zeromicro/go-zero/core/logc"
-	"math/big"
-	"oasisscan-backend/api/internal/errort"
-	"oasisscan-backend/common"
-	"time"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -152,9 +152,7 @@ func parseMethod(raw *transaction.Transaction) (string, error) {
 		bodyJson, _ := json.Marshal(t)
 		return string(bodyJson), nil
 	case "keymanager.UpdatePolicy":
-		var t keymanager.SignedPolicySGX
-		_ = cbor.Unmarshal(raw.Body, &t)
-		bodyJson, _ := json.Marshal(t)
+		// TODO: Fix keymanager policy type
 		return string(bodyJson), nil
 	case "roothash.ExecutorCommit":
 		var t roothash.ExecutorCommit

@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/robfig/cron/v3"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/job/internal/config"
 	"oasisscan-backend/job/internal/server"
 	"oasisscan-backend/job/internal/svc"
 	"oasisscan-backend/job/proto"
 	"oasisscan-backend/job/task"
+
+	"github.com/robfig/cron/v3"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
@@ -174,6 +175,6 @@ func main() {
 
 	cr.Start()
 
-	logx.Errorf("Starting rpc server at %s...\n", c.ListenOn)
+	logx.Infof("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

@@ -72,6 +72,7 @@ type (
 	ValidatorRuntime {
 		Name   string `json:"name"`
 		Id     string `json:"id"`
+		NodeId string `json:"nodeId"`
 		Online bool   `json:"online"`
 	}
 	Bound {

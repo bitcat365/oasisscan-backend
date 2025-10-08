@@ -3,11 +3,12 @@ package governance
 import (
 	"net/http"
 
-	"github.com/zeromicro/go-zero/rest/httpx"
 	"oasisscan-backend/api/internal/logic/governance"
 	"oasisscan-backend/api/internal/response"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
+
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func GovernanceProposalWithVotesHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

@@ -3,6 +3,7 @@ package model
 import (
 	"context"
 	"fmt"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -31,7 +32,7 @@ func NewNodeModel(conn sqlx.SqlConn) NodeModel {
 
 func (m *customNodeModel) FindByEntityId(ctx context.Context, entityId string) ([]*Node, error) {
 	var resp []*Node
-	query := fmt.Sprintf("select %s from %s where entity_id = $1", nodeRows, m.table)
+	query := fmt.Sprintf("select %s from %s where entity_id = $1 order by id desc", nodeRows, m.table)
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, entityId)
 	switch err {
 	case nil:

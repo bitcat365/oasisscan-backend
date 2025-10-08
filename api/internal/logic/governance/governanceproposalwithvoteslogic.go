@@ -5,13 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
-	"github.com/oasisprotocol/oasis-core/go/common/quantity"
-	governance "github.com/oasisprotocol/oasis-core/go/governance/api"
-	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"math/big"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/svc"
@@ -19,6 +12,14 @@ import (
 	"oasisscan-backend/common"
 	"sort"
 	"strconv"
+
+	beacon "github.com/oasisprotocol/oasis-core/go/beacon/api"
+	"github.com/oasisprotocol/oasis-core/go/common/quantity"
+	governance "github.com/oasisprotocol/oasis-core/go/governance/api"
+	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type GovernanceProposalWithVotesLogic struct {
@@ -41,6 +42,11 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 		if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 			logc.Errorf(l.ctx, "FindOneByProposalId error, %v", err)
 			return nil, errort.NewDefaultError()
+		}
+
+		if m == nil {
+			logc.Errorf(l.ctx, "proposal not found, id: %d", req.Id)
+			return nil, errort.NewCodeError(errort.NotFoundErrCode, "proposal not found")
 		}
 
 		var proposal governance.Proposal
@@ -95,7 +101,7 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 			accountInfo, err := l.svcCtx.Staking.Account(l.ctx, &accountQuery)
 			if err != nil {
 				logc.Errorf(l.ctx, "account info error, %v", err)
-				return nil, errort.NewDefaultError()
+				// return nil, errort.NewDefaultError()
 			}
 			if accountInfo != nil {
 				escrow := accountInfo.Escrow.Active.Balance
@@ -184,7 +190,7 @@ func (l *GovernanceProposalWithVotesLogic) GovernanceProposalWithVotes(req *type
 
 	if err != nil {
 		logc.Errorf(l.ctx, "cache error, %v", err)
-		return nil, errort.NewDefaultError()
+		return nil, err
 	}
 	resp = v.(*types.GovernanceProposalWithVotesResponse)
 

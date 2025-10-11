@@ -4,15 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
 	"oasisscan-backend/common"
 	"sort"
 	"strconv"
+	"time"
+
+	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -62,13 +64,18 @@ func (l *AccountDebondingLogic) AccountDebonding(req *types.AccountDebondingRequ
 			continue
 		}
 		for _, delegation := range delegations {
+			// Calculate debond end timestamp: current time + (DebondEndTime - currentEpoch) * 3600
+			epochDiff := int64(delegation.DebondEndTime - currentEpoch)
+			debondEndTimestamp := time.Now().Unix() + epochDiff*3600
+
 			all = append(all, &types.AccountDebondingInfo{
 				ValidatorAddress: validator.String(),
 				ValidatorName:    validatorInfo.Name,
 				Icon:             validatorInfo.Icon,
 				Shares:           fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(delegation.Shares.ToBigInt(), common.Decimals)),
 				DebondEnd:        int64(delegation.DebondEndTime),
-				EpochLeft:        int64(delegation.DebondEndTime - currentEpoch),
+				EpochLeft:        epochDiff,
+				EndTime:          debondEndTimestamp,
 			})
 		}
 	}

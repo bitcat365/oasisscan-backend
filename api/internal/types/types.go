@@ -15,6 +15,7 @@ type AccountDebondingInfo struct {
 	Shares           string `json:"shares"`
 	DebondEnd        int64  `json:"debondEnd"`
 	EpochLeft        int64  `json:"epochLeft"`
+	EndTime          int64  `json:"endTime"`
 }
 
 type AccountDebondingRequest struct {

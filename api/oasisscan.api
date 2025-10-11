@@ -251,6 +251,7 @@ type (
 		Shares           string `json:"shares"`
 		DebondEnd        int64  `json:"debondEnd"`
 		EpochLeft        int64  `json:"epochLeft"`
+		EndTime          int64  `json:"endTime"`
 	}
 	AccountDebondingResponse {
 		List []*AccountDebondingInfo `json:"list"`

@@ -3,6 +3,7 @@ package chain
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"oasisscan-backend/api/internal/errort"
@@ -17,6 +18,7 @@ import (
 	"github.com/oasisprotocol/oasis-core/go/consensus/api/transaction"
 	roothash "github.com/oasisprotocol/oasis-core/go/roothash/api"
 	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -44,7 +46,7 @@ func (l *ChainTransactionInfoLogic) ChainTransactionInfo(req *types.ChainTransac
 	hash := req.Hash
 
 	tx, err := l.svcCtx.TransactionModel.FindOneByTxHash(l.ctx, hash)
-	if err != nil {
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "transaction FindOneByTxHash error, %v", err)
 		return nil, errort.NewDefaultError()
 	}

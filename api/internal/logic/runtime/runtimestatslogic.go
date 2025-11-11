@@ -3,11 +3,12 @@ package runtime
 import (
 	"context"
 	"errors"
-	"github.com/zeromicro/go-zero/core/logc"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/common"
 	"sort"
+
+	"github.com/zeromicro/go-zero/core/logc"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -43,7 +44,7 @@ func (l *RuntimeStatsLogic) RuntimeStats(req *types.RuntimeStatsRequest) (resp *
 			logc.Errorf(l.ctx, "find runtime entities error, %v", err)
 			return nil, errort.NewDefaultError()
 		}
-		if entities == nil || len(entities) == 0 {
+		if len(entities) == 0 {
 			return resp, nil
 		}
 
@@ -59,7 +60,7 @@ func (l *RuntimeStatsLogic) RuntimeStats(req *types.RuntimeStatsRequest) (resp *
 			logc.Errorf(l.ctx, "GetNodes error, %v", err)
 			return nil, errort.NewDefaultError()
 		}
-		if nodes == nil || len(nodes) == 0 {
+		if len(nodes) == 0 {
 			return resp, nil
 		}
 

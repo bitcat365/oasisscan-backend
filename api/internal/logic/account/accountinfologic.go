@@ -3,11 +3,12 @@ package account
 import (
 	"context"
 	"fmt"
+	"oasisscan-backend/api/internal/errort"
+	"oasisscan-backend/common"
+
 	"github.com/oasisprotocol/oasis-core/go/common/quantity"
 	staking "github.com/oasisprotocol/oasis-core/go/staking/api"
 	"github.com/zeromicro/go-zero/core/logc"
-	"oasisscan-backend/api/internal/errort"
-	"oasisscan-backend/common"
 
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
@@ -106,13 +107,11 @@ func (l *AccountInfoLogic) AccountInfo(req *types.AccountInfoRequest) (resp *typ
 
 	allowances := make([]*types.AccountAllowance, 0)
 	allowanceMap := account.General.Allowances
-	if allowanceMap != nil {
-		for address, q := range allowanceMap {
-			allowances = append(allowances, &types.AccountAllowance{
-				Address: address.String(),
-				Amount:  fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(q.ToBigInt(), common.Decimals)),
-			})
-		}
+	for address, q := range allowanceMap {
+		allowances = append(allowances, &types.AccountAllowance{
+			Address: address.String(),
+			Amount:  fmt.Sprintf("%.9f", common.ValueToFloatByDecimals(q.ToBigInt(), common.Decimals)),
+		})
 	}
 
 	resp = &types.AccountInfoResponse{

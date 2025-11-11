@@ -51,6 +51,9 @@ func (l *ChainTransactionInfoLogic) ChainTransactionInfo(req *types.ChainTransac
 		return nil, errort.NewDefaultError()
 	}
 
+	if tx == nil {
+		return nil, errort.NewCodeError(errort.NotFoundErrCode, "transaction not found")
+	}
 	var txError results.Error
 	if tx.Error != "" {
 		err = json.Unmarshal([]byte(tx.Error), &txError)

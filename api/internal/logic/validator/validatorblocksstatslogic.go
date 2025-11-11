@@ -3,6 +3,7 @@ package validator
 import (
 	"context"
 	"errors"
+	"oasisscan-backend/api/internal/errort"
 	"oasisscan-backend/api/internal/svc"
 	"oasisscan-backend/api/internal/types"
 	"oasisscan-backend/common"
@@ -65,10 +66,14 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 
 	latestHeight := latestSignBlock.Height
 	validator, err := l.svcCtx.ValidatorModel.FindOneByEntityAddress(l.ctx, req.Address)
-	if err != nil {
+	if err != nil && !errors.Is(err, sqlx.ErrNotFound) {
 		logc.Errorf(l.ctx, "ValidatorModel FindOneByEntityAddress error, %v", err)
 		return resp, nil
 	}
+	if validator == nil {
+		return resp, errort.NewCodeError(errort.NotFoundErrCode, "validator not found")
+	}
+
 	consensusAddresses := make([]string, 0)
 	if validator != nil {
 		nodes, err := l.svcCtx.NodeModel.FindByEntityId(l.ctx, validator.EntityId)

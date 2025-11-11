@@ -3,9 +3,10 @@ package model
 import (
 	"context"
 	"fmt"
+	"oasisscan-backend/common"
+
 	"github.com/zeromicro/go-zero/core/stores/sqlc"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
-	"oasisscan-backend/common"
 )
 
 var _ StakingEventModel = (*customStakingEventModel)(nil)
@@ -37,9 +38,27 @@ func (m *customStakingEventModel) withSession(session sqlx.Session) StakingEvent
 }
 
 func (m *customStakingEventModel) FindByAddress(ctx context.Context, address string, pageable common.Pageable) ([]*StakingEvent, error) {
-	query := fmt.Sprintf("select %s from %s where event_from=$1 or event_to=$2 order by height desc,position desc limit %d offset %d", stakingEventRows, m.table, pageable.Limit, pageable.Offset)
+	query := fmt.Sprintf(`
+		WITH from_part AS (
+			SELECT %s FROM %s WHERE event_from=$1 ORDER BY height DESC, position DESC LIMIT %d
+		),
+		to_part AS (
+			SELECT %s FROM %s WHERE event_to=$1 ORDER BY height DESC, position DESC LIMIT %d
+		),
+		u AS (
+			SELECT *, row_number() OVER (PARTITION BY id ORDER BY height DESC, position DESC) AS rn
+			FROM (
+				SELECT * FROM from_part
+				UNION ALL
+				SELECT * FROM to_part
+			) x
+		)
+		SELECT %s FROM u WHERE rn = 1 ORDER BY height DESC, position DESC LIMIT %d OFFSET %d`,
+		stakingEventRows, m.table, pageable.Limit,
+		stakingEventRows, m.table, pageable.Limit,
+		stakingEventRows, pageable.Limit, pageable.Offset)
 	var resp []*StakingEvent
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, address, address)
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, address)
 	switch err {
 	case nil:
 		return resp, nil

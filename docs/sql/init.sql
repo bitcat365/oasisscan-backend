@@ -17,6 +17,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS block_height_uniq ON block (height);
 CREATE INDEX IF NOT EXISTS block_timestamp_idx ON block (timestamp);
 CREATE INDEX IF NOT EXISTS block_proposer_address_idx ON block (proposer_address);
 CREATE INDEX IF NOT EXISTS block_hash_idx ON block (hash);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS block_proposer_height_idx ON block (proposer_address, height DESC);
 
 CREATE TABLE IF NOT EXISTS block_signature
 (
@@ -61,6 +62,8 @@ CREATE TABLE IF NOT EXISTS node
     CONSTRAINT unique_entity_id_node_id_consensus_address UNIQUE (entity_id, node_id, consensus_address)
 );
 CREATE INDEX IF NOT EXISTS node_height_idx ON node (height);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS node_consensus_address_idx ON node (consensus_address);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS node_entity_id_idx ON node (entity_id);
 
 CREATE TABLE IF NOT EXISTS reward
 (
@@ -117,6 +120,8 @@ CREATE INDEX IF NOT EXISTS transaction_height_idx ON transaction (height);
 CREATE INDEX IF NOT EXISTS transaction_timestamp_idx ON transaction (timestamp);
 CREATE INDEX IF NOT EXISTS transaction_sign_addr_idx ON transaction (sign_addr);
 CREATE INDEX IF NOT EXISTS transaction_to_addr_idx ON transaction (to_addr);
+CREATE INDEX IF NOT EXISTS transaction_method_sign_addr_idx ON transaction (method, sign_addr);
+CREATE INDEX IF NOT EXISTS transaction_method_to_addr_idx   ON transaction (method, to_addr);
 CREATE MATERIALIZED VIEW daily_transaction_counts AS
 SELECT DATE_TRUNC('day', timestamp) AS day,
        COUNT(id)                    AS count
@@ -157,6 +162,8 @@ CREATE TABLE IF NOT EXISTS validator
     created_at        TIMESTAMP NOT NULL DEFAULT now(),
     updated_at        TIMESTAMP NOT NULL DEFAULT now()
 );
+CREATE INDEX CONCURRENTLY IF NOT EXISTS validator_entity_address_idx ON validator (entity_address);
+
 
 CREATE TABLE IF NOT EXISTS runtime
 (
@@ -237,6 +244,14 @@ CREATE INDEX IF NOT EXISTS staking_event_tx_hash_idx ON staking_event (tx_hash);
 CREATE INDEX IF NOT EXISTS staking_event_kind_idx ON staking_event (kind);
 CREATE INDEX IF NOT EXISTS staking_event_consensus_from_idx ON staking_event (event_from);
 CREATE INDEX IF NOT EXISTS staking_event_consensus_to_idx ON staking_event (event_to);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS staking_event_from_ht_pos_idx
+ON staking_event (event_from, height DESC, position DESC);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS staking_event_to_ht_pos_idx
+ON staking_event (event_to,   height DESC, position DESC);
+
+
+
+
 
 CREATE TABLE IF NOT EXISTS escrow_stats
 (

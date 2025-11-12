@@ -122,6 +122,9 @@ CREATE INDEX IF NOT EXISTS transaction_sign_addr_idx ON transaction (sign_addr);
 CREATE INDEX IF NOT EXISTS transaction_to_addr_idx ON transaction (to_addr);
 CREATE INDEX IF NOT EXISTS transaction_method_sign_addr_idx ON transaction (method, sign_addr);
 CREATE INDEX IF NOT EXISTS transaction_method_to_addr_idx   ON transaction (method, to_addr);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS transaction_sign_addr_timestamp_idx ON transaction (sign_addr, timestamp DESC);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS transaction_method_to_addr_timestamp_idx ON transaction (method, to_addr, timestamp DESC);
+
 CREATE MATERIALIZED VIEW daily_transaction_counts AS
 SELECT DATE_TRUNC('day', timestamp) AS day,
        COUNT(id)                    AS count

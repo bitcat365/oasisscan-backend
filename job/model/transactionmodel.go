@@ -108,20 +108,23 @@ func (m *customTransactionModel) FindOneByTxHash(ctx context.Context, txHash str
 
 func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, address string, method string, runtime bool, pageable common.Pageable) ([]*TransactionWithType, error) {
 	var resp []*TransactionWithType
-	query := fmt.Sprintf(`
-        SELECT * FROM (
-            SELECT 
-                'consensus' as tx_type,
-                %s,
-                '' as runtime_id,
-				'' as runtime_name
-            FROM %s 
-            WHERE `, transactionRows, m.table)
-	var conditions []string
-	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
 	orderField := "timestamp"
+
+	// Build consensus query
+	consensusQuery := fmt.Sprintf(`
+        SELECT * FROM (
+            SELECT
+                'consensus' as tx_type,
+                %s,
+                '' as runtime_id,
+                '' as runtime_name
+            FROM %s
+            WHERE `, transactionRows, m.table)
+
+	var conditions []string
+	conditions = append(conditions, "1=1")
 
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
@@ -130,28 +133,53 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 	}
 	if address != "" {
 		orderField = "timestamp + INTERVAL '0 day'"
-		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
+		// Split OR into two UNION branches to avoid performance issues
+		consensusQuery = fmt.Sprintf(`
+        SELECT * FROM (
+            SELECT
+                'consensus' as tx_type,
+                %s,
+                '' as runtime_id,
+                '' as runtime_name
+            FROM %s
+            WHERE sign_addr = $%d
+            UNION ALL
+            SELECT
+                'consensus' as tx_type,
+                %s,
+                '' as runtime_id,
+                '' as runtime_name
+            FROM %s
+            WHERE method='staking.Transfer' AND to_addr = $%d
+            WHERE `, transactionRows, m.table, paramIndex, transactionRows, m.table, paramIndex+1)
 		args = append(args, address, address)
 		paramIndex += 2
-	}
-	if method != "" {
-		conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
-		args = append(args, method)
-		paramIndex++
+		// Skip further conditions for consensus when address is set, as we use UNION
+		if method != "" {
+			conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
+			args = append(args, method)
+			paramIndex++
+		}
+		consensusQuery += strings.Join(conditions, " AND ")
+	} else {
+		if method != "" {
+			conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
+			args = append(args, method)
+			paramIndex++
+		}
+		//latest 10000 blocks tx
+		if len(conditions) == 1 {
+			conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
+		}
+		consensusQuery += strings.Join(conditions, " AND ")
 	}
 
-	//latest 10000 blocks tx
-	if len(conditions) == 1 {
-		conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
-	}
-
-	query += strings.Join(conditions, " AND ")
 	if runtime {
 		runtimeQuery := `
             UNION ALL
-            SELECT 
+            SELECT
                 'runtime' as tx_type,
-				rt.id,
+                rt.id,
                 rt.tx_hash,
                 rt.method,
                 rt.result as status,
@@ -168,8 +196,8 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
                 rt.raw,
                 rt.created_at,
                 rt.updated_at,
-				rt.runtime_id,
-				r.name as runtime_name
+                rt.runtime_id,
+                r.name as runtime_name
             FROM runtime_transaction rt left join runtime r on rt.runtime_id=r.runtime_id
             WHERE `
 
@@ -181,11 +209,11 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 		}
 
 		runtimeQuery += strings.Join(runtimeConditions, " AND ")
-		query = query + " " + runtimeQuery
+		consensusQuery = consensusQuery + " " + runtimeQuery
 	}
-	query += fmt.Sprintf(`) AS combined_txs ORDER BY %s DESC limit %d offset %d`, orderField, pageable.Limit, pageable.Offset)
+	consensusQuery += fmt.Sprintf(`) AS combined_txs ORDER BY %s DESC limit %d offset %d`, orderField, pageable.Limit, pageable.Offset)
 
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, args...)
+	err := m.conn.QueryRowsCtx(ctx, &resp, consensusQuery, args...)
 	switch err {
 	case nil:
 		return resp, nil
@@ -198,13 +226,16 @@ func (m *customTransactionModel) FindTxs(ctx context.Context, height int64, addr
 
 func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, address string, method string, runtime bool) (int64, error) {
 	var resp int64
-	query := fmt.Sprintf(`
-        SELECT COUNT(*) FROM (
-            SELECT tx_hash FROM %s WHERE `, m.table)
-	var conditions []string
-	conditions = append(conditions, "1=1")
 	var args []interface{}
 	paramIndex := 1
+
+	// Build consensus count query
+	countQuery := fmt.Sprintf(`
+        SELECT COUNT(*) FROM (
+            SELECT tx_hash FROM %s WHERE `, m.table)
+
+	var conditions []string
+	conditions = append(conditions, "1=1")
 
 	if height > 0 {
 		conditions = append(conditions, fmt.Sprintf("height = $%d", paramIndex))
@@ -212,42 +243,57 @@ func (m *customTransactionModel) CountTxs(ctx context.Context, height int64, add
 		paramIndex++
 	}
 	if address != "" {
-		conditions = append(conditions, fmt.Sprintf("(sign_addr = $%d or (method='staking.Transfer' and to_addr=$%d))", paramIndex, paramIndex+1))
+		// Split OR into two UNION branches for counting
+		countQuery = fmt.Sprintf(`
+	       SELECT COUNT(*) FROM (
+	           SELECT tx_hash FROM %s WHERE sign_addr = $%d
+	           UNION ALL
+	           SELECT tx_hash FROM %s WHERE method='staking.Transfer' AND to_addr = $%d
+	           WHERE `, m.table, paramIndex, m.table, paramIndex+1)
 		args = append(args, address, address)
 		paramIndex += 2
+		if method != "" {
+			conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
+			args = append(args, method)
+			paramIndex++
+		}
+		countQuery += strings.Join(conditions, " AND ")
+	} else {
+		if method != "" {
+			conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
+			args = append(args, method)
+			paramIndex++
+		}
+		//latest 10000 blocks tx
+		if len(conditions) == 1 {
+			conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
+		}
+		countQuery += strings.Join(conditions, " AND ")
 	}
-	if method != "" {
-		conditions = append(conditions, fmt.Sprintf("method = $%d", paramIndex))
-		args = append(args, method)
-		paramIndex++
-	}
-
-	//latest 10000 blocks tx
-	if len(conditions) == 1 {
-		conditions = append(conditions, fmt.Sprintf("height>((select max(height) from %s)-10000)", m.table))
-	}
-
-	query += strings.Join(conditions, " AND ")
 
 	if runtime {
 		//runtime query
-		query += ` UNION ALL 
-        SELECT tx_hash FROM runtime_transaction WHERE `
+		countQuery += ` UNION ALL
+	       SELECT tx_hash FROM runtime_transaction WHERE `
 
 		runtimeConditions := []string{"1=1"}
 		if address != "" {
-			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d)", paramIndex-2, paramIndex-1))
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("(consensus_from = $%d or consensus_to = $%d)", paramIndex, paramIndex+1))
+			args = append(args, address, address)
+			paramIndex += 2
 		}
 		if method != "" {
-			runtimeConditions = append(runtimeConditions, fmt.Sprintf("method = $%d", paramIndex-1))
+			runtimeConditions = append(runtimeConditions, fmt.Sprintf("method = $%d", paramIndex))
+			args = append(args, method)
+			paramIndex++
 		}
 
-		query += strings.Join(runtimeConditions, " AND ")
+		countQuery += strings.Join(runtimeConditions, " AND ")
 	}
 
-	query += ") t"
+	countQuery += ") t"
 
-	err := m.conn.QueryRowCtx(ctx, &resp, query, args...)
+	err := m.conn.QueryRowCtx(ctx, &resp, countQuery, args...)
 	switch err {
 	case nil:
 		return resp, nil

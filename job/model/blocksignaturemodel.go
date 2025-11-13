@@ -168,7 +168,7 @@ func (m *customBlockSignatureModel) FindBlocksByHeight(ctx context.Context, sign
 }
 
 func (m *customBlockSignatureModel) RefreshBlockCountDaysView(ctx context.Context) error {
-	query := "REFRESH MATERIALIZED VIEW block_count_days"
+	query := "REFRESH MATERIALIZED VIEW CONCURRENTLY block_count_days"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }

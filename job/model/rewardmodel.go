@@ -115,7 +115,7 @@ func (m *customRewardModel) DeleteBeforeEpoch(ctx context.Context, epoch int64) 
 }
 
 func (m *customRewardModel) RefreshRewardDaysView(ctx context.Context) error {
-	query := "REFRESH MATERIALIZED VIEW reward_days"
+	query := "REFRESH MATERIALIZED VIEW CONCURRENTLY reward_days"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }

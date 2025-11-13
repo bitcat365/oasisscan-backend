@@ -273,7 +273,7 @@ func (m *customTransactionModel) TransactionCountStats(ctx context.Context, day 
 }
 
 func (m *customTransactionModel) RefreshDailyCountsStatsView(ctx context.Context) error {
-	query := "REFRESH MATERIALIZED VIEW daily_transaction_counts"
+	query := "REFRESH MATERIALIZED VIEW CONCURRENTLY daily_transaction_counts"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }
@@ -293,7 +293,7 @@ func (m *customTransactionModel) LatestTx(ctx context.Context) (*Transaction, er
 }
 
 func (m *customTransactionModel) RefreshTransactionMethodView(ctx context.Context) error {
-	query := "REFRESH MATERIALIZED VIEW transaction_method"
+	query := "REFRESH MATERIALIZED VIEW CONCURRENTLY transaction_method"
 	_, err := m.conn.ExecCtx(ctx, query)
 	return err
 }

@@ -75,15 +75,13 @@ func (l *ValidatorBlocksStatsLogic) ValidatorBlocksStats(req *types.ValidatorBlo
 	}
 
 	consensusAddresses := make([]string, 0)
-	if validator != nil {
-		nodes, err := l.svcCtx.NodeModel.FindByEntityId(l.ctx, validator.EntityId)
-		if err != nil {
-			logc.Errorf(l.ctx, "NodeModel FindByEntityId error, %v", err)
-			return resp, nil
-		}
-		for _, node := range nodes {
-			consensusAddresses = append(consensusAddresses, node.ConsensusAddress)
-		}
+	nodes, err := l.svcCtx.NodeModel.FindByEntityId(l.ctx, validator.EntityId)
+	if err != nil {
+		logc.Errorf(l.ctx, "NodeModel FindByEntityId error, %v", err)
+		return resp, nil
+	}
+	for _, node := range nodes {
+		consensusAddresses = append(consensusAddresses, node.ConsensusAddress)
 	}
 
 	if len(consensusAddresses) == 0 {
